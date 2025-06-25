@@ -9,7 +9,228 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      clubs: {
+        Row: {
+          bundesliga: boolean | null
+          champions_league: boolean | null
+          club_world_cup: boolean | null
+          conference_league: boolean | null
+          copa_del_rey: boolean | null
+          country: string | null
+          dfb_pokal: boolean | null
+          europa_league: boolean | null
+          fa_cup: boolean | null
+          facebook_url: string | null
+          fanshop_url: string | null
+          founded_year: number | null
+          id: number
+          instagram_url: string | null
+          la_liga: boolean | null
+          logo_url: string | null
+          members_count: number | null
+          name: string | null
+          popularity_score: number | null
+          premier_league: boolean | null
+          primary_color: string | null
+          second_bundesliga: boolean | null
+          secondary_color: string | null
+          slug: string | null
+          stadium_capacity: number | null
+          stadium_location: string | null
+          stadium_name: string | null
+          twitter_url: string | null
+          website_url: string | null
+        }
+        Insert: {
+          bundesliga?: boolean | null
+          champions_league?: boolean | null
+          club_world_cup?: boolean | null
+          conference_league?: boolean | null
+          copa_del_rey?: boolean | null
+          country?: string | null
+          dfb_pokal?: boolean | null
+          europa_league?: boolean | null
+          fa_cup?: boolean | null
+          facebook_url?: string | null
+          fanshop_url?: string | null
+          founded_year?: number | null
+          id: number
+          instagram_url?: string | null
+          la_liga?: boolean | null
+          logo_url?: string | null
+          members_count?: number | null
+          name?: string | null
+          popularity_score?: number | null
+          premier_league?: boolean | null
+          primary_color?: string | null
+          second_bundesliga?: boolean | null
+          secondary_color?: string | null
+          slug?: string | null
+          stadium_capacity?: number | null
+          stadium_location?: string | null
+          stadium_name?: string | null
+          twitter_url?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          bundesliga?: boolean | null
+          champions_league?: boolean | null
+          club_world_cup?: boolean | null
+          conference_league?: boolean | null
+          copa_del_rey?: boolean | null
+          country?: string | null
+          dfb_pokal?: boolean | null
+          europa_league?: boolean | null
+          fa_cup?: boolean | null
+          facebook_url?: string | null
+          fanshop_url?: string | null
+          founded_year?: number | null
+          id?: number
+          instagram_url?: string | null
+          la_liga?: boolean | null
+          logo_url?: string | null
+          members_count?: number | null
+          name?: string | null
+          popularity_score?: number | null
+          premier_league?: boolean | null
+          primary_color?: string | null
+          second_bundesliga?: boolean | null
+          secondary_color?: string | null
+          slug?: string | null
+          stadium_capacity?: number | null
+          stadium_location?: string | null
+          stadium_name?: string | null
+          twitter_url?: string | null
+          website_url?: string | null
+        }
+        Relationships: []
+      }
+      leagues: {
+        Row: {
+          "country code": string | null
+          league: string | null
+          league_id: number
+          league_slug: string | null
+          "number of games": number | null
+        }
+        Insert: {
+          "country code"?: string | null
+          league?: string | null
+          league_id: number
+          league_slug?: string | null
+          "number of games"?: number | null
+        }
+        Update: {
+          "country code"?: string | null
+          league?: string | null
+          league_id?: number
+          league_slug?: string | null
+          "number of games"?: number | null
+        }
+        Relationships: []
+      }
+      streaming: {
+        Row: {
+          affiliate_url: string | null
+          bundesliga: number | null
+          champions_league: number | null
+          club_world_cup: number | null
+          conference_league: number | null
+          copa_del_rey: number | null
+          coppa_italia: number | null
+          coupe_de_france: number | null
+          dfb_pokal: number | null
+          efl_cup: number | null
+          eredevise: number | null
+          europa_league: number | null
+          fa_cup: number | null
+          features: Json | null
+          la_liga: number | null
+          liga_portugal: number | null
+          ligue_1: number | null
+          logo_url: string | null
+          mls: number | null
+          monthly_price: string | null
+          name: string | null
+          premier_league: number | null
+          provider_name: string | null
+          saudi_pro_league: number | null
+          second_bundesliga: number | null
+          serie_a: number | null
+          slug: string | null
+          streamer_id: number
+          sueper_lig: number | null
+          third_bundesliga: number | null
+          yearly_price: string | null
+        }
+        Insert: {
+          affiliate_url?: string | null
+          bundesliga?: number | null
+          champions_league?: number | null
+          club_world_cup?: number | null
+          conference_league?: number | null
+          copa_del_rey?: number | null
+          coppa_italia?: number | null
+          coupe_de_france?: number | null
+          dfb_pokal?: number | null
+          efl_cup?: number | null
+          eredevise?: number | null
+          europa_league?: number | null
+          fa_cup?: number | null
+          features?: Json | null
+          la_liga?: number | null
+          liga_portugal?: number | null
+          ligue_1?: number | null
+          logo_url?: string | null
+          mls?: number | null
+          monthly_price?: string | null
+          name?: string | null
+          premier_league?: number | null
+          provider_name?: string | null
+          saudi_pro_league?: number | null
+          second_bundesliga?: number | null
+          serie_a?: number | null
+          slug?: string | null
+          streamer_id: number
+          sueper_lig?: number | null
+          third_bundesliga?: number | null
+          yearly_price?: string | null
+        }
+        Update: {
+          affiliate_url?: string | null
+          bundesliga?: number | null
+          champions_league?: number | null
+          club_world_cup?: number | null
+          conference_league?: number | null
+          copa_del_rey?: number | null
+          coppa_italia?: number | null
+          coupe_de_france?: number | null
+          dfb_pokal?: number | null
+          efl_cup?: number | null
+          eredevise?: number | null
+          europa_league?: number | null
+          fa_cup?: number | null
+          features?: Json | null
+          la_liga?: number | null
+          liga_portugal?: number | null
+          ligue_1?: number | null
+          logo_url?: string | null
+          mls?: number | null
+          monthly_price?: string | null
+          name?: string | null
+          premier_league?: number | null
+          provider_name?: string | null
+          saudi_pro_league?: number | null
+          second_bundesliga?: number | null
+          serie_a?: number | null
+          slug?: string | null
+          streamer_id?: number
+          sueper_lig?: number | null
+          third_bundesliga?: number | null
+          yearly_price?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

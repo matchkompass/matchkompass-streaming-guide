@@ -1,6 +1,5 @@
-
-import { useState } from "react";
-import { ChevronLeft, ChevronRight, Search, Check, Star } from "lucide-react";
+import { useState, useMemo } from "react";
+import { ChevronLeft, ChevronRight, Search, Check, Star, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,67 +7,67 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { useClubs, Club } from "@/hooks/useClubs";
+import { useStreaming } from "@/hooks/useStreaming";
+import { useLeagues } from "@/hooks/useLeagues";
+import { calculateCoverage, getAllCompetitionsForClubs, getClubCompetitions } from "@/utils/coverageCalculator";
 
 const Wizard = () => {
   const [currentStep, setCurrentStep] = useState(1);
-  const [selectedClubs, setSelectedClubs] = useState<string[]>([]);
+  const [selectedClubIds, setSelectedClubIds] = useState<number[]>([]);
   const [selectedCompetitions, setSelectedCompetitions] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const clubs = [
-    { id: "bayern", name: "Bayern München", logo: "⚽", competitions: ["Bundesliga", "Champions League", "DFB-Pokal"] },
-    { id: "dortmund", name: "Borussia Dortmund", logo: "🟡", competitions: ["Bundesliga", "Champions League", "DFB-Pokal"] },
-    { id: "barcelona", name: "FC Barcelona", logo: "🔵", competitions: ["La Liga", "Champions League", "Copa del Rey"] },
-    { id: "hertha", name: "Hertha BSC", logo: "🔷", competitions: ["2. Bundesliga", "DFB-Pokal"] },
-    { id: "real", name: "Real Madrid", logo: "⚪", competitions: ["La Liga", "Champions League", "Copa del Rey"] },
-    { id: "schalke", name: "Schalke 04", logo: "🔵", competitions: ["2. Bundesliga", "DFB-Pokal"] }
-  ];
+  const { clubs, loading: clubsLoading } = useClubs();
+  const { providers, loading: providersLoading } = useStreaming();
+  const { leagues, loading: leaguesLoading } = useLeagues();
 
-  const competitions = [
-    { id: "bundesliga", name: "Bundesliga", logo: "🏆", games: 308, provider: "Sky" },
-    { id: "2bundesliga", name: "2. Bundesliga", logo: "🥈", games: 306, provider: "Sky" },
-    { id: "champions", name: "Champions League", logo: "⭐", games: 189, provider: "DAZN" },
-    { id: "dfb", name: "DFB-Pokal", logo: "🏆", games: 63, provider: "Sky" },
-    { id: "laliga", name: "La Liga", logo: "🇪🇸", games: 380, provider: "DAZN" },
-    { id: "copa", name: "Copa del Rey", logo: "👑", games: 61, provider: "DAZN" }
-  ];
+  const selectedClubs = useMemo(() => {
+    return clubs.filter(club => selectedClubIds.includes(club.id));
+  }, [clubs, selectedClubIds]);
 
-  const streamingPackages = [
-    {
-      type: "Maximalabdeckung",
-      coverage: 100,
-      price: 67.47,
-      providers: ["DAZN", "WOW", "Amazon Prime"],
-      description: "Alle Spiele deiner Vereine sichtbar",
-      highlight: "Empfehlung",
-      games: "308 von 308"
-    },
-    {
-      type: "Preis-Leistungs-Empfehlung",
-      coverage: 99,
-      price: 59.98,
-      providers: ["DAZN", "WOW"],
-      description: "Beste Balance zwischen Kosten und Abdeckung",
-      highlight: "Beliebt",
-      games: "305 von 308"
-    },
-    {
-      type: "Budget-Option",
-      coverage: 78,
-      price: 29.99,
-      providers: ["DAZN"],
-      description: "Günstigste Option für die wichtigsten Spiele",
-      highlight: "Günstig",
-      games: "240 von 308"
+  const filteredClubs = useMemo(() => {
+    return clubs.filter(club => 
+      club.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [clubs, searchTerm]);
+
+  const clubCompetitions = useMemo(() => {
+    if (selectedClubs.length === 0) return [];
+    return getAllCompetitionsForClubs(selectedClubs);
+  }, [selectedClubs]);
+
+  const allCompetitions = useMemo(() => {
+    const competitionNames = {
+      bundesliga: { name: "Bundesliga", logo: "🏆" },
+      second_bundesliga: { name: "2. Bundesliga", logo: "🥈" },
+      dfb_pokal: { name: "DFB-Pokal", logo: "🏆" },
+      champions_league: { name: "Champions League", logo: "⭐" },
+      europa_league: { name: "Europa League", logo: "🏅" },
+      conference_league: { name: "Conference League", logo: "🏅" },
+      club_world_cup: { name: "FIFA-Club-WM", logo: "🌍" },
+      premier_league: { name: "Premier League", logo: "👑" },
+      fa_cup: { name: "FA Cup", logo: "🏆" },
+      la_liga: { name: "La Liga", logo: "🇪🇸" },
+      copa_del_rey: { name: "Copa del Rey", logo: "👑" }
+    };
+
+    return Object.entries(competitionNames).map(([key, value]) => ({
+      id: key,
+      ...value,
+      isRecommended: clubCompetitions.includes(key)
+    }));
+  }, [clubCompetitions]);
+
+  const recommendations = useMemo(() => {
+    if (selectedClubs.length === 0 || selectedCompetitions.length === 0 || providers.length === 0) {
+      return [];
     }
-  ];
+    return calculateCoverage(selectedClubs, selectedCompetitions, providers, leagues);
+  }, [selectedClubs, selectedCompetitions, providers, leagues]);
 
-  const filteredClubs = clubs.filter(club => 
-    club.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const handleClubToggle = (clubId: string) => {
-    setSelectedClubs(prev => 
+  const handleClubToggle = (clubId: number) => {
+    setSelectedClubIds(prev => 
       prev.includes(clubId) 
         ? prev.filter(id => id !== clubId)
         : [...prev, clubId]
@@ -83,21 +82,16 @@ const Wizard = () => {
     );
   };
 
-  const getRecommendedCompetitions = () => {
-    const recommendedCompetitions = new Set<string>();
-    selectedClubs.forEach(clubId => {
-      const club = clubs.find(c => c.id === clubId);
-      if (club) {
-        club.competitions.forEach(comp => {
-          const competition = competitions.find(c => c.name === comp);
-          if (competition) {
-            recommendedCompetitions.add(competition.id);
-          }
-        });
-      }
-    });
-    return Array.from(recommendedCompetitions);
-  };
+  if (clubsLoading || providersLoading || leaguesLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p>Lade Vereinsdaten...</p>
+        </div>
+      </div>
+    );
+  }
 
   const renderStepContent = () => {
     switch (currentStep) {
@@ -128,28 +122,34 @@ const Wizard = () => {
                 <Card
                   key={club.id}
                   className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
-                    selectedClubs.includes(club.id)
+                    selectedClubIds.includes(club.id)
                       ? 'ring-2 ring-green-500 bg-green-50'
                       : 'hover:bg-gray-50'
                   }`}
                   onClick={() => handleClubToggle(club.id)}
                 >
                   <CardContent className="p-6 text-center">
-                    <div className="text-4xl mb-3">{club.logo}</div>
+                    <div className="text-4xl mb-3">
+                      {club.logo_url ? (
+                        <img src={club.logo_url} alt={club.name} className="w-12 h-12 mx-auto object-contain" />
+                      ) : (
+                        "⚽"
+                      )}
+                    </div>
                     <h3 className="font-semibold text-lg mb-2">{club.name}</h3>
                     <div className="flex flex-wrap gap-1 justify-center">
-                      {club.competitions.slice(0, 2).map((comp, idx) => (
+                      {getClubCompetitions(club).slice(0, 2).map((comp, idx) => (
                         <Badge key={idx} variant="secondary" className="text-xs">
                           {comp}
                         </Badge>
                       ))}
-                      {club.competitions.length > 2 && (
+                      {getClubCompetitions(club).length > 2 && (
                         <Badge variant="secondary" className="text-xs">
-                          +{club.competitions.length - 2}
+                          +{getClubCompetitions(club).length - 2}
                         </Badge>
                       )}
                     </div>
-                    {selectedClubs.includes(club.id) && (
+                    {selectedClubIds.includes(club.id) && (
                       <div className="mt-3">
                         <Check className="h-6 w-6 text-green-600 mx-auto" />
                       </div>
@@ -159,10 +159,10 @@ const Wizard = () => {
               ))}
             </div>
 
-            {selectedClubs.length > 0 && (
+            {selectedClubIds.length > 0 && (
               <div className="text-center">
                 <Badge className="bg-green-100 text-green-800">
-                  {selectedClubs.length} Vereine ausgewählt
+                  {selectedClubIds.length} Vereine ausgewählt
                 </Badge>
               </div>
             )}
@@ -170,7 +170,10 @@ const Wizard = () => {
         );
 
       case 2:
-        const recommendedCompetitionIds = getRecommendedCompetitions();
+        // Auto-select recommended competitions on first render
+        if (selectedCompetitions.length === 0 && clubCompetitions.length > 0) {
+          setSelectedCompetitions(clubCompetitions);
+        }
         
         return (
           <div className="space-y-6">
@@ -183,54 +186,97 @@ const Wizard = () => {
               </p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-6">
-              {competitions.map((competition) => {
-                const isRecommended = recommendedCompetitionIds.includes(competition.id);
-                const isSelected = selectedCompetitions.includes(competition.id);
-                
-                return (
-                  <Card
-                    key={competition.id}
-                    className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
-                      isSelected
-                        ? 'ring-2 ring-green-500 bg-green-50'
-                        : isRecommended
-                        ? 'ring-1 ring-blue-300 bg-blue-50'
-                        : 'hover:bg-gray-50'
-                    }`}
-                    onClick={() => handleCompetitionToggle(competition.id)}
-                  >
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center space-x-3">
-                          <span className="text-2xl">{competition.logo}</span>
-                          <div>
-                            <h3 className="font-semibold text-lg">{competition.name}</h3>
-                            <p className="text-sm text-gray-500">
-                              {competition.games} Spiele pro Saison
-                            </p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <Badge className="mb-2">{competition.provider}</Badge>
-                          {isRecommended && (
-                            <div>
-                              <Badge className="bg-blue-100 text-blue-800">
+            {/* Recommended Competitions */}
+            {clubCompetitions.length > 0 && (
+              <div className="mb-8">
+                <h3 className="text-xl font-semibold mb-4 text-blue-800">
+                  Empfohlene Wettbewerbe (basierend auf deinen Vereinen)
+                </h3>
+                <div className="grid md:grid-cols-2 gap-4">
+                  {allCompetitions.filter(comp => comp.isRecommended).map((competition) => {
+                    const isSelected = selectedCompetitions.includes(competition.id);
+                    const league = leagues.find(l => l.league_slug === competition.id);
+                    
+                    return (
+                      <Card
+                        key={competition.id}
+                        className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
+                          isSelected
+                            ? 'ring-2 ring-green-500 bg-green-50'
+                            : 'ring-1 ring-blue-300 bg-blue-50'
+                        }`}
+                        onClick={() => handleCompetitionToggle(competition.id)}
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                              <span className="text-2xl">{competition.logo}</span>
+                              <div>
+                                <h4 className="font-semibold">{competition.name}</h4>
+                                <p className="text-sm text-gray-500">
+                                  {league?.['number of games'] || 0} Spiele pro Saison
+                                </p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <Badge className="bg-blue-100 text-blue-800 mb-2">
                                 Empfohlen
                               </Badge>
+                              {isSelected && (
+                                <div>
+                                  <Check className="h-5 w-5 text-green-600" />
+                                </div>
+                              )}
                             </div>
-                          )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Other Competitions */}
+            <div>
+              <h3 className="text-xl font-semibold mb-4 text-gray-700">
+                Weitere Wettbewerbe
+              </h3>
+              <div className="grid md:grid-cols-2 gap-4">
+                {allCompetitions.filter(comp => !comp.isRecommended).map((competition) => {
+                  const isSelected = selectedCompetitions.includes(competition.id);
+                  const league = leagues.find(l => l.league_slug === competition.id);
+                  
+                  return (
+                    <Card
+                      key={competition.id}
+                      className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
+                        isSelected
+                          ? 'ring-2 ring-green-500 bg-green-50'
+                          : 'hover:bg-gray-50'
+                      }`}
+                      onClick={() => handleCompetitionToggle(competition.id)}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <span className="text-2xl">{competition.logo}</span>
+                            <div>
+                              <h4 className="font-semibold">{competition.name}</h4>
+                              <p className="text-sm text-gray-500">
+                                {league?.['number of games'] || 0} Spiele pro Saison
+                              </p>
+                            </div>
+                          </div>
                           {isSelected && (
-                            <div className="mt-2">
-                              <Check className="h-5 w-5 text-green-600" />
-                            </div>
+                            <Check className="h-5 w-5 text-green-600" />
                           )}
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
             </div>
 
             {selectedCompetitions.length > 0 && (
@@ -256,7 +302,7 @@ const Wizard = () => {
             </div>
 
             <div className="grid gap-6">
-              {streamingPackages.map((pkg, index) => (
+              {recommendations.map((pkg, index) => (
                 <Card key={index} className={`${index === 0 ? 'ring-2 ring-green-500' : ''}`}>
                   <CardHeader>
                     <div className="flex items-center justify-between">
@@ -286,7 +332,9 @@ const Wizard = () => {
                           <span className="text-sm font-medium">{pkg.coverage}%</span>
                         </div>
                         <Progress value={pkg.coverage} className="h-2" />
-                        <p className="text-xs text-gray-500 mt-1">{pkg.games} Spiele</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {pkg.coveredGames} von {pkg.totalGames} Spielen
+                        </p>
                       </div>
 
                       <div>
@@ -294,8 +342,22 @@ const Wizard = () => {
                         <div className="flex flex-wrap gap-2">
                           {pkg.providers.map((provider, idx) => (
                             <Badge key={idx} variant="outline">
-                              {provider}
+                              {provider.provider_name}
                             </Badge>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <p className="text-sm font-medium mb-2">Wettbewerb-Abdeckung:</p>
+                        <div className="space-y-1">
+                          {pkg.competitions.map((comp, idx) => (
+                            <div key={idx} className="flex justify-between text-sm">
+                              <span>{comp.competition}</span>
+                              <span className={comp.coverage === 100 ? 'text-green-600' : 'text-orange-600'}>
+                                {comp.coverage}% ({comp.coveredGames}/{comp.totalGames})
+                              </span>
+                            </div>
                           ))}
                         </div>
                       </div>
@@ -303,6 +365,12 @@ const Wizard = () => {
                       <Button 
                         className="w-full bg-green-600 hover:bg-green-700"
                         size="lg"
+                        onClick={() => {
+                          // Link to provider's affiliate URL
+                          if (pkg.providers[0]?.affiliate_url) {
+                            window.open(pkg.providers[0].affiliate_url, '_blank');
+                          }
+                        }}
                       >
                         Zu den Streaming-Paketen
                         <ChevronRight className="ml-2 h-4 w-4" />
@@ -321,7 +389,7 @@ const Wizard = () => {
   };
 
   const canProceed = () => {
-    if (currentStep === 1) return selectedClubs.length > 0;
+    if (currentStep === 1) return selectedClubIds.length > 0;
     if (currentStep === 2) return selectedCompetitions.length > 0;
     return true;
   };
@@ -385,7 +453,11 @@ const Wizard = () => {
             </Button>
           ) : (
             <Button
-              onClick={() => setCurrentStep(1)}
+              onClick={() => {
+                setCurrentStep(1);
+                setSelectedClubIds([]);
+                setSelectedCompetitions([]);
+              }}
               className="bg-green-600 hover:bg-green-700"
             >
               Neue Analyse starten
