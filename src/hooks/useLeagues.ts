@@ -6,7 +6,7 @@ export interface League {
   league_id: number;
   league: string;
   league_slug: string;
-  country_code: string;
+  'country code': string;
   'number of games': number;
 }
 
