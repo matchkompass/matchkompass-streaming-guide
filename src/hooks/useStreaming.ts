@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface StreamingProvider {
@@ -36,30 +36,32 @@ export interface StreamingProvider {
   coupe_de_france: number;
 }
 
+const fetchProviders = async (): Promise<StreamingProvider[]> => {
+  console.log('Fetching streaming providers from Supabase...');
+  
+  const { data, error } = await supabase
+    .from('streaming')
+    .select('*')
+    .order('provider_name');
+
+  if (error) {
+    console.error('Error fetching streaming providers:', error);
+    throw error;
+  }
+
+  console.log('Streaming providers fetched successfully:', data?.length || 0, 'providers');
+  return data || [];
+};
+
 export const useStreaming = () => {
-  const [providers, setProviders] = useState<StreamingProvider[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const query = useQuery({
+    queryKey: ['streaming'],
+    queryFn: fetchProviders,
+  });
 
-  useEffect(() => {
-    const fetchProviders = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('streaming')
-          .select('*')
-          .order('provider_name');
-
-        if (error) throw error;
-        setProviders(data || []);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProviders();
-  }, []);
-
-  return { providers, loading, error };
+  return {
+    providers: query.data || [],
+    loading: query.isLoading,
+    error: query.error?.message || null,
+  };
 };

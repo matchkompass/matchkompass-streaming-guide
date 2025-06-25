@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface League {
@@ -10,30 +10,32 @@ export interface League {
   'number of games': number;
 }
 
+const fetchLeagues = async (): Promise<League[]> => {
+  console.log('Fetching leagues from Supabase...');
+  
+  const { data, error } = await supabase
+    .from('leagues')
+    .select('*')
+    .order('league');
+
+  if (error) {
+    console.error('Error fetching leagues:', error);
+    throw error;
+  }
+
+  console.log('Leagues fetched successfully:', data?.length || 0, 'leagues');
+  return data || [];
+};
+
 export const useLeagues = () => {
-  const [leagues, setLeagues] = useState<League[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const query = useQuery({
+    queryKey: ['leagues'],
+    queryFn: fetchLeagues,
+  });
 
-  useEffect(() => {
-    const fetchLeagues = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('leagues')
-          .select('*')
-          .order('league');
-
-        if (error) throw error;
-        setLeagues(data || []);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchLeagues();
-  }, []);
-
-  return { leagues, loading, error };
+  return {
+    leagues: query.data || [],
+    loading: query.isLoading,
+    error: query.error?.message || null,
+  };
 };

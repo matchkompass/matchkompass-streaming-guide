@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface Club {
@@ -23,30 +23,32 @@ export interface Club {
   copa_del_rey: boolean;
 }
 
+const fetchClubs = async (): Promise<Club[]> => {
+  console.log('Fetching clubs from Supabase...');
+  
+  const { data, error } = await supabase
+    .from('clubs')
+    .select('*')
+    .order('name');
+
+  if (error) {
+    console.error('Error fetching clubs:', error);
+    throw error;
+  }
+
+  console.log('Clubs fetched successfully:', data?.length || 0, 'clubs');
+  return data || [];
+};
+
 export const useClubs = () => {
-  const [clubs, setClubs] = useState<Club[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const query = useQuery({
+    queryKey: ['clubs'],
+    queryFn: fetchClubs,
+  });
 
-  useEffect(() => {
-    const fetchClubs = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('clubs')
-          .select('*')
-          .order('name');
-
-        if (error) throw error;
-        setClubs(data || []);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchClubs();
-  }, []);
-
-  return { clubs, loading, error };
+  return {
+    clubs: query.data || [],
+    loading: query.isLoading,
+    error: query.error?.message || null,
+  };
 };

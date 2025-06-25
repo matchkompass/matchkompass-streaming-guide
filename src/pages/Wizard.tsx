@@ -1,10 +1,11 @@
 import { useState, useMemo } from "react";
-import { ChevronLeft, ChevronRight, Search, Check, Star, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search, Check, Star, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useClubs, Club } from "@/hooks/useClubs";
@@ -18,9 +19,17 @@ const Wizard = () => {
   const [selectedCompetitions, setSelectedCompetitions] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { clubs, loading: clubsLoading } = useClubs();
-  const { providers, loading: providersLoading } = useStreaming();
-  const { leagues, loading: leaguesLoading } = useLeagues();
+  const { clubs, loading: clubsLoading, error: clubsError } = useClubs();
+  const { providers, loading: providersLoading, error: providersError } = useStreaming();
+  const { leagues, loading: leaguesLoading, error: leaguesError } = useLeagues();
+
+  console.log('Wizard render - Data status:', {
+    clubs: clubs.length,
+    providers: providers.length,
+    leagues: leagues.length,
+    loading: { clubsLoading, providersLoading, leaguesLoading },
+    errors: { clubsError, providersError, leaguesError }
+  });
 
   const selectedClubs = useMemo(() => {
     return clubs.filter(club => selectedClubIds.includes(club.id));
@@ -82,13 +91,49 @@ const Wizard = () => {
     );
   };
 
+  // Handle loading states
   if (clubsLoading || providersLoading || leaguesLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p>Lade Vereinsdaten...</p>
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-green-600" />
+            <h2 className="text-xl font-semibold mb-2">Lade Daten...</h2>
+            <p className="text-gray-600">
+              {clubsLoading && "Lade Vereinsdaten... "}
+              {providersLoading && "Lade Streaming-Anbieter... "}
+              {leaguesLoading && "Lade Liga-Informationen... "}
+            </p>
+          </div>
         </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Handle error states
+  if (clubsError || providersError || leaguesError) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          <Alert className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Fehler beim Laden der Daten:</strong>
+              <ul className="mt-2 list-disc list-inside">
+                {clubsError && <li>Vereinsdaten: {clubsError}</li>}
+                {providersError && <li>Streaming-Anbieter: {providersError}</li>}
+                {leaguesError && <li>Liga-Daten: {leaguesError}</li>}
+              </ul>
+            </AlertDescription>
+          </Alert>
+          <Button onClick={() => window.location.reload()} className="bg-green-600 hover:bg-green-700">
+            Seite neu laden
+          </Button>
+        </div>
+        <Footer />
       </div>
     );
   }
@@ -117,47 +162,53 @@ const Wizard = () => {
               />
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {filteredClubs.map((club) => (
-                <Card
-                  key={club.id}
-                  className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
-                    selectedClubIds.includes(club.id)
-                      ? 'ring-2 ring-green-500 bg-green-50'
-                      : 'hover:bg-gray-50'
-                  }`}
-                  onClick={() => handleClubToggle(club.id)}
-                >
-                  <CardContent className="p-6 text-center">
-                    <div className="text-4xl mb-3">
-                      {club.logo_url ? (
-                        <img src={club.logo_url} alt={club.name} className="w-12 h-12 mx-auto object-contain" />
-                      ) : (
-                        "⚽"
-                      )}
-                    </div>
-                    <h3 className="font-semibold text-lg mb-2">{club.name}</h3>
-                    <div className="flex flex-wrap gap-1 justify-center">
-                      {getClubCompetitions(club).slice(0, 2).map((comp, idx) => (
-                        <Badge key={idx} variant="secondary" className="text-xs">
-                          {comp}
-                        </Badge>
-                      ))}
-                      {getClubCompetitions(club).length > 2 && (
-                        <Badge variant="secondary" className="text-xs">
-                          +{getClubCompetitions(club).length - 2}
-                        </Badge>
-                      )}
-                    </div>
-                    {selectedClubIds.includes(club.id) && (
-                      <div className="mt-3">
-                        <Check className="h-6 w-6 text-green-600 mx-auto" />
+            {filteredClubs.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-gray-500">Keine Vereine gefunden.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {filteredClubs.map((club) => (
+                  <Card
+                    key={club.id}
+                    className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
+                      selectedClubIds.includes(club.id)
+                        ? 'ring-2 ring-green-500 bg-green-50'
+                        : 'hover:bg-gray-50'
+                    }`}
+                    onClick={() => handleClubToggle(club.id)}
+                  >
+                    <CardContent className="p-6 text-center">
+                      <div className="text-4xl mb-3">
+                        {club.logo_url ? (
+                          <img src={club.logo_url} alt={club.name} className="w-12 h-12 mx-auto object-contain" />
+                        ) : (
+                          "⚽"
+                        )}
                       </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                      <h3 className="font-semibold text-lg mb-2">{club.name}</h3>
+                      <div className="flex flex-wrap gap-1 justify-center">
+                        {getClubCompetitions(club).slice(0, 2).map((comp, idx) => (
+                          <Badge key={idx} variant="secondary" className="text-xs">
+                            {comp}
+                          </Badge>
+                        ))}
+                        {getClubCompetitions(club).length > 2 && (
+                          <Badge variant="secondary" className="text-xs">
+                            +{getClubCompetitions(club).length - 2}
+                          </Badge>
+                        )}
+                      </div>
+                      {selectedClubIds.includes(club.id) && (
+                        <div className="mt-3">
+                          <Check className="h-6 w-6 text-green-600 mx-auto" />
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
 
             {selectedClubIds.length > 0 && (
               <div className="text-center">
@@ -301,85 +352,91 @@ const Wizard = () => {
               </p>
             </div>
 
-            <div className="grid gap-6">
-              {recommendations.map((pkg, index) => (
-                <Card key={index} className={`${index === 0 ? 'ring-2 ring-green-500' : ''}`}>
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <CardTitle className="text-xl flex items-center gap-2">
-                          {pkg.type}
-                          {index === 0 && <Star className="h-5 w-5 text-yellow-500 fill-current" />}
-                        </CardTitle>
-                        <CardDescription>{pkg.description}</CardDescription>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-2xl font-bold text-green-600">
-                          {pkg.price.toFixed(2)} €
+            {recommendations.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-gray-500">Keine Empfehlungen verfügbar. Bitte wähle Vereine und Wettbewerbe aus.</p>
+              </div>
+            ) : (
+              <div className="grid gap-6">
+                {recommendations.map((pkg, index) => (
+                  <Card key={index} className={`${index === 0 ? 'ring-2 ring-green-500' : ''}`}>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <CardTitle className="text-xl flex items-center gap-2">
+                            {pkg.type}
+                            {index === 0 && <Star className="h-5 w-5 text-yellow-500 fill-current" />}
+                          </CardTitle>
+                          <CardDescription>{pkg.description}</CardDescription>
                         </div>
-                        <div className="text-sm text-gray-500">pro Monat</div>
-                        <Badge className={index === 0 ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}>
-                          {pkg.highlight}
-                        </Badge>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div>
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-sm font-medium">Abdeckung</span>
-                          <span className="text-sm font-medium">{pkg.coverage}%</span>
+                        <div className="text-right">
+                          <div className="text-2xl font-bold text-green-600">
+                            {pkg.price.toFixed(2)} €
+                          </div>
+                          <div className="text-sm text-gray-500">pro Monat</div>
+                          <Badge className={index === 0 ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}>
+                            {pkg.highlight}
+                          </Badge>
                         </div>
-                        <Progress value={pkg.coverage} className="h-2" />
-                        <p className="text-xs text-gray-500 mt-1">
-                          {pkg.coveredGames} von {pkg.totalGames} Spielen
-                        </p>
                       </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div>
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-sm font-medium">Abdeckung</span>
+                            <span className="text-sm font-medium">{pkg.coverage}%</span>
+                          </div>
+                          <Progress value={pkg.coverage} className="h-2" />
+                          <p className="text-xs text-gray-500 mt-1">
+                            {pkg.coveredGames} von {pkg.totalGames} Spielen
+                          </p>
+                        </div>
 
-                      <div>
-                        <p className="text-sm font-medium mb-2">Benötigte Anbieter:</p>
-                        <div className="flex flex-wrap gap-2">
-                          {pkg.providers.map((provider, idx) => (
-                            <Badge key={idx} variant="outline">
-                              {provider.provider_name}
-                            </Badge>
-                          ))}
+                        <div>
+                          <p className="text-sm font-medium mb-2">Benötigte Anbieter:</p>
+                          <div className="flex flex-wrap gap-2">
+                            {pkg.providers.map((provider, idx) => (
+                              <Badge key={idx} variant="outline">
+                                {provider.provider_name}
+                              </Badge>
+                            ))}
+                          </div>
                         </div>
-                      </div>
 
-                      <div>
-                        <p className="text-sm font-medium mb-2">Wettbewerb-Abdeckung:</p>
-                        <div className="space-y-1">
-                          {pkg.competitions.map((comp, idx) => (
-                            <div key={idx} className="flex justify-between text-sm">
-                              <span>{comp.competition}</span>
-                              <span className={comp.coverage === 100 ? 'text-green-600' : 'text-orange-600'}>
-                                {comp.coverage}% ({comp.coveredGames}/{comp.totalGames})
-                              </span>
-                            </div>
-                          ))}
+                        <div>
+                          <p className="text-sm font-medium mb-2">Wettbewerb-Abdeckung:</p>
+                          <div className="space-y-1">
+                            {pkg.competitions.map((comp, idx) => (
+                              <div key={idx} className="flex justify-between text-sm">
+                                <span>{comp.competition}</span>
+                                <span className={comp.coverage === 100 ? 'text-green-600' : 'text-orange-600'}>
+                                  {comp.coverage}% ({comp.coveredGames}/{comp.totalGames})
+                                </span>
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                      </div>
 
-                      <Button 
-                        className="w-full bg-green-600 hover:bg-green-700"
-                        size="lg"
-                        onClick={() => {
-                          // Link to provider's affiliate URL
-                          if (pkg.providers[0]?.affiliate_url) {
-                            window.open(pkg.providers[0].affiliate_url, '_blank');
-                          }
-                        }}
-                      >
-                        Zu den Streaming-Paketen
-                        <ChevronRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                        <Button 
+                          className="w-full bg-green-600 hover:bg-green-700"
+                          size="lg"
+                          onClick={() => {
+                            // Link to provider's affiliate URL
+                            if (pkg.providers[0]?.affiliate_url) {
+                              window.open(pkg.providers[0].affiliate_url, '_blank');
+                            }
+                          }}
+                        >
+                          Zu den Streaming-Paketen
+                          <ChevronRight className="ml-2 h-4 w-4" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </div>
         );
 
