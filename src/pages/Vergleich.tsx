@@ -1,180 +1,131 @@
 
-import { useState } from "react";
-import { Filter, Check, Star } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Filter, Star, Check, X, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Progress } from "@/components/ui/progress";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { useStreaming } from "@/hooks/useStreaming";
+import { useLeagues } from "@/hooks/useLeagues";
+import ComparisonSidebar from "@/components/comparison/ComparisonSidebar";
+
+interface ComparisonFilters {
+  competitions: string[];
+  priceRange: [number, number];
+  features: {
+    fourK: boolean;
+    mobile: boolean;
+    download: boolean;
+    multiStream: boolean;
+  };
+  simultaneousStreams: number;
+  sortBy: string;
+}
 
 const Vergleich = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedProviders, setSelectedProviders] = useState<string[]>([]);
-  const [priceFilter, setPriceFilter] = useState("all");
-  const [competitionFilter, setCompetitionFilter] = useState("all");
-
-  const streamingProviders = [
-    {
-      id: "sky",
-      name: "Sky Deutschland",
-      logo: "📺",
-      basePrice: 25.00,
-      sportsPackage: 32.00,
-      totalPrice: 57.00,
-      competitions: ["Bundesliga", "2. Bundesliga", "DFB-Pokal", "Premier League"],
-      features: {
-        "4K": true,
-        "Mobil": true,
-        "Gleichzeitige Streams": 2,
-        "Aufnahme": true,
-        "Live-Pause": true
-      },
-      coverage: {
-        "Bundesliga": 100,
-        "2. Bundesliga": 100,
-        "DFB-Pokal": 100,
-        "Champions League": 0
-      },
-      highlights: ["Alle Bundesliga-Spiele", "Konferenz am Samstag", "Original Kommentar"],
-      dealInfo: "Jetzt 12 Monate für 29,99€/Monat",
-      rating: 4.2,
-      pros: ["Komplette Bundesliga", "Exzellente Übertragungsqualität", "Umfangreiches Sportangebot"],
-      cons: ["Teuerster Anbieter", "Lange Vertragslaufzeit", "Keine Champions League"]
-    },
-    {
-      id: "dazn",
-      name: "DAZN",
-      logo: "🥊",
-      basePrice: 44.99,
-      sportsPackage: 0,
-      totalPrice: 44.99,
-      competitions: ["Champions League", "Europa League", "La Liga", "Serie A"],
-      features: {
-        "4K": false,
-        "Mobil": true,
-        "Gleichzeitige Streams": 2,
-        "Aufnahme": false,
-        "Live-Pause": true
-      },
-      coverage: {
-        "Bundesliga": 0,
-        "Champions League": 100,
-        "La Liga": 100,
-        "Serie A": 100
-      },
-      highlights: ["Alle Champions League Spiele", "Internationale Top-Ligen", "Vielfältiger Sport-Mix"],
-      dealInfo: "Flexible monatliche Kündigung",
-      rating: 3.8,
-      pros: ["Champions League komplett", "Internationale Ligen", "Flexible Kündigung"],
-      cons: ["Keine deutsche Bundesliga", "Kein 4K", "Häufige Preiserhöhungen"]
-    },
-    {
-      id: "wow",
-      name: "WOW (ehemals Sky Ticket)",
-      logo: "🎬",
-      basePrice: 9.99,
-      sportsPackage: 19.99,
-      totalPrice: 29.98,
-      competitions: ["Bundesliga", "DFB-Pokal", "Premier League", "Formula 1"],
-      features: {
-        "4K": false,
-        "Mobil": true,
-        "Gleichzeitige Streams": 1,
-        "Aufnahme": false,
-        "Live-Pause": false
-      },
-      coverage: {
-        "Bundesliga": 85,
-        "DFB-Pokal": 100,
-        "Premier League": 100,
-        "Formula 1": 100
-      },
-      highlights: ["Günstige Sky-Alternative", "Flexibel buchbar", "Keine Vertragsbindung"],
-      dealInfo: "Sport-Paket für 19,99€/Monat",
-      rating: 3.9,
-      pros: ["Günstigster Zugang zu Sky-Inhalten", "Keine Vertragsbindung", "Einfache Kündigung"],
-      cons: ["Kein 4K", "Nur ein Stream gleichzeitig", "Nicht alle Bundesliga-Spiele"]
-    },
-    {
-      id: "amazon",
-      name: "Amazon Prime Video",
-      logo: "📦",
-      basePrice: 8.99,
-      sportsPackage: 0,
-      totalPrice: 8.99,
-      competitions: ["Einzelspiele Bundesliga", "Champions League (ausgewählte)", "Tennis"],
-      features: {
-        "4K": true,
-        "Mobil": true,
-        "Gleichzeitige Streams": 3,
-        "Aufnahme": false,
-        "Live-Pause": true
-      },
-      coverage: {
-        "Bundesliga": 10,
-        "Champions League": 25,
-        "Tennis": 60,
-        "Prime Originals": 100
-      },
-      highlights: ["Top-Einzelspiele", "Prime-Vorteile inklusive", "Große Streaming-Bibliothek"],
-      dealInfo: "Inklusive Prime-Mitgliedschaft",
-      rating: 4.1,
-      pros: ["Sehr günstig", "Prime-Mitgliedschaft inklusive", "Hochwertige Eigenproduktionen"],
-      cons: ["Wenige Live-Spiele", "Begrenzte Sportauswahl", "Unregelmäßige Übertragungen"]
-    },
-    {
-      id: "magenta",
-      name: "MagentaTV",
-      logo: "📱",
-      basePrice: 5.00,
-      sportsPackage: 12.95,
-      totalPrice: 17.95,
-      competitions: ["3. Liga", "Regionalliga", "Frauenfußball", "Basketball"],
-      features: {
-        "4K": true,
-        "Mobil": true,
-        "Gleichzeitige Streams": 4,
-        "Aufnahme": true,
-        "Live-Pause": true
-      },
-      coverage: {
-        "3. Liga": 100,
-        "Regionalliga": 100,
-        "Frauenfußball": 100,
-        "Basketball": 80
-      },
-      highlights: ["Komplette 3. Liga", "Deutscher Nachwuchsfußball", "Günstige Telekom-Option"],
-      dealInfo: "Für Telekom-Kunden vergünstigt",
-      rating: 3.6,
-      pros: ["Sehr günstig für Telekom-Kunden", "Untere Ligen komplett", "Gute technische Qualität"],
-      cons: ["Keine Top-Ligen", "Hauptsächlich für Telekom-Kunden", "Begrenzte Reichweite"]
-    }
-  ];
-
-  const competitions = [
-    "Alle Wettbewerbe",
-    "Bundesliga",
-    "2. Bundesliga", 
-    "Champions League",
-    "DFB-Pokal",
-    "La Liga",
-    "Premier League"
-  ];
-
-  const filteredProviders = streamingProviders.filter(provider => {
-    const matchesPrice = priceFilter === "all" || 
-      (priceFilter === "budget" && provider.totalPrice <= 30) ||
-      (priceFilter === "mid" && provider.totalPrice > 30 && provider.totalPrice <= 50) ||
-      (priceFilter === "premium" && provider.totalPrice > 50);
-
-    const matchesCompetition = competitionFilter === "all" || 
-      provider.competitions.some(comp => 
-        comp.toLowerCase().includes(competitionFilter.toLowerCase())
-      );
-
-    return matchesPrice && matchesCompetition;
+  const [filters, setFilters] = useState<ComparisonFilters>({
+    competitions: [],
+    priceRange: [0, 100],
+    features: { fourK: false, mobile: false, download: false, multiStream: false },
+    simultaneousStreams: 1,
+    sortBy: 'relevance'
   });
+
+  const { providers, loading: providersLoading, error: providersError } = useStreaming();
+  const { leagues, loading: leaguesLoading, error: leaguesError } = useLeagues();
+
+  const parsePrice = (priceString?: string): number => {
+    if (!priceString) return 0;
+    return parseFloat(priceString.replace(/[^\d.,]/g, '').replace(',', '.')) || 0;
+  };
+
+  const parseFeatures = (provider: any) => {
+    const features = { fourK: false, mobile: false, download: false, streams: 1 };
+    if (provider.features) {
+      try {
+        const featureObj = typeof provider.features === 'string' 
+          ? JSON.parse(provider.features) 
+          : provider.features;
+        
+        features.fourK = featureObj['4K'] || false;
+        features.mobile = featureObj.mobile || false;
+        features.download = featureObj.download || false;
+        features.streams = featureObj.streams || 1;
+      } catch (e) {
+        // Fallback features
+      }
+    }
+    return features;
+  };
+
+  const getProviderCoverage = (provider: any, competitions: string[]) => {
+    if (competitions.length === 0) return 0;
+    
+    let totalPossible = 0;
+    let totalCovered = 0;
+    
+    competitions.forEach(comp => {
+      const league = leagues.find(l => l.league_slug === comp);
+      const totalGames = league ? league['number of games'] : 0;
+      const providerGames = provider[comp] || 0;
+      
+      totalPossible += totalGames;
+      totalCovered += Math.min(providerGames, totalGames);
+    });
+    
+    return totalPossible > 0 ? Math.round((totalCovered / totalPossible) * 100) : 0;
+  };
+
+  const filteredProviders = useMemo(() => {
+    let filtered = providers.filter(provider => {
+      const price = parsePrice(provider.monthly_price);
+      const features = parseFeatures(provider);
+      
+      // Price filter
+      if (price < filters.priceRange[0] || price > filters.priceRange[1]) return false;
+      
+      // Feature filters
+      if (filters.features.fourK && !features.fourK) return false;
+      if (filters.features.mobile && !features.mobile) return false;
+      if (filters.features.download && !features.download) return false;
+      if (filters.features.multiStream && features.streams < 2) return false;
+      if (features.streams < filters.simultaneousStreams) return false;
+      
+      return true;
+    });
+
+    // Sorting
+    filtered.sort((a, b) => {
+      const priceA = parsePrice(a.monthly_price);
+      const priceB = parsePrice(b.monthly_price);
+      const coverageA = getProviderCoverage(a, filters.competitions);
+      const coverageB = getProviderCoverage(b, filters.competitions);
+      
+      switch (filters.sortBy) {
+        case 'price-asc':
+          return priceA - priceB;
+        case 'price-desc':
+          return priceB - priceA;
+        case 'coverage':
+          return coverageB - coverageA;
+        case 'popularity':
+          return (b.provider_name.length) - (a.provider_name.length); // Mock popularity
+        default: // relevance
+          return (coverageB * 0.7) + ((100 - Math.min(priceB, 100)) * 0.3) - 
+                 ((coverageA * 0.7) + ((100 - Math.min(priceA, 100)) * 0.3));
+      }
+    });
+
+    return filtered;
+  }, [providers, filters, leagues]);
+
+  const availableCompetitions = useMemo(() => {
+    return leagues.map(league => league.league_slug);
+  }, [leagues]);
 
   const handleProviderToggle = (providerId: string) => {
     setSelectedProviders(prev => 
@@ -184,206 +135,247 @@ const Vergleich = () => {
     );
   };
 
+  const handleAffiliateClick = (provider: any) => {
+    const affiliateUrl = provider.affiliate_url || '#';
+    window.open(affiliateUrl, '_blank');
+  };
+
+  if (providersLoading || leaguesLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Lade Anbieter-Daten...</p>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
       
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+        <div className="text-center mb-6">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Streaming-Anbieter Vergleich
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Vergleiche alle wichtigen Streaming-Dienste für Fußball und finde die beste Option für deine Bedürfnisse
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Vergleiche alle wichtigen Streaming-Dienste für Fußball und finde die beste Option
           </p>
         </div>
 
-        {/* Filters */}
-        <Card className="mb-8">
-          <CardContent className="p-6">
-            <div className="grid md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Preisbereich
-                </label>
-                <Select value={priceFilter} onValueChange={setPriceFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Alle Preise" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Alle Preise</SelectItem>
-                    <SelectItem value="budget">Budget (bis 30€)</SelectItem>
-                    <SelectItem value="mid">Mittel (30-50€)</SelectItem>
-                    <SelectItem value="premium">Premium (über 50€)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Wettbewerb
-                </label>
-                <Select value={competitionFilter} onValueChange={setCompetitionFilter}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Alle Wettbewerbe" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {competitions.map((comp) => (
-                      <SelectItem key={comp} value={comp === "Alle Wettbewerbe" ? "all" : comp}>
-                        {comp}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+        <div className="flex gap-6">
+          {/* Sidebar for desktop, drawer for mobile */}
+          <div className="hidden lg:block w-80 flex-shrink-0">
+            <ComparisonSidebar
+              filters={filters}
+              onFiltersChange={setFilters}
+              availableCompetitions={availableCompetitions}
+              isOpen={true}
+              onClose={() => {}}
+            />
+          </div>
 
-              <div className="flex items-end">
-                <Button variant="outline" className="w-full">
-                  <Filter className="mr-2 h-4 w-4" />
-                  Weitere Filter
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Comparison Table */}
-        <div className="grid gap-6">
-          {filteredProviders.map((provider) => (
-            <Card key={provider.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="text-4xl">{provider.logo}</div>
-                    <div>
-                      <CardTitle className="text-2xl">{provider.name}</CardTitle>
-                      <div className="flex items-center space-x-2 mt-1">
-                        <div className="flex items-center">
-                          {[...Array(5)].map((_, i) => (
-                            <Star
-                              key={i}
-                              className={`h-4 w-4 ${
-                                i < Math.floor(provider.rating)
-                                  ? 'text-yellow-400 fill-current'
-                                  : 'text-gray-300'
-                              }`}
-                            />
-                          ))}
-                        </div>
-                        <span className="text-sm text-gray-600">({provider.rating})</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-3xl font-bold text-green-600">
-                      {provider.totalPrice.toFixed(2)}€
-                    </div>
-                    <div className="text-sm text-gray-500">pro Monat</div>
-                    {provider.dealInfo && (
-                      <Badge className="mt-2 bg-orange-100 text-orange-800">
-                        {provider.dealInfo}
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-              </CardHeader>
-              
-              <CardContent>
-                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {/* Wettbewerbe */}
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-3">Wettbewerbe</h4>
-                    <div className="space-y-2">
-                      {provider.competitions.map((comp, idx) => (
-                        <Badge key={idx} variant="secondary" className="mr-1 mb-1">
-                          {comp}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Features */}
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-3">Features</h4>
-                    <ul className="space-y-1 text-sm">
-                      {Object.entries(provider.features).map(([feature, available]) => (
-                        <li key={feature} className="flex items-center">
-                          {available ? (
-                            <Check className="h-4 w-4 text-green-500 mr-2" />
-                          ) : (
-                            <div className="h-4 w-4 mr-2" />
-                          )}
-                          <span className={available ? 'text-gray-900' : 'text-gray-400'}>
-                            {feature}: {typeof available === 'boolean' ? (available ? 'Ja' : 'Nein') : available}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Vorteile */}
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-3">Vorteile</h4>
-                    <ul className="space-y-1 text-sm text-green-700">
-                      {provider.pros.map((pro, idx) => (
-                        <li key={idx} className="flex items-start">
-                          <Check className="h-3 w-3 mt-1 mr-2 flex-shrink-0" />
-                          {pro}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Nachteile */}
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-3">Nachteile</h4>
-                    <ul className="space-y-1 text-sm text-red-600">
-                      {provider.cons.map((con, idx) => (
-                        <li key={idx} className="flex items-start">
-                          <div className="h-3 w-3 mt-1 mr-2 rounded-full bg-red-500 flex-shrink-0" />
-                          {con}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-
-                <div className="mt-6 pt-6 border-t flex flex-col sm:flex-row gap-4">
-                  <Button 
-                    className="flex-1 bg-green-600 hover:bg-green-700"
-                    size="lg"
-                  >
-                    Zum Anbieter *
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="lg"
-                    onClick={() => handleProviderToggle(provider.id)}
-                    className={selectedProviders.includes(provider.id) ? 'bg-blue-50 border-blue-300' : ''}
-                  >
-                    {selectedProviders.includes(provider.id) ? 'Ausgewählt' : 'Zum Vergleich hinzufügen'}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {selectedProviders.length > 1 && (
-          <div className="mt-8 text-center">
-            <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
-              {selectedProviders.length} Anbieter detailliert vergleichen
+          {/* Mobile filter button */}
+          <div className="lg:hidden fixed top-20 right-4 z-40">
+            <Button
+              onClick={() => setSidebarOpen(true)}
+              className="bg-green-600 hover:bg-green-700 shadow-lg"
+            >
+              <Filter className="h-4 w-4 mr-2" />
+              Filter
             </Button>
           </div>
-        )}
 
-        {/* Disclaimer */}
-        <div className="mt-12 p-6 bg-gray-100 rounded-lg">
-          <p className="text-sm text-gray-600 text-center">
-            * Affiliate-Links: Wir erhalten eine Provision, wenn Sie über unsere Links ein Abonnement abschließen. 
-            Dies beeinflusst nicht unsere Bewertungen und Vergleiche. Alle Preise sind unverbindlich und können sich ändern.
-          </p>
+          {/* Mobile sidebar */}
+          {sidebarOpen && (
+            <ComparisonSidebar
+              filters={filters}
+              onFiltersChange={setFilters}
+              availableCompetitions={availableCompetitions}
+              isOpen={sidebarOpen}
+              onClose={() => setSidebarOpen(false)}
+            />
+          )}
+
+          {/* Main content */}
+          <div className="flex-1 space-y-4">
+            {/* Results header */}
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-sm text-gray-600">
+                {filteredProviders.length} Anbieter gefunden
+              </p>
+              {selectedProviders.length > 0 && (
+                <Button
+                  onClick={() => console.log('Compare selected:', selectedProviders)}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  {selectedProviders.length} Anbieter vergleichen
+                </Button>
+              )}
+            </div>
+
+            {/* Provider cards */}
+            <div className="space-y-4">
+              {filteredProviders.map((provider) => {
+                const price = parsePrice(provider.monthly_price);
+                const features = parseFeatures(provider);
+                const coverage = getProviderCoverage(provider, filters.competitions);
+                const isSelected = selectedProviders.includes(provider.streamer_id.toString());
+
+                return (
+                  <Card key={provider.streamer_id} className={`hover:shadow-lg transition-all duration-200 ${
+                    isSelected ? 'ring-2 ring-blue-500' : ''
+                  }`}>
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center space-x-4">
+                          <div className="text-3xl">
+                            {provider.logo_url ? (
+                              <img src={provider.logo_url} alt={provider.provider_name} className="w-12 h-12 object-contain" />
+                            ) : (
+                              "📺"
+                            )}
+                          </div>
+                          <div>
+                            <CardTitle className="text-xl">{provider.provider_name}</CardTitle>
+                            <CardDescription>{provider.name}</CardDescription>
+                            <div className="flex items-center space-x-2 mt-2">
+                              <div className="flex items-center">
+                                {[...Array(5)].map((_, i) => (
+                                  <Star
+                                    key={i}
+                                    className={`h-4 w-4 ${
+                                      i < 4 ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                                    }`}
+                                  />
+                                ))}
+                              </div>
+                              <span className="text-sm text-gray-600">(4.0)</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-2xl font-bold text-green-600">
+                            {price.toFixed(2)}€
+                          </div>
+                          <div className="text-sm text-gray-500">pro Monat</div>
+                          {provider.yearly_price && (
+                            <div className="text-xs text-orange-600 mt-1">
+                              Jahresabo verfügbar
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </CardHeader>
+                    
+                    <CardContent>
+                      <div className="grid md:grid-cols-3 gap-4 mb-4">
+                        {/* Coverage */}
+                        {filters.competitions.length > 0 && (
+                          <div>
+                            <h4 className="font-medium text-sm mb-2">Abdeckung</h4>
+                            <div className="space-y-2">
+                              <Progress value={coverage} className="h-2" />
+                              <p className="text-xs text-gray-600">{coverage}% der gewählten Ligen</p>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Features */}
+                        <div>
+                          <h4 className="font-medium text-sm mb-2">Features</h4>
+                          <div className="flex flex-wrap gap-1">
+                            {features.fourK && (
+                              <Badge variant="secondary" className="text-xs">4K</Badge>
+                            )}
+                            {features.mobile && (
+                              <Badge variant="secondary" className="text-xs">Mobile</Badge>
+                            )}
+                            {features.download && (
+                              <Badge variant="secondary" className="text-xs">Download</Badge>
+                            )}
+                            <Badge variant="secondary" className="text-xs">
+                              {features.streams} Stream{features.streams > 1 ? 's' : ''}
+                            </Badge>
+                          </div>
+                        </div>
+
+                        {/* Top competitions */}
+                        <div>
+                          <h4 className="font-medium text-sm mb-2">Top Ligen</h4>
+                          <div className="flex flex-wrap gap-1">
+                            {['bundesliga', 'champions_league', 'premier_league'].map(comp => {
+                              const games = provider[comp] || 0;
+                              if (games > 0) {
+                                return (
+                                  <Badge key={comp} variant="outline" className="text-xs">
+                                    {comp.replace('_', ' ')}
+                                  </Badge>
+                                );
+                              }
+                              return null;
+                            })}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-2">
+                        <Button 
+                          className="flex-1 bg-green-600 hover:bg-green-700"
+                          onClick={() => handleAffiliateClick(provider)}
+                        >
+                          Zum Anbieter
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          onClick={() => handleProviderToggle(provider.streamer_id.toString())}
+                          className={isSelected ? 'bg-blue-50 border-blue-300' : ''}
+                        >
+                          {isSelected ? (
+                            <>
+                              <Check className="h-4 w-4 mr-2" />
+                              Ausgewählt
+                            </>
+                          ) : (
+                            'Vergleichen'
+                          )}
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+
+            {filteredProviders.length === 0 && (
+              <div className="text-center py-12">
+                <div className="text-gray-400 mb-4">
+                  <Filter className="h-12 w-12 mx-auto" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  Keine Anbieter gefunden
+                </h3>
+                <p className="text-gray-600">
+                  Versuche deine Filter anzupassen, um mehr Ergebnisse zu sehen.
+                </p>
+              </div>
+            )}
+
+            {/* Disclaimer */}
+            <div className="mt-8 p-4 bg-gray-100 rounded-lg">
+              <p className="text-sm text-gray-600 text-center">
+                * Affiliate-Links: Wir erhalten eine Provision, wenn Sie über unsere Links ein Abonnement abschließen. 
+                Dies beeinflusst nicht unsere Bewertungen und Vergleiche. Alle Preise sind unverbindlich und können sich ändern.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
