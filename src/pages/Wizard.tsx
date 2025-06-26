@@ -13,7 +13,7 @@ import { useStreaming } from "@/hooks/useStreaming";
 import { useLeagues } from "@/hooks/useLeagues";
 import { calculateEnhancedCoverage, getAllCompetitionsForClubs, getClubCompetitions } from "@/utils/enhancedCoverageCalculator";
 import EnhancedPackageCard from "@/components/wizard/EnhancedPackageCard";
-import EnhancedCompetitionSelector from "@/components/wizard/EnhancedCompetitionSelector";
+import SimplifiedCompetitionSelector from "@/components/wizard/SimplifiedCompetitionSelector";
 
 const Wizard = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -70,6 +70,13 @@ const Wizard = () => {
         : [...prev, competitionId]
     );
   };
+
+  // Auto-select recommended competitions when clubs change
+  useMemo(() => {
+    if (clubCompetitions.length > 0 && selectedCompetitions.length === 0) {
+      setSelectedCompetitions(clubCompetitions);
+    }
+  }, [clubCompetitions]);
 
   // Handle loading states
   if (clubsLoading || providersLoading || leaguesLoading) {
@@ -201,17 +208,11 @@ const Wizard = () => {
         );
 
       case 2:
-        // Auto-select recommended competitions on first render
-        if (selectedCompetitions.length === 0 && clubCompetitions.length > 0) {
-          setSelectedCompetitions(clubCompetitions);
-        }
-        
         return (
-          <EnhancedCompetitionSelector
+          <SimplifiedCompetitionSelector
             selectedCompetitions={selectedCompetitions}
             onCompetitionToggle={handleCompetitionToggle}
-            leagues={leagues}
-            recommendedCompetitions={clubCompetitions}
+            selectedClubs={selectedClubs}
           />
         );
 

@@ -7,19 +7,16 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Wizard from "./pages/Wizard";
 import Vergleich from "./pages/Vergleich";
+import EnhancedVergleich from "./pages/EnhancedVergleich";
+import DetailVergleich from "./pages/DetailVergleich";
+import ClubDetail from "./pages/ClubDetail";
+import CompetitionDetail from "./pages/CompetitionDetail";
+import ProviderDetail from "./pages/ProviderDetail";
 import Deals from "./pages/Deals";
 import News from "./pages/News";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 3,
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      refetchOnWindowFocus: false,
-    },
-  },
-});
+const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -30,10 +27,14 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/wizard" element={<Wizard />} />
-          <Route path="/vergleich" element={<Vergleich />} />
+          <Route path="/vergleich" element={<EnhancedVergleich />} />
+          <Route path="/vergleich-alt" element={<Vergleich />} />
+          <Route path="/detailvergleich" element={<DetailVergleich />} />
+          <Route path="/club/:slug" element={<ClubDetail />} />
+          <Route path="/competition/:slug" element={<CompetitionDetail />} />
+          <Route path="/streaming-provider/:slug" element={<ProviderDetail />} />
           <Route path="/deals" element={<Deals />} />
           <Route path="/news" element={<News />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
