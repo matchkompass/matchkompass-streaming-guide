@@ -1,10 +1,10 @@
+
 import { useState, useMemo } from "react";
-import { ChevronLeft, ChevronRight, Search, Check, Star, Loader2, AlertCircle } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search, Check, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -12,6 +12,8 @@ import { useClubs, Club } from "@/hooks/useClubs";
 import { useStreaming } from "@/hooks/useStreaming";
 import { useLeagues } from "@/hooks/useLeagues";
 import { calculateCoverage, getAllCompetitionsForClubs, getClubCompetitions } from "@/utils/coverageCalculator";
+import PackageCard from "@/components/wizard/PackageCard";
+import CompetitionSelector from "@/components/wizard/CompetitionSelector";
 
 const Wizard = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -48,17 +50,17 @@ const Wizard = () => {
 
   const allCompetitions = useMemo(() => {
     const competitionNames = {
-      bundesliga: { name: "Bundesliga", logo: "🏆" },
-      second_bundesliga: { name: "2. Bundesliga", logo: "🥈" },
-      dfb_pokal: { name: "DFB-Pokal", logo: "🏆" },
-      champions_league: { name: "Champions League", logo: "⭐" },
-      europa_league: { name: "Europa League", logo: "🏅" },
-      conference_league: { name: "Conference League", logo: "🏅" },
-      club_world_cup: { name: "FIFA-Club-WM", logo: "🌍" },
-      premier_league: { name: "Premier League", logo: "👑" },
-      fa_cup: { name: "FA Cup", logo: "🏆" },
-      la_liga: { name: "La Liga", logo: "🇪🇸" },
-      copa_del_rey: { name: "Copa del Rey", logo: "👑" }
+      bundesliga: { name: "Bundesliga", logo: "🏆", region: 'Deutschland' as const },
+      second_bundesliga: { name: "2. Bundesliga", logo: "🥈", region: 'Deutschland' as const },
+      dfb_pokal: { name: "DFB-Pokal", logo: "🏆", region: 'Deutschland' as const },
+      champions_league: { name: "Champions League", logo: "⭐", region: 'Europa' as const },
+      europa_league: { name: "Europa League", logo: "🏅", region: 'Europa' as const },
+      conference_league: { name: "Conference League", logo: "🏅", region: 'Europa' as const },
+      club_world_cup: { name: "FIFA-Club-WM", logo: "🌍", region: 'International' as const },
+      premier_league: { name: "Premier League", logo: "👑", region: 'International' as const },
+      fa_cup: { name: "FA Cup", logo: "🏆", region: 'International' as const },
+      la_liga: { name: "La Liga", logo: "🇪🇸", region: 'International' as const },
+      copa_del_rey: { name: "Copa del Rey", logo: "👑", region: 'International' as const }
     };
 
     return Object.entries(competitionNames).map(([key, value]) => ({
@@ -227,117 +229,12 @@ const Wizard = () => {
         }
         
         return (
-          <div className="space-y-6">
-            <div className="text-center">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                Wettbewerbe auswählen
-              </h2>
-              <p className="text-gray-600 mb-8">
-                Basierend auf deinen Vereinen empfehlen wir diese Wettbewerbe
-              </p>
-            </div>
-
-            {/* Recommended Competitions */}
-            {clubCompetitions.length > 0 && (
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold mb-4 text-blue-800">
-                  Empfohlene Wettbewerbe (basierend auf deinen Vereinen)
-                </h3>
-                <div className="grid md:grid-cols-2 gap-4">
-                  {allCompetitions.filter(comp => comp.isRecommended).map((competition) => {
-                    const isSelected = selectedCompetitions.includes(competition.id);
-                    const league = leagues.find(l => l.league_slug === competition.id);
-                    
-                    return (
-                      <Card
-                        key={competition.id}
-                        className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
-                          isSelected
-                            ? 'ring-2 ring-green-500 bg-green-50'
-                            : 'ring-1 ring-blue-300 bg-blue-50'
-                        }`}
-                        onClick={() => handleCompetitionToggle(competition.id)}
-                      >
-                        <CardContent className="p-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
-                              <span className="text-2xl">{competition.logo}</span>
-                              <div>
-                                <h4 className="font-semibold">{competition.name}</h4>
-                                <p className="text-sm text-gray-500">
-                                  {league?.['number of games'] || 0} Spiele pro Saison
-                                </p>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <Badge className="bg-blue-100 text-blue-800 mb-2">
-                                Empfohlen
-                              </Badge>
-                              {isSelected && (
-                                <div>
-                                  <Check className="h-5 w-5 text-green-600" />
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Other Competitions */}
-            <div>
-              <h3 className="text-xl font-semibold mb-4 text-gray-700">
-                Weitere Wettbewerbe
-              </h3>
-              <div className="grid md:grid-cols-2 gap-4">
-                {allCompetitions.filter(comp => !comp.isRecommended).map((competition) => {
-                  const isSelected = selectedCompetitions.includes(competition.id);
-                  const league = leagues.find(l => l.league_slug === competition.id);
-                  
-                  return (
-                    <Card
-                      key={competition.id}
-                      className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
-                        isSelected
-                          ? 'ring-2 ring-green-500 bg-green-50'
-                          : 'hover:bg-gray-50'
-                      }`}
-                      onClick={() => handleCompetitionToggle(competition.id)}
-                    >
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3">
-                            <span className="text-2xl">{competition.logo}</span>
-                            <div>
-                              <h4 className="font-semibold">{competition.name}</h4>
-                              <p className="text-sm text-gray-500">
-                                {league?.['number of games'] || 0} Spiele pro Saison
-                              </p>
-                            </div>
-                          </div>
-                          {isSelected && (
-                            <Check className="h-5 w-5 text-green-600" />
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-            </div>
-
-            {selectedCompetitions.length > 0 && (
-              <div className="text-center">
-                <Badge className="bg-green-100 text-green-800">
-                  {selectedCompetitions.length} Wettbewerbe ausgewählt
-                </Badge>
-              </div>
-            )}
-          </div>
+          <CompetitionSelector
+            allCompetitions={allCompetitions}
+            selectedCompetitions={selectedCompetitions}
+            onCompetitionToggle={handleCompetitionToggle}
+            leagues={leagues}
+          />
         );
 
       case 3:
@@ -357,83 +254,21 @@ const Wizard = () => {
                 <p className="text-gray-500">Keine Empfehlungen verfügbar. Bitte wähle Vereine und Wettbewerbe aus.</p>
               </div>
             ) : (
-              <div className="grid gap-6">
+              <div className="grid gap-8">
                 {recommendations.map((pkg, index) => (
-                  <Card key={index} className={`${index === 0 ? 'ring-2 ring-green-500' : ''}`}>
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <CardTitle className="text-xl flex items-center gap-2">
-                            {pkg.type}
-                            {index === 0 && <Star className="h-5 w-5 text-yellow-500 fill-current" />}
-                          </CardTitle>
-                          <CardDescription>{pkg.description}</CardDescription>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-2xl font-bold text-green-600">
-                            {pkg.price.toFixed(2)} €
-                          </div>
-                          <div className="text-sm text-gray-500">pro Monat</div>
-                          <Badge className={index === 0 ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}>
-                            {pkg.highlight}
-                          </Badge>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        <div>
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="text-sm font-medium">Abdeckung</span>
-                            <span className="text-sm font-medium">{pkg.coverage}%</span>
-                          </div>
-                          <Progress value={pkg.coverage} className="h-2" />
-                          <p className="text-xs text-gray-500 mt-1">
-                            {pkg.coveredGames} von {pkg.totalGames} Spielen
-                          </p>
-                        </div>
-
-                        <div>
-                          <p className="text-sm font-medium mb-2">Benötigte Anbieter:</p>
-                          <div className="flex flex-wrap gap-2">
-                            {pkg.providers.map((provider, idx) => (
-                              <Badge key={idx} variant="outline">
-                                {provider.provider_name}
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div>
-                          <p className="text-sm font-medium mb-2">Wettbewerb-Abdeckung:</p>
-                          <div className="space-y-1">
-                            {pkg.competitions.map((comp, idx) => (
-                              <div key={idx} className="flex justify-between text-sm">
-                                <span>{comp.competition}</span>
-                                <span className={comp.coverage === 100 ? 'text-green-600' : 'text-orange-600'}>
-                                  {comp.coverage}% ({comp.coveredGames}/{comp.totalGames})
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        <Button 
-                          className="w-full bg-green-600 hover:bg-green-700"
-                          size="lg"
-                          onClick={() => {
-                            // Link to provider's affiliate URL
-                            if (pkg.providers[0]?.affiliate_url) {
-                              window.open(pkg.providers[0].affiliate_url, '_blank');
-                            }
-                          }}
-                        >
-                          Zu den Streaming-Paketen
-                          <ChevronRight className="ml-2 h-4 w-4" />
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <PackageCard
+                    key={index}
+                    type={pkg.type}
+                    coverage={pkg.coverage}
+                    price={pkg.price}
+                    providers={pkg.providers}
+                    competitions={pkg.competitions}
+                    totalGames={pkg.totalGames}
+                    coveredGames={pkg.coveredGames}
+                    description={pkg.description}
+                    highlight={pkg.highlight}
+                    isRecommended={index === 0}
+                  />
                 ))}
               </div>
             )}
