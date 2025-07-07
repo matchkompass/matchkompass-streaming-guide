@@ -1,4 +1,3 @@
-
 import { Club } from '@/hooks/useClubs';
 import { StreamingProvider } from '@/hooks/useStreaming';
 import { League } from '@/hooks/useLeagues';
@@ -43,7 +42,11 @@ const COMPETITION_MAPPING = {
   liga_portugal: 'liga_portugal',
   sueper_lig: 'sueper_lig',
   mls: 'mls',
-  saudi_pro_league: 'saudi_pro_league'
+  saudi_pro_league: 'saudi_pro_league',
+  third_bundesliga: 'third_bundesliga',
+  efl_cup: 'efl_cup',
+  coppa_italia: 'coppa_italia',
+  coupe_de_france: 'coupe_de_france'
 };
 
 export const getClubCompetitions = (club: Club): string[] => {
@@ -132,12 +135,23 @@ const generateProviderCombinations = (providers: StreamingProvider[]): Streaming
     }
   }
   
-  // Three-provider combinations (limited to most relevant ones)
-  const topProviders = providers.slice(0, 4); // Limit to top 4 providers
+  // Three-provider combinations
+  for (let i = 0; i < providers.length; i++) {
+    for (let j = i + 1; j < providers.length; j++) {
+      for (let k = j + 1; k < providers.length; k++) {
+        combinations.push([providers[i], providers[j], providers[k]]);
+      }
+    }
+  }
+  
+  // Four-provider combinations (limited to prevent performance issues)
+  const topProviders = providers.slice(0, 5); // Limit to top 5 providers for 4-way combinations
   for (let i = 0; i < topProviders.length; i++) {
     for (let j = i + 1; j < topProviders.length; j++) {
       for (let k = j + 1; k < topProviders.length; k++) {
-        combinations.push([topProviders[i], topProviders[j], topProviders[k]]);
+        for (let l = k + 1; l < topProviders.length; l++) {
+          combinations.push([topProviders[i], topProviders[j], topProviders[k], topProviders[l]]);
+        }
       }
     }
   }
@@ -214,54 +228,13 @@ export const calculateEnhancedCoverage = (
     });
   });
 
-  // Sort recommendations by a composite score
+  // Sort recommendations by a composite score favoring coverage and cost efficiency
   recommendations.sort((a, b) => {
-    const scoreA = (a.coverage * 0.6) + ((100 - Math.min(a.price, 100)) * 0.3) + (a.coveredGames * 0.1);
-    const scoreB = (b.coverage * 0.6) + ((100 - Math.min(b.price, 100)) * 0.3) + (b.coveredGames * 0.1);
+    // Prioritize coverage, then cost efficiency, then total games covered
+    const scoreA = (a.coverage * 0.4) + ((100 - Math.min(a.price, 100)) * 0.3) + ((a.coveredGames / Math.max(a.totalGames, 1)) * 0.3);
+    const scoreB = (b.coverage * 0.4) + ((100 - Math.min(b.price, 100)) * 0.3) + ((b.coveredGames / Math.max(b.totalGames, 1)) * 0.3);
     return scoreB - scoreA;
   });
 
-  // Create final recommendation tiers
-  const finalRecommendations: EnhancedProviderRecommendation[] = [];
-  
-  // Best overall (highest coverage)
-  const bestOverall = recommendations.find(r => r.coverage >= 90) || recommendations[0];
-  if (bestOverall) {
-    finalRecommendations.push({
-      ...bestOverall,
-      type: 'Beste Abdeckung',
-      description: 'Maximale Spieleabdeckung für deine Auswahl',
-      highlight: 'Empfohlen'
-    });
-  }
-
-  // Best value (best cost per game ratio under €40)
-  const bestValue = recommendations
-    .filter(r => r.price <= 40 && r.coverage >= 70 && r !== bestOverall)
-    .sort((a, b) => (a.costPerGame || Infinity) - (b.costPerGame || Infinity))[0];
-  
-  if (bestValue) {
-    finalRecommendations.push({
-      ...bestValue,
-      type: 'Preis-Leistungs-Sieger',
-      description: 'Beste Balance zwischen Kosten und Abdeckung',
-      highlight: 'Beliebt'
-    });
-  }
-
-  // Budget option (cheapest with decent coverage)
-  const budgetOption = recommendations
-    .filter(r => r.coverage >= 50 && r !== bestOverall && r !== bestValue)
-    .sort((a, b) => a.price - b.price)[0];
-  
-  if (budgetOption) {
-    finalRecommendations.push({
-      ...budgetOption,
-      type: 'Budget-Option',
-      description: 'Günstigste Option für die wichtigsten Spiele',
-      highlight: 'Günstig'
-    });
-  }
-
-  return finalRecommendations.slice(0, 3);
+  return recommendations;
 };

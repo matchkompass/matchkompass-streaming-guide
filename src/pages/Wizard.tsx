@@ -13,12 +13,14 @@ import { useStreaming } from "@/hooks/useStreaming";
 import { useLeagues } from "@/hooks/useLeagues";
 import { calculateEnhancedCoverage, getAllCompetitionsForClubs, getClubCompetitions } from "@/utils/enhancedCoverageCalculator";
 import EnhancedPackageCard from "@/components/wizard/EnhancedPackageCard";
-import SimplifiedCompetitionSelector from "@/components/wizard/SimplifiedCompetitionSelector";
+import EnhancedCompetitionSelector from "@/components/wizard/EnhancedCompetitionSelector";
+import ComprehensiveResults from "@/components/wizard/ComprehensiveResults";
 
 const Wizard = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedClubIds, setSelectedClubIds] = useState<number[]>([]);
   const [selectedCompetitions, setSelectedCompetitions] = useState<string[]>([]);
+  const [existingProviders, setExistingProviders] = useState<number[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
 
   const { clubs, loading: clubsLoading, error: clubsError } = useClubs();
@@ -38,9 +40,17 @@ const Wizard = () => {
   }, [clubs, selectedClubIds]);
 
   const filteredClubs = useMemo(() => {
-    return clubs.filter(club => 
-      club.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    return clubs
+      .filter(club => 
+        club.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        club.country?.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+      .sort((a, b) => {
+        // Sort by country first, then by name
+        const countryComparison = (a.country || 'ZZ').localeCompare(b.country || 'ZZ');
+        if (countryComparison !== 0) return countryComparison;
+        return (a.name || '').localeCompare(b.name || '');
+      });
   }, [clubs, searchTerm]);
 
   const clubCompetitions = useMemo(() => {
@@ -48,12 +58,20 @@ const Wizard = () => {
     return getAllCompetitionsForClubs(selectedClubs);
   }, [selectedClubs]);
 
-  const recommendations = useMemo(() => {
+  const { recommendations, allCombinations } = useMemo(() => {
     if (selectedClubs.length === 0 || selectedCompetitions.length === 0 || providers.length === 0) {
-      return [];
+      return { recommendations: [], allCombinations: [] };
     }
-    return calculateEnhancedCoverage(selectedClubs, selectedCompetitions, providers, leagues);
-  }, [selectedClubs, selectedCompetitions, providers, leagues]);
+    
+    // Filter out existing providers from recommendations
+    const availableProviders = providers.filter(p => !existingProviders.includes(p.streamer_id));
+    const allResults = calculateEnhancedCoverage(selectedClubs, selectedCompetitions, availableProviders, leagues);
+    
+    return {
+      recommendations: allResults.slice(0, 3), // Top 3 recommendations
+      allCombinations: allResults // All possible combinations
+    };
+  }, [selectedClubs, selectedCompetitions, providers, leagues, existingProviders]);
 
   const handleClubToggle = (clubId: number) => {
     setSelectedClubIds(prev => 
@@ -71,9 +89,9 @@ const Wizard = () => {
     );
   };
 
-  // Auto-select recommended competitions when clubs change
+  // Auto-select ALL competitions where clubs participate
   useMemo(() => {
-    if (clubCompetitions.length > 0 && selectedCompetitions.length === 0) {
+    if (clubCompetitions.length > 0) {
       setSelectedCompetitions(clubCompetitions);
     }
   }, [clubCompetitions]);
@@ -154,8 +172,30 @@ const Wizard = () => {
                 <p className="text-gray-500">Keine Vereine gefunden.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                {filteredClubs.map((club) => (
+              <div>
+                {/* Group clubs by country */}
+                {Object.entries(
+                  filteredClubs.reduce((acc, club) => {
+                    const country = club.country || 'Other';
+                    if (!acc[country]) acc[country] = [];
+                    acc[country].push(club);
+                    return acc;
+                  }, {} as Record<string, typeof filteredClubs>)
+                ).map(([country, clubsInCountry]) => (
+                  <div key={country} className="mb-6">
+                    <h3 className="text-lg font-semibold mb-3 text-gray-800 border-b pb-2">
+                      {country === 'Germany' ? '🇩🇪 Deutschland' : 
+                       country === 'Spain' ? '🇪🇸 Spanien' :
+                       country === 'England' ? '🏴󠁧󠁢󠁥󠁮󠁧󠁿 England' :
+                       country === 'France' ? '🇫🇷 Frankreich' :
+                       country === 'Italy' ? '🇮🇹 Italien' :
+                       country === 'Netherlands' ? '🇳🇱 Niederlande' :
+                       country === 'Portugal' ? '🇵🇹 Portugal' :
+                       country === 'USA' ? '🇺🇸 USA' :
+                       `🌍 ${country}`}
+                    </h3>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                      {clubsInCountry.map((club) => (
                   <Card
                     key={club.club_id}
                     className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
@@ -192,7 +232,10 @@ const Wizard = () => {
                         </div>
                       )}
                     </CardContent>
-                  </Card>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
                 ))}
               </div>
             )}
@@ -209,14 +252,88 @@ const Wizard = () => {
 
       case 2:
         return (
-          <SimplifiedCompetitionSelector
+          <EnhancedCompetitionSelector
             selectedCompetitions={selectedCompetitions}
             onCompetitionToggle={handleCompetitionToggle}
-            selectedClubs={selectedClubs}
+            leagues={leagues}
+            recommendedCompetitions={clubCompetitions}
           />
         );
 
       case 3:
+        return (
+          <div className="space-y-6">
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Bestehende Abonnements
+              </h2>
+              <p className="text-gray-600 mb-6">
+                Welche Streaming-Dienste nutzt du bereits?
+              </p>
+            </div>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={existingProviders.length === 0}
+                  onChange={() => setExistingProviders([])}
+                  className="mr-2"
+                />
+                <span className="font-medium">Ich habe noch kein Streaming-Abonnement</span>
+              </label>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {providers.map((provider) => (
+                <Card
+                  key={provider.streamer_id}
+                  className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
+                    existingProviders.includes(provider.streamer_id)
+                      ? 'ring-2 ring-blue-500 bg-blue-50'
+                      : 'hover:bg-gray-50'
+                  }`}
+                  onClick={() => {
+                    setExistingProviders(prev =>
+                      prev.includes(provider.streamer_id)
+                        ? prev.filter(id => id !== provider.streamer_id)
+                        : [...prev, provider.streamer_id]
+                    );
+                  }}
+                >
+                  <CardContent className="p-4 text-center">
+                    <div className="mb-2">
+                      {provider.logo_url ? (
+                        <img src={provider.logo_url} alt={provider.provider_name} className="w-12 h-12 mx-auto object-contain" />
+                      ) : (
+                        <div className="w-12 h-12 bg-gray-200 rounded-lg mx-auto flex items-center justify-center">
+                          📺
+                        </div>
+                      )}
+                    </div>
+                    <h3 className="font-medium text-sm mb-1">{provider.provider_name}</h3>
+                    <p className="text-xs text-gray-600">{provider.monthly_price}/Monat</p>
+                    {existingProviders.includes(provider.streamer_id) && (
+                      <div className="mt-2">
+                        <Check className="h-5 w-5 text-blue-600 mx-auto" />
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {existingProviders.length > 0 && (
+              <div className="text-center">
+                <Badge className="bg-blue-100 text-blue-800">
+                  {existingProviders.length} Anbieter bereits vorhanden
+                </Badge>
+              </div>
+            )}
+          </div>
+        );
+
+      case 4:
         return (
           <div className="space-y-6">
             <div className="text-center">
@@ -233,64 +350,12 @@ const Wizard = () => {
                 <p className="text-gray-500">Keine Empfehlungen verfügbar. Bitte wähle Vereine und Wettbewerbe aus.</p>
               </div>
             ) : (
-              <div className="grid lg:grid-cols-2 xl:grid-cols-3 gap-4">
-                {recommendations.map((pkg, index) => (
-                  <EnhancedPackageCard
-                    key={index}
-                    type={pkg.type}
-                    coverage={pkg.coverage}
-                    price={pkg.price}
-                    yearlyPrice={pkg.yearlyPrice}
-                    providers={pkg.providers}
-                    competitions={pkg.competitions}
-                    totalGames={pkg.totalGames}
-                    coveredGames={pkg.coveredGames}
-                    description={pkg.description}
-                    highlight={pkg.highlight}
-                    isRecommended={index === 0}
-                    savings={pkg.savings}
-                  />
-                ))}
-              </div>
+              <ComprehensiveResults
+                recommendations={recommendations}
+                allCombinations={allCombinations}
+              />
             )}
 
-            {/* Quick comparison table */}
-            {recommendations.length > 1 && (
-              <div className="mt-8">
-                <h3 className="text-lg font-semibold mb-4">Schnellvergleich</h3>
-                <div className="overflow-x-auto">
-                  <table className="min-w-full bg-white border border-gray-200 rounded-lg">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Paket</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Preis</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Abdeckung</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Anbieter</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                      {recommendations.map((pkg, index) => (
-                        <tr key={index} className={index === 0 ? 'bg-green-50' : ''}>
-                          <td className="px-4 py-3 text-sm font-medium">{pkg.type}</td>
-                          <td className="px-4 py-3 text-sm">{pkg.price.toFixed(2)}€/Monat</td>
-                          <td className="px-4 py-3 text-sm">
-                            <span className={`font-medium ${
-                              pkg.coverage >= 90 ? 'text-green-600' : 
-                              pkg.coverage >= 70 ? 'text-orange-600' : 'text-red-600'
-                            }`}>
-                              {pkg.coverage}%
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 text-sm">
-                            {pkg.providers.map(p => p.provider_name).join(', ')}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
           </div>
         );
 
@@ -302,6 +367,7 @@ const Wizard = () => {
   const canProceed = () => {
     if (currentStep === 1) return selectedClubIds.length > 0;
     if (currentStep === 2) return selectedCompetitions.length > 0;
+    if (currentStep === 3) return true; // Can proceed with or without existing providers
     return true;
   };
 
@@ -313,7 +379,7 @@ const Wizard = () => {
         {/* Progress Indicator */}
         <div className="mb-6">
           <div className="flex items-center justify-center space-x-4 mb-3">
-            {[1, 2, 3].map((step) => (
+            {[1, 2, 3, 4].map((step) => (
               <div key={step} className="flex items-center">
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
@@ -324,7 +390,7 @@ const Wizard = () => {
                 >
                   {currentStep > step ? <Check className="h-4 w-4" /> : step}
                 </div>
-                {step < 3 && (
+                {step < 4 && (
                   <div className={`w-12 h-1 mx-2 ${currentStep > step ? 'bg-green-600' : 'bg-gray-200'}`} />
                 )}
               </div>
@@ -332,7 +398,7 @@ const Wizard = () => {
           </div>
           <div className="text-center">
             <p className="text-sm text-gray-600">
-              Schritt {currentStep} von 3
+              Schritt {currentStep} von 4
             </p>
           </div>
         </div>
@@ -353,7 +419,7 @@ const Wizard = () => {
             Zurück
           </Button>
 
-          {currentStep < 3 ? (
+          {currentStep < 4 ? (
             <Button
               onClick={() => setCurrentStep(prev => prev + 1)}
               disabled={!canProceed()}
@@ -368,6 +434,7 @@ const Wizard = () => {
                 setCurrentStep(1);
                 setSelectedClubIds([]);
                 setSelectedCompetitions([]);
+                setExistingProviders([]);
               }}
               className="bg-green-600 hover:bg-green-700"
             >

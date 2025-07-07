@@ -1,8 +1,9 @@
 
 import { Link } from "react-router-dom";
-import { Search, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import EnhancedGlobalSearch from "./enhanced/EnhancedGlobalSearch";
 
 const Header = () => {
   const navigation = [
@@ -37,12 +38,9 @@ const Header = () => {
             ))}
           </nav>
 
-          {/* Search Button */}
+          {/* Search */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button variant="outline" size="sm">
-              <Search className="h-4 w-4 mr-2" />
-              Verein suchen
-            </Button>
+            <EnhancedGlobalSearch />
           </div>
 
           {/* Mobile Menu */}
@@ -64,10 +62,7 @@ const Header = () => {
                   </Link>
                 ))}
                 <div className="pt-4 border-t">
-                  <Button variant="outline" className="w-full">
-                    <Search className="h-4 w-4 mr-2" />
-                    Verein suchen
-                  </Button>
+                  <EnhancedGlobalSearch />
                 </div>
               </div>
             </SheetContent>
