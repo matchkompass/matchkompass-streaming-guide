@@ -142,7 +142,7 @@ const CompetitionDetail = () => {
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     {participatingClubs.map((club) => (
                       <div 
-                        key={club.id}
+                        key={club.club_id}
                         className="flex flex-col items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
                         onClick={() => window.location.href = `/club/${club.slug}`}
                       >

@@ -42,7 +42,7 @@ const GlobalSearch = () => {
       if (club.name?.toLowerCase().includes(searchQuery)) {
         allResults.push({
           type: 'club',
-          id: club.id.toString(),
+          id: club.club_id.toString(),
           name: club.name,
           slug: club.slug || '',
           route: `/club/${club.slug}`,

@@ -3,13 +3,23 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface Club {
-  id: number;
+  club_id: number;
   name: string;
   slug: string;
   logo_url: string;
   country: string;
   primary_color: string;
   secondary_color: string;
+  founded_year: number;
+  stadium_name: string;
+  stadium_capacity: number;
+  stadium_location: string;
+  members_count: number;
+  website_url: string;
+  fanshop_url: string;
+  facebook_url: string;
+  twitter_url: string;
+  instagram_url: string;
   bundesliga: boolean;
   second_bundesliga: boolean;
   dfb_pokal: boolean;
@@ -21,6 +31,17 @@ export interface Club {
   fa_cup: boolean;
   la_liga: boolean;
   copa_del_rey: boolean;
+  third_bundesliga: boolean;
+  serie_a: boolean;
+  ligue_1: boolean;
+  eredevise: boolean;
+  sueper_lig: boolean;
+  liga_portugal: boolean;
+  saudi_pro_league: boolean;
+  mls: boolean;
+  efl_cup: boolean;
+  coppa_italia: boolean;
+  coupe_de_france: boolean;
 }
 
 const fetchClubs = async (): Promise<Club[]> => {

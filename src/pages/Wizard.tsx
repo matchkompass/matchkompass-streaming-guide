@@ -34,7 +34,7 @@ const Wizard = () => {
   });
 
   const selectedClubs = useMemo(() => {
-    return clubs.filter(club => selectedClubIds.includes(club.id));
+    return clubs.filter(club => selectedClubIds.includes(club.club_id));
   }, [clubs, selectedClubIds]);
 
   const filteredClubs = useMemo(() => {
@@ -157,13 +157,13 @@ const Wizard = () => {
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                 {filteredClubs.map((club) => (
                   <Card
-                    key={club.id}
+                    key={club.club_id}
                     className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
-                      selectedClubIds.includes(club.id)
+                      selectedClubIds.includes(club.club_id)
                         ? 'ring-2 ring-green-500 bg-green-50'
                         : 'hover:bg-gray-50'
                     }`}
-                    onClick={() => handleClubToggle(club.id)}
+                    onClick={() => handleClubToggle(club.club_id)}
                   >
                     <CardContent className="p-3 text-center">
                       <div className="text-3xl mb-2">
@@ -186,7 +186,7 @@ const Wizard = () => {
                           </Badge>
                         )}
                       </div>
-                      {selectedClubIds.includes(club.id) && (
+                      {selectedClubIds.includes(club.club_id) && (
                         <div className="mt-2">
                           <Check className="h-5 w-5 text-green-600 mx-auto" />
                         </div>

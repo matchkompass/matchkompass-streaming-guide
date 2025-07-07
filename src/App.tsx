@@ -15,6 +15,7 @@ import ProviderDetail from "./pages/ProviderDetail";
 import Deals from "./pages/Deals";
 import News from "./pages/News";
 import NotFound from "./pages/NotFound";
+import StreamingOptimizerPage from "./pages/StreamingOptimizer";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/vergleich" element={<EnhancedVergleich />} />
           <Route path="/vergleich-alt" element={<Vergleich />} />
           <Route path="/detailvergleich" element={<DetailVergleich />} />
+          <Route path="/optimizer" element={<StreamingOptimizerPage />} />
           <Route path="/club/:slug" element={<ClubDetail />} />
           <Route path="/competition/:slug" element={<CompetitionDetail />} />
           <Route path="/streaming-provider/:slug" element={<ProviderDetail />} />
