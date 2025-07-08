@@ -8,13 +8,13 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { useClubs, Club } from "@/hooks/useClubs";
-import { useStreaming } from "@/hooks/useStreaming";
-import { useLeagues } from "@/hooks/useLeagues";
-import { calculateEnhancedCoverage, getAllCompetitionsForClubs, getClubCompetitions } from "@/utils/enhancedCoverageCalculator";
-import EnhancedPackageCard from "@/components/wizard/EnhancedPackageCard";
 import EnhancedCompetitionSelector from "@/components/wizard/EnhancedCompetitionSelector";
-import ComprehensiveResults from "@/components/wizard/ComprehensiveResults";
+import EnhancedStep3Providers from "@/components/wizard/EnhancedStep3Providers";
+import EnhancedStep4Results from "@/components/wizard/EnhancedStep4Results";
+import { useClubs, Club } from "@/hooks/useClubs";
+import { useStreamingEnhanced } from "@/hooks/useStreamingEnhanced";
+import { useLeaguesEnhanced } from "@/hooks/useLeaguesEnhanced";
+import { getAllCompetitionsForClubs, getClubCompetitions } from "@/utils/enhancedCoverageCalculator";
 
 const Wizard = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -22,11 +22,11 @@ const Wizard = () => {
   const [selectedCompetitions, setSelectedCompetitions] = useState<string[]>([]);
   const [existingProviders, setExistingProviders] = useState<number[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [expandedLeagues, setExpandedLeagues] = useState<string[]>(['Bundesliga', 'Premier League', 'La Liga']); // Default expanded leagues
+  const [expandedLeagues, setExpandedLeagues] = useState<string[]>(['Bundesliga', 'Premier League', 'La Liga']);
 
   const { clubs, loading: clubsLoading, error: clubsError } = useClubs();
-  const { providers, loading: providersLoading, error: providersError } = useStreaming();
-  const { leagues, loading: leaguesLoading, error: leaguesError } = useLeagues();
+  const { providers, loading: providersLoading, error: providersError } = useStreamingEnhanced();
+  const { leagues, loading: leaguesLoading, error: leaguesError } = useLeaguesEnhanced();
 
   console.log('Enhanced Wizard render - Data status:', {
     clubs: clubs.length,
@@ -43,7 +43,6 @@ const Wizard = () => {
   // Group clubs by league and sort by popularity
   const clubsByLeague = useMemo(() => {
     const grouped = clubs.reduce((acc, club) => {
-      // Get the leagues this club participates in
       const clubLeagues = getClubCompetitions(club);
       
       clubLeagues.forEach(leagueSlug => {
@@ -54,7 +53,6 @@ const Wizard = () => {
             acc[leagueName] = [];
           }
           
-          // Only add if not already added to this league
           if (!acc[leagueName].find(c => c.club_id === club.club_id)) {
             acc[leagueName].push(club);
           }
@@ -89,21 +87,6 @@ const Wizard = () => {
     return getAllCompetitionsForClubs(selectedClubs);
   }, [selectedClubs]);
 
-  const { recommendations, allCombinations } = useMemo(() => {
-    if (selectedClubs.length === 0 || selectedCompetitions.length === 0 || providers.length === 0) {
-      return { recommendations: [], allCombinations: [] };
-    }
-    
-    // Filter out existing providers from recommendations
-    const availableProviders = providers.filter(p => !existingProviders.includes(p.streamer_id));
-    const allResults = calculateEnhancedCoverage(selectedClubs, selectedCompetitions, availableProviders, leagues);
-    
-    return {
-      recommendations: allResults.slice(0, 3), // Top 3 recommendations
-      allCombinations: allResults // All possible combinations
-    };
-  }, [selectedClubs, selectedCompetitions, providers, leagues, existingProviders]);
-
   const handleClubToggle = (clubId: number) => {
     setSelectedClubIds(prev => 
       prev.includes(clubId) 
@@ -117,6 +100,14 @@ const Wizard = () => {
       prev.includes(competitionId)
         ? prev.filter(id => id !== competitionId)
         : [...prev, competitionId]
+    );
+  };
+
+  const handleProviderToggle = (providerId: number) => {
+    setExistingProviders(prev =>
+      prev.includes(providerId)
+        ? prev.filter(id => id !== providerId)
+        : [...prev, providerId]
     );
   };
 
@@ -335,101 +326,22 @@ const Wizard = () => {
 
       case 3:
         return (
-          <div className="space-y-6">
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                Bestehende Abonnements
-              </h2>
-              <p className="text-gray-600 mb-6">
-                Welche Streaming-Dienste nutzt du bereits?
-              </p>
-            </div>
-
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={existingProviders.length === 0}
-                  onChange={() => setExistingProviders([])}
-                  className="mr-2"
-                />
-                <span className="font-medium">Ich habe noch kein Streaming-Abonnement</span>
-              </label>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {providers.map((provider) => (
-                <Card
-                  key={provider.streamer_id}
-                  className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
-                    existingProviders.includes(provider.streamer_id)
-                      ? 'ring-2 ring-blue-500 bg-blue-50'
-                      : 'hover:bg-gray-50'
-                  }`}
-                  onClick={() => {
-                    setExistingProviders(prev =>
-                      prev.includes(provider.streamer_id)
-                        ? prev.filter(id => id !== provider.streamer_id)
-                        : [...prev, provider.streamer_id]
-                    );
-                  }}
-                >
-                  <CardContent className="p-4 text-center">
-                    <div className="mb-2">
-                      {provider.logo_url ? (
-                        <img src={provider.logo_url} alt={provider.provider_name} className="w-12 h-12 mx-auto object-contain" />
-                      ) : (
-                        <div className="w-12 h-12 bg-gray-200 rounded-lg mx-auto flex items-center justify-center">
-                          📺
-                        </div>
-                      )}
-                    </div>
-                    <h3 className="font-medium text-sm mb-1">{provider.provider_name}</h3>
-                    <p className="text-xs text-gray-600">{provider.monthly_price}/Monat</p>
-                    {existingProviders.includes(provider.streamer_id) && (
-                      <div className="mt-2">
-                        <Check className="h-5 w-5 text-blue-600 mx-auto" />
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            {existingProviders.length > 0 && (
-              <div className="text-center">
-                <Badge className="bg-blue-100 text-blue-800">
-                  {existingProviders.length} Anbieter bereits vorhanden
-                </Badge>
-              </div>
-            )}
-          </div>
+          <EnhancedStep3Providers
+            providers={providers}
+            existingProviders={existingProviders}
+            onToggleProvider={handleProviderToggle}
+          />
         );
 
       case 4:
         return (
-          <div className="space-y-6">
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                Deine optimalen Streaming-Pakete
-              </h2>
-              <p className="text-gray-600 mb-6">
-                Hier sind die besten Kombinationen für deine Auswahl
-              </p>
-            </div>
-
-            {recommendations.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-gray-500">Keine Empfehlungen verfügbar. Bitte wähle Vereine und Wettbewerbe aus.</p>
-              </div>
-            ) : (
-              <ComprehensiveResults
-                recommendations={recommendations}
-                allCombinations={allCombinations}
-              />
-            )}
-
-          </div>
+          <EnhancedStep4Results
+            selectedClubs={selectedClubs}
+            selectedCompetitions={selectedCompetitions}
+            existingProviders={existingProviders}
+            providers={providers}
+            leagues={leagues}
+          />
         );
 
       default:
