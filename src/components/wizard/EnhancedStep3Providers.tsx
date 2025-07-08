@@ -79,7 +79,7 @@ const EnhancedStep3Providers = ({
                 </Badge>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
                 {groupProviders
                   .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
                   .map((provider) => (
@@ -92,45 +92,40 @@ const EnhancedStep3Providers = ({
                       }`}
                       onClick={() => onToggleProvider(provider.streamer_id)}
                     >
-                      <CardContent className="p-4">
+                      <CardContent className="p-3">
                         <div className="text-center">
                           <div className="mb-3">
                             {provider.logo_url ? (
                               <img 
                                 src={provider.logo_url} 
                                 alt={provider.name || provider.provider_name} 
-                                className="w-12 h-12 mx-auto object-contain" 
+                                className="w-10 h-10 mx-auto object-contain" 
                               />
                             ) : (
-                              <div className="w-12 h-12 bg-gray-200 rounded-lg mx-auto flex items-center justify-center">
+                              <div className="w-10 h-10 bg-gray-200 rounded-lg mx-auto flex items-center justify-center text-xs">
                                 📺
                               </div>
                             )}
                           </div>
                           
-                          <h4 className="font-medium text-sm mb-2 min-h-[2.5rem] flex items-center justify-center">
+                          <h4 className="font-medium text-xs mb-2 min-h-[2rem] flex items-center justify-center text-center">
                             {provider.name || provider.provider_name}
                           </h4>
                           
-                          <div className="mb-3">
-                            <p className="text-sm font-semibold text-green-600">
+                          <div className="mb-2">
+                            <p className="text-xs font-semibold text-green-600">
                               {provider.monthly_price}/Monat
                             </p>
-                            {provider.yearly_price && (
-                              <p className="text-xs text-gray-500">
-                                {provider.yearly_price}/Jahr
-                              </p>
-                            )}
                           </div>
 
                           {/* Highlights */}
-                          <div className="flex flex-wrap gap-1 justify-center mb-3 min-h-[4rem]">
+                          <div className="flex flex-wrap gap-1 justify-center mb-2 min-h-[2rem]">
                             {provider.highlights.highlight_1 && (
                               <HighlightBadge
                                 text={provider.highlights.highlight_1}
                                 priority="primary"
                                 tooltip={true}
-                                className="text-xs"
+                                className="text-[10px] px-1 py-0.5"
                               />
                             )}
                             {provider.highlights.highlight_2 && (
@@ -138,15 +133,7 @@ const EnhancedStep3Providers = ({
                                 text={provider.highlights.highlight_2}
                                 priority="secondary"
                                 tooltip={true}
-                                className="text-xs"
-                              />
-                            )}
-                            {provider.highlights.highlight_3 && (
-                              <HighlightBadge
-                                text={provider.highlights.highlight_3}
-                                priority="tertiary"
-                                tooltip={true}
-                                className="text-xs"
+                                className="text-[10px] px-1 py-0.5"
                               />
                             )}
                           </div>

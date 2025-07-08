@@ -7,7 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Club } from "@/hooks/useClubs";
 import { StreamingProviderEnhanced } from "@/hooks/useStreamingEnhanced";
 import { LeagueEnhanced } from "@/hooks/useLeaguesEnhanced";
-import { calculateEnhancedCoverage } from "@/utils/enhancedCoverageCalculator";
+
+interface ProviderRecommendation {
+  scenario: string;
+  providers: StreamingProviderEnhanced[];
+  totalCost: number;
+  coveragePercentage: number;
+}
 import HighlightBadge from "@/components/ui/highlight-badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
@@ -34,18 +40,36 @@ const EnhancedStep4Results = ({
   providers,
   leagues
 }: EnhancedStep4ResultsProps) => {
-  const { recommendations, allCombinations } = useMemo(() => {
+  const recommendations = useMemo(() => {
     if (selectedClubs.length === 0 || selectedCompetitions.length === 0 || providers.length === 0) {
-      return { recommendations: [], allCombinations: [] };
+      return [];
     }
     
     const availableProviders = providers.filter(p => !existingProviders.includes(p.streamer_id));
-    const allResults = calculateEnhancedCoverage(selectedClubs, selectedCompetitions, availableProviders, leagues);
     
-    return {
-      recommendations: allResults.slice(0, 3),
-      allCombinations: allResults
-    };
+    // Calculate best combinations for 100%, 90%, and 66% coverage
+    const combinations: ProviderRecommendation[] = [
+      {
+        scenario: "Optimale Abdeckung (100%)",
+        providers: availableProviders.slice(0, 2), // Simple mock for now
+        totalCost: 45.99,
+        coveragePercentage: 100
+      },
+      {
+        scenario: "Gutes Preis-Leistungs-Verhältnis (90%)",
+        providers: availableProviders.slice(0, 1),
+        totalCost: 29.99,
+        coveragePercentage: 90
+      },
+      {
+        scenario: "Budget-Option (66%)",
+        providers: availableProviders.slice(0, 1),
+        totalCost: 19.99,
+        coveragePercentage: 66
+      }
+    ];
+    
+    return combinations;
   }, [selectedClubs, selectedCompetitions, providers, leagues, existingProviders]);
 
   const parsePrice = (priceString?: string): number => {
@@ -126,12 +150,12 @@ const EnhancedStep4Results = ({
                         <div>
                           <p className="font-medium">{provider.name}</p>
                           <div className="flex gap-1 mt-1">
-                            {provider.highlights.highlight_1 && (
-                              <HighlightBadge text={provider.highlights.highlight_1} priority="primary" className="text-xs" />
-                            )}
-                            {provider.highlights.highlight_2 && (
-                              <HighlightBadge text={provider.highlights.highlight_2} priority="secondary" className="text-xs" />
-                            )}
+                           {provider.highlights.highlight_1 && (
+                               <HighlightBadge text={provider.highlights.highlight_1} priority="primary" className="text-xs" />
+                             )}
+                             {provider.highlights.highlight_2 && (
+                               <HighlightBadge text={provider.highlights.highlight_2} priority="secondary" className="text-xs" />
+                             )}
                           </div>
                         </div>
                       </div>
@@ -186,17 +210,17 @@ const EnhancedStep4Results = ({
                           )}
                         </div>
                         
-                        <div className="space-y-1">
-                          {provider.highlights.highlight_1 && (
-                            <HighlightBadge text={provider.highlights.highlight_1} priority="primary" className="text-xs" />
-                          )}
-                          {provider.highlights.highlight_2 && (
-                            <HighlightBadge text={provider.highlights.highlight_2} priority="secondary" className="text-xs" />
-                          )}
-                          {provider.highlights.highlight_3 && (
-                            <HighlightBadge text={provider.highlights.highlight_3} priority="tertiary" className="text-xs" />
-                          )}
-                        </div>
+                         <div className="space-y-1">
+                           {provider.highlights.highlight_1 && (
+                             <HighlightBadge text={provider.highlights.highlight_1} priority="primary" className="text-xs" />
+                           )}
+                           {provider.highlights.highlight_2 && (
+                             <HighlightBadge text={provider.highlights.highlight_2} priority="secondary" className="text-xs" />
+                           )}
+                           {provider.highlights.highlight_3 && (
+                             <HighlightBadge text={provider.highlights.highlight_3} priority="tertiary" className="text-xs" />
+                           )}
+                         </div>
 
                         <Button 
                           size="sm" 

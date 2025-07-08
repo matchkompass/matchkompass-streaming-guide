@@ -31,7 +31,7 @@ const EnhancedCompetitionSelector: React.FC<EnhancedCompetitionSelectorProps> = 
 }) => {
   const [showAllCompetitions, setShowAllCompetitions] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [expandedRegions, setExpandedRegions] = useState<string[]>(['Deutschland', 'Europa']);
+  const [expandedRegions, setExpandedRegions] = useState<string[]>(['Deutschland', 'Europa', 'International']);
 
   // Create competitions from database leagues
   const allCompetitions = useMemo(() => {

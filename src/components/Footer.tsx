@@ -50,18 +50,22 @@ const Footer = () => {
               <span className="text-xl font-bold">MatchKompass</span>
             </Link>
             <p className="text-gray-400 mb-4">
-              Deutschlands führende Plattform für optimale Streaming-Kombinationen im Fußball. 
-              Finde die beste Lösung für deine Lieblingsvereine.
+              Ihre Plattform für die optimale Streaming-Lösung. Finden Sie die perfekte 
+              Kombination für Ihre Lieblingsvereine.
             </p>
+            <div className="flex items-center gap-2 text-sm text-gray-400 mb-4">
+              <span className="text-red-500">❤️</span>
+              <span>Made with love for football fans</span>
+            </div>
             <div className="flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+              <a href="#" className="text-gray-400 hover:text-green-400 transition-colors">
                 Twitter
               </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+              <a href="#" className="text-gray-400 hover:text-green-400 transition-colors">
                 Facebook
               </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                Instagram
+              <a href="#" className="text-gray-400 hover:text-green-400 transition-colors">
+                Youtube
               </a>
             </div>
           </div>
@@ -114,20 +118,22 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Legal Links */}
+          {/* Legal & Contact Links */}
           <div>
             <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-3">
               Rechtliches
             </h3>
             <ul className="space-y-2">
-              {footerLinks.rechtliches.map((link) => (
-                <li key={link.name}>
-                  <Link to={link.href} className="text-gray-400 hover:text-white transition-colors">
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
+              <li><Link to="/impressum" className="text-gray-400 hover:text-green-400 transition-colors">Impressum</Link></li>
+              <li><Link to="/datenschutz" className="text-gray-400 hover:text-green-400 transition-colors">Datenschutz</Link></li>
+              <li><Link to="/agb" className="text-gray-400 hover:text-green-400 transition-colors">AGB</Link></li>
+              <li><Link to="/widerrufsrecht" className="text-gray-400 hover:text-green-400 transition-colors">Widerrufsrecht</Link></li>
             </ul>
+            <div className="mt-4 space-y-1 text-gray-400 text-sm">
+              <div>📧 info@matchkompass.de</div>
+              <div>📞 +49 (0) 123 456 789</div>
+              <div>📍 Deutschland</div>
+            </div>
           </div>
         </div>
 

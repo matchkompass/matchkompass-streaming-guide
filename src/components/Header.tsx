@@ -14,9 +14,7 @@ const Header = () => {
   const navigationItems = [
     { name: 'Wizard', href: '/wizard' },
     { name: 'Vergleich', href: '/vergleich' },
-    { name: 'Enhanced Vergleich', href: '/enhanced-vergleich' },
     { name: 'Detailvergleich', href: '/detailvergleich' },
-    { name: 'Optimizer', href: '/optimizer' },
     { name: 'Deals', href: '/deals' },
     { name: 'News', href: '/news' }
   ];

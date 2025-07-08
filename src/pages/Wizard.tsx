@@ -23,6 +23,7 @@ const Wizard = () => {
   const [existingProviders, setExistingProviders] = useState<number[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [expandedLeagues, setExpandedLeagues] = useState<string[]>(['Bundesliga', 'Premier League', 'La Liga']);
+  const [showAllClubs, setShowAllClubs] = useState<Record<string, boolean>>({});
 
   const { clubs, loading: clubsLoading, error: clubsError } = useClubs();
   const { providers, loading: providersLoading, error: providersError } = useStreamingEnhanced();
@@ -50,29 +51,31 @@ const Wizard = () => {
         if (league) {
           const leagueName = league.league || leagueSlug;
           if (!acc[leagueName]) {
-            acc[leagueName] = [];
+            acc[leagueName] = {
+              clubs: [],
+              popularity: 0
+            };
           }
           
-          if (!acc[leagueName].find(c => c.club_id === club.club_id)) {
-            acc[leagueName].push(club);
+          if (!acc[leagueName].clubs.find(c => c.club_id === club.club_id)) {
+            acc[leagueName].clubs.push(club);
           }
         }
       });
       
       return acc;
-    }, {} as Record<string, Club[]>);
+    }, {} as Record<string, { clubs: Club[], popularity: number }>);
 
-    // Sort clubs within each league by popularity_score (highest first) and limit to top 8
+    // Sort clubs within each league by popularity_score (highest first)
     Object.keys(grouped).forEach(leagueName => {
-      grouped[leagueName] = grouped[leagueName]
-        .sort((a, b) => (b.popularity_score || 0) - (a.popularity_score || 0))
-        .slice(0, 8);
+      grouped[leagueName].clubs = grouped[leagueName].clubs
+        .sort((a, b) => (b.popularity_score || 0) - (a.popularity_score || 0));
     });
 
     // Filter by search term
     if (searchTerm) {
       Object.keys(grouped).forEach(leagueName => {
-        grouped[leagueName] = grouped[leagueName].filter(club =>
+        grouped[leagueName].clubs = grouped[leagueName].clubs.filter(club =>
           club.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
           club.country?.toLowerCase().includes(searchTerm.toLowerCase())
         );
@@ -204,11 +207,13 @@ const Wizard = () => {
             ) : (
               <div className="space-y-6">
                 {Object.entries(clubsByLeague)
-                  .sort(([a], [b]) => a.localeCompare(b))
-                  .map(([leagueName, clubsInLeague]) => {
-                    if (clubsInLeague.length === 0) return null;
+                  .sort(([a, aData], [b, bData]) => (bData.popularity || 0) - (aData.popularity || 0))
+                  .map(([leagueName, leagueData]) => {
+                    if (leagueData.clubs.length === 0) return null;
                     
                     const isExpanded = expandedLeagues.includes(leagueName);
+                    const showAll = showAllClubs[leagueName] || false;
+                    const displayedClubs = showAll ? leagueData.clubs : leagueData.clubs.slice(0, 8);
                     
                     return (
                       <div key={leagueName} className="border rounded-lg bg-white shadow-sm">
@@ -221,7 +226,7 @@ const Wizard = () => {
                               🏆 {leagueName}
                             </h3>
                             <Badge variant="secondary" className="text-xs">
-                              {clubsInLeague.length} Vereine
+                              {leagueData.clubs.length} Vereine
                             </Badge>
                           </div>
                           {isExpanded ? 
@@ -233,7 +238,7 @@ const Wizard = () => {
                         {isExpanded && (
                           <div className="px-6 pb-6">
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                              {clubsInLeague.map((club) => (
+                              {displayedClubs.map((club) => (
                                 <Card
                                   key={club.club_id}
                                   className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
@@ -296,6 +301,21 @@ const Wizard = () => {
                                 </Card>
                               ))}
                             </div>
+                            
+                            {leagueData.clubs.length > 8 && (
+                              <div className="mt-4 text-center">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => setShowAllClubs(prev => ({
+                                    ...prev,
+                                    [leagueName]: !showAll
+                                  }))}
+                                >
+                                  {showAll ? 'Weniger anzeigen' : `Alle ${leagueData.clubs.length} Vereine anzeigen`}
+                                </Button>
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
@@ -319,7 +339,7 @@ const Wizard = () => {
           <EnhancedCompetitionSelector
             selectedCompetitions={selectedCompetitions}
             onCompetitionToggle={handleCompetitionToggle}
-            leagues={leagues}
+            leagues={leagues as any}
             recommendedCompetitions={clubCompetitions}
           />
         );
