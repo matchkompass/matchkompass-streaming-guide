@@ -4,8 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useClubs } from '@/hooks/useClubs';
-import { useLeagues } from '@/hooks/useLeagues';
-import { useStreaming } from '@/hooks/useStreaming';
+import { useLeaguesEnhanced } from '@/hooks/useLeaguesEnhanced';
+import { useStreamingEnhanced } from '@/hooks/useStreamingEnhanced';
 import { useNavigate } from 'react-router-dom';
 
 interface SearchResult {
@@ -25,8 +25,8 @@ const EnhancedGlobalSearch: React.FC = () => {
   const navigate = useNavigate();
 
   const { clubs } = useClubs();
-  const { leagues } = useLeagues();
-  const { providers } = useStreaming();
+  const { leagues } = useLeaguesEnhanced();
+  const { providers } = useStreamingEnhanced();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -67,11 +67,12 @@ const EnhancedGlobalSearch: React.FC = () => {
         });
       });
 
-    // Search leagues
+    // Search leagues using new enhanced data structure
     leagues
       .filter(league => 
         league.league?.toLowerCase().includes(lowerQuery) ||
-        league.league_slug?.toLowerCase().includes(lowerQuery)
+        league.league_slug?.toLowerCase().includes(lowerQuery) ||
+        league.country?.toLowerCase().includes(lowerQuery)
       )
       .slice(0, 3)
       .forEach(league => {
@@ -79,24 +80,34 @@ const EnhancedGlobalSearch: React.FC = () => {
           type: 'competition',
           id: league.league_id.toString(),
           title: league.league || '',
-          subtitle: `${league['number of games']} Spiele`,
+          subtitle: `${league['number of games']} Spiele • ${league.country}`,
           route: `/competition/${league.league_slug}`
         });
       });
 
-    // Search providers
+    // Search providers with highlights information
     providers
       .filter(provider => 
         provider.provider_name?.toLowerCase().includes(lowerQuery) ||
-        provider.name?.toLowerCase().includes(lowerQuery)
+        provider.name?.toLowerCase().includes(lowerQuery) ||
+        provider.highlights.highlight_1?.toLowerCase().includes(lowerQuery) ||
+        provider.highlights.highlight_2?.toLowerCase().includes(lowerQuery) ||
+        provider.highlights.highlight_3?.toLowerCase().includes(lowerQuery)
       )
       .slice(0, 3)
       .forEach(provider => {
+        // Find the primary highlight that matches the search
+        const matchingHighlight = 
+          provider.highlights.highlight_1?.toLowerCase().includes(lowerQuery) ? provider.highlights.highlight_1 :
+          provider.highlights.highlight_2?.toLowerCase().includes(lowerQuery) ? provider.highlights.highlight_2 :
+          provider.highlights.highlight_3?.toLowerCase().includes(lowerQuery) ? provider.highlights.highlight_3 :
+          `ab ${provider.monthly_price}/Monat`;
+          
         searchResults.push({
           type: 'provider',
           id: provider.streamer_id.toString(),
           title: provider.provider_name || '',
-          subtitle: `ab ${provider.monthly_price}/Monat`,
+          subtitle: matchingHighlight,
           route: `/streaming-provider/${provider.slug}`,
           logo: provider.logo_url || ''
         });

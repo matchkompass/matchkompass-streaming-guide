@@ -178,21 +178,27 @@ export type Database = {
       }
       leagues: {
         Row: {
+          country: string | null
           "country code": string | null
+          country_code: string | null
           league: string | null
           league_id: number
           league_slug: string | null
           "number of games": number | null
         }
         Insert: {
+          country?: string | null
           "country code"?: string | null
+          country_code?: string | null
           league?: string | null
           league_id: number
           league_slug?: string | null
           "number of games"?: number | null
         }
         Update: {
+          country?: string | null
           "country code"?: string | null
+          country_code?: string | null
           league?: string | null
           league_id?: number
           league_slug?: string | null
@@ -216,6 +222,9 @@ export type Database = {
           europa_league: number | null
           fa_cup: number | null
           features: Json | null
+          highlight_1: string | null
+          highlight_2: string | null
+          highlight_3: string | null
           la_liga: number | null
           liga_portugal: number | null
           ligue_1: number | null
@@ -249,6 +258,9 @@ export type Database = {
           europa_league?: number | null
           fa_cup?: number | null
           features?: Json | null
+          highlight_1?: string | null
+          highlight_2?: string | null
+          highlight_3?: string | null
           la_liga?: number | null
           liga_portugal?: number | null
           ligue_1?: number | null
@@ -282,6 +294,9 @@ export type Database = {
           europa_league?: number | null
           fa_cup?: number | null
           features?: Json | null
+          highlight_1?: string | null
+          highlight_2?: string | null
+          highlight_3?: string | null
           la_liga?: number | null
           liga_portugal?: number | null
           ligue_1?: number | null
