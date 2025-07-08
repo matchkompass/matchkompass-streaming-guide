@@ -74,6 +74,7 @@ export type Database = {
           members_count: number | null
           mls: boolean | null
           name: string | null
+          popularity: number | null
           popularity_score: number | null
           premier_league: boolean | null
           primary_color: string | null
@@ -116,6 +117,7 @@ export type Database = {
           members_count?: number | null
           mls?: boolean | null
           name?: string | null
+          popularity?: number | null
           popularity_score?: number | null
           premier_league?: boolean | null
           primary_color?: string | null
@@ -158,6 +160,7 @@ export type Database = {
           members_count?: number | null
           mls?: boolean | null
           name?: string | null
+          popularity?: number | null
           popularity_score?: number | null
           premier_league?: boolean | null
           primary_color?: string | null
@@ -178,6 +181,7 @@ export type Database = {
       }
       leagues: {
         Row: {
+          competition_type: string | null
           country: string | null
           "country code": string | null
           country_code: string | null
@@ -185,8 +189,10 @@ export type Database = {
           league_id: number
           league_slug: string | null
           "number of games": number | null
+          popularity: number | null
         }
         Insert: {
+          competition_type?: string | null
           country?: string | null
           "country code"?: string | null
           country_code?: string | null
@@ -194,8 +200,10 @@ export type Database = {
           league_id: number
           league_slug?: string | null
           "number of games"?: number | null
+          popularity?: number | null
         }
         Update: {
+          competition_type?: string | null
           country?: string | null
           "country code"?: string | null
           country_code?: string | null
@@ -203,6 +211,7 @@ export type Database = {
           league_id?: number
           league_slug?: string | null
           "number of games"?: number | null
+          popularity?: number | null
         }
         Relationships: []
       }

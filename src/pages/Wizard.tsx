@@ -1,6 +1,6 @@
 
 import { useState, useMemo } from "react";
-import { ChevronLeft, ChevronRight, Search, Check, Loader2, AlertCircle } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search, Check, Loader2, AlertCircle, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,7 @@ const Wizard = () => {
   const [selectedCompetitions, setSelectedCompetitions] = useState<string[]>([]);
   const [existingProviders, setExistingProviders] = useState<number[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [expandedLeagues, setExpandedLeagues] = useState<string[]>(['Bundesliga', 'Premier League', 'La Liga']); // Default expanded leagues
 
   const { clubs, loading: clubsLoading, error: clubsError } = useClubs();
   const { providers, loading: providersLoading, error: providersError } = useStreaming();
@@ -39,19 +40,49 @@ const Wizard = () => {
     return clubs.filter(club => selectedClubIds.includes(club.club_id));
   }, [clubs, selectedClubIds]);
 
-  const filteredClubs = useMemo(() => {
-    return clubs
-      .filter(club => 
-        club.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        club.country?.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-      .sort((a, b) => {
-        // Sort by country first, then by name
-        const countryComparison = (a.country || 'ZZ').localeCompare(b.country || 'ZZ');
-        if (countryComparison !== 0) return countryComparison;
-        return (a.name || '').localeCompare(b.name || '');
+  // Group clubs by league and sort by popularity
+  const clubsByLeague = useMemo(() => {
+    const grouped = clubs.reduce((acc, club) => {
+      // Get the leagues this club participates in
+      const clubLeagues = getClubCompetitions(club);
+      
+      clubLeagues.forEach(leagueSlug => {
+        const league = leagues.find(l => l.league_slug === leagueSlug);
+        if (league) {
+          const leagueName = league.league || leagueSlug;
+          if (!acc[leagueName]) {
+            acc[leagueName] = [];
+          }
+          
+          // Only add if not already added to this league
+          if (!acc[leagueName].find(c => c.club_id === club.club_id)) {
+            acc[leagueName].push(club);
+          }
+        }
       });
-  }, [clubs, searchTerm]);
+      
+      return acc;
+    }, {} as Record<string, Club[]>);
+
+    // Sort clubs within each league by popularity_score (highest first) and limit to top 8
+    Object.keys(grouped).forEach(leagueName => {
+      grouped[leagueName] = grouped[leagueName]
+        .sort((a, b) => (b.popularity_score || 0) - (a.popularity_score || 0))
+        .slice(0, 8);
+    });
+
+    // Filter by search term
+    if (searchTerm) {
+      Object.keys(grouped).forEach(leagueName => {
+        grouped[leagueName] = grouped[leagueName].filter(club =>
+          club.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          club.country?.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      });
+    }
+
+    return grouped;
+  }, [clubs, leagues, searchTerm]);
 
   const clubCompetitions = useMemo(() => {
     if (selectedClubs.length === 0) return [];
@@ -86,6 +117,14 @@ const Wizard = () => {
       prev.includes(competitionId)
         ? prev.filter(id => id !== competitionId)
         : [...prev, competitionId]
+    );
+  };
+
+  const toggleLeague = (leagueName: string) => {
+    setExpandedLeagues(prev => 
+      prev.includes(leagueName)
+        ? prev.filter(name => name !== leagueName)
+        : [...prev, leagueName]
     );
   };
 
@@ -160,83 +199,117 @@ const Wizard = () => {
             <div className="relative max-w-md mx-auto">
               <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="Verein suchen..."
+                placeholder="Verein oder Liga suchen..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
               />
             </div>
 
-            {filteredClubs.length === 0 ? (
+            {Object.keys(clubsByLeague).length === 0 ? (
               <div className="text-center py-8">
                 <p className="text-gray-500">Keine Vereine gefunden.</p>
               </div>
             ) : (
-              <div>
-                {/* Group clubs by country */}
-                {Object.entries(
-                  filteredClubs.reduce((acc, club) => {
-                    const country = club.country || 'Other';
-                    if (!acc[country]) acc[country] = [];
-                    acc[country].push(club);
-                    return acc;
-                  }, {} as Record<string, typeof filteredClubs>)
-                ).map(([country, clubsInCountry]) => (
-                  <div key={country} className="mb-6">
-                    <h3 className="text-lg font-semibold mb-3 text-gray-800 border-b pb-2">
-                      {country === 'Germany' ? '🇩🇪 Deutschland' : 
-                       country === 'Spain' ? '🇪🇸 Spanien' :
-                       country === 'England' ? '🏴󠁧󠁢󠁥󠁮󠁧󠁿 England' :
-                       country === 'France' ? '🇫🇷 Frankreich' :
-                       country === 'Italy' ? '🇮🇹 Italien' :
-                       country === 'Netherlands' ? '🇳🇱 Niederlande' :
-                       country === 'Portugal' ? '🇵🇹 Portugal' :
-                       country === 'USA' ? '🇺🇸 USA' :
-                       `🌍 ${country}`}
-                    </h3>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                      {clubsInCountry.map((club) => (
-                  <Card
-                    key={club.club_id}
-                    className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
-                      selectedClubIds.includes(club.club_id)
-                        ? 'ring-2 ring-green-500 bg-green-50'
-                        : 'hover:bg-gray-50'
-                    }`}
-                    onClick={() => handleClubToggle(club.club_id)}
-                  >
-                    <CardContent className="p-3 text-center">
-                      <div className="text-3xl mb-2">
-                        {club.logo_url ? (
-                          <img src={club.logo_url} alt={club.name} className="w-8 h-8 mx-auto object-contain" />
-                        ) : (
-                          "⚽"
+              <div className="space-y-6">
+                {Object.entries(clubsByLeague)
+                  .sort(([a], [b]) => a.localeCompare(b))
+                  .map(([leagueName, clubsInLeague]) => {
+                    if (clubsInLeague.length === 0) return null;
+                    
+                    const isExpanded = expandedLeagues.includes(leagueName);
+                    
+                    return (
+                      <div key={leagueName} className="border rounded-lg bg-white shadow-sm">
+                        <button
+                          onClick={() => toggleLeague(leagueName)}
+                          className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                        >
+                          <div className="flex items-center gap-3">
+                            <h3 className="text-lg font-semibold text-gray-800">
+                              🏆 {leagueName}
+                            </h3>
+                            <Badge variant="secondary" className="text-xs">
+                              {clubsInLeague.length} Vereine
+                            </Badge>
+                          </div>
+                          {isExpanded ? 
+                            <ChevronUp className="h-5 w-5 text-gray-500" /> : 
+                            <ChevronDown className="h-5 w-5 text-gray-500" />
+                          }
+                        </button>
+                        
+                        {isExpanded && (
+                          <div className="px-6 pb-6">
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                              {clubsInLeague.map((club) => (
+                                <Card
+                                  key={club.club_id}
+                                  className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
+                                    selectedClubIds.includes(club.club_id)
+                                      ? 'ring-2 ring-green-500 bg-green-50'
+                                      : 'hover:bg-gray-50'
+                                  }`}
+                                  onClick={() => handleClubToggle(club.club_id)}
+                                >
+                                  <CardContent className="p-3 text-center">
+                                    <div className="text-3xl mb-2">
+                                      {club.logo_url ? (
+                                        <img src={club.logo_url} alt={club.name} className="w-8 h-8 mx-auto object-contain" />
+                                      ) : (
+                                        "⚽"
+                                      )}
+                                    </div>
+                                    <h3 className="font-medium text-sm mb-2 line-clamp-2">{club.name}</h3>
+                                    
+                                    {/* Popularity Score */}
+                                    {club.popularity_score && (
+                                      <div className="flex items-center justify-center gap-1 mb-2">
+                                        <div className="flex">
+                                          {[...Array(5)].map((_, i) => (
+                                            <div
+                                              key={i}
+                                              className={`w-2 h-2 rounded-full ${
+                                                i < Math.min(5, Math.floor((club.popularity_score || 0) / 20))
+                                                  ? 'bg-yellow-400'
+                                                  : 'bg-gray-200'
+                                              }`}
+                                            />
+                                          ))}
+                                        </div>
+                                        <span className="text-xs text-gray-500">
+                                          {club.popularity_score}
+                                        </span>
+                                      </div>
+                                    )}
+                                    
+                                    <div className="flex flex-wrap gap-1 justify-center mb-2">
+                                      {getClubCompetitions(club).slice(0, 1).map((comp, idx) => (
+                                        <Badge key={idx} variant="secondary" className="text-xs">
+                                          {comp.replace('_', ' ')}
+                                        </Badge>
+                                      ))}
+                                      {getClubCompetitions(club).length > 1 && (
+                                        <Badge variant="secondary" className="text-xs">
+                                          +{getClubCompetitions(club).length - 1}
+                                        </Badge>
+                                      )}
+                                    </div>
+                                    
+                                    {selectedClubIds.includes(club.club_id) && (
+                                      <div className="mt-2">
+                                        <Check className="h-5 w-5 text-green-600 mx-auto" />
+                                      </div>
+                                    )}
+                                  </CardContent>
+                                </Card>
+                              ))}
+                            </div>
+                          </div>
                         )}
                       </div>
-                      <h3 className="font-medium text-sm mb-2">{club.name}</h3>
-                      <div className="flex flex-wrap gap-1 justify-center">
-                        {getClubCompetitions(club).slice(0, 1).map((comp, idx) => (
-                          <Badge key={idx} variant="secondary" className="text-xs">
-                            {comp.replace('_', ' ')}
-                          </Badge>
-                        ))}
-                        {getClubCompetitions(club).length > 1 && (
-                          <Badge variant="secondary" className="text-xs">
-                            +{getClubCompetitions(club).length - 1}
-                          </Badge>
-                        )}
-                      </div>
-                      {selectedClubIds.includes(club.club_id) && (
-                        <div className="mt-2">
-                          <Check className="h-5 w-5 text-green-600 mx-auto" />
-                        </div>
-                      )}
-                    </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-                ))}
+                    );
+                  })}
               </div>
             )}
 

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import {
   Table,
   TableBody,
@@ -15,13 +16,13 @@ import {
 } from "@/components/ui/table";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { useStreaming } from "@/hooks/useStreaming";
-import { useLeagues } from "@/hooks/useLeagues";
+import { useStreamingEnhanced } from "@/hooks/useStreamingEnhanced";
+import { useLeaguesEnhanced } from "@/hooks/useLeaguesEnhanced";
 
 const DetailVergleich = () => {
   const [selectedLeagues, setSelectedLeagues] = useState<string[]>(['bundesliga', 'champions_league']);
-  const { providers, loading: providersLoading } = useStreaming();
-  const { leagues, loading: leaguesLoading } = useLeagues();
+  const { providers, loading: providersLoading } = useStreamingEnhanced();
+  const { leagues, loading: leaguesLoading } = useLeaguesEnhanced();
 
   const parsePrice = (priceString?: string): number => {
     if (!priceString) return 0;
@@ -249,6 +250,9 @@ const DetailVergleich = () => {
                                 {bestCombination.price.toFixed(2)}€/Monat
                               </span>
                             </div>
+                          </div>
+                          <div className="mb-2">
+                            <Progress value={bestCombination.coverage} className="h-2" />
                           </div>
                           <p className="text-sm text-gray-600">
                             {bestCombination.coveredGames}/{bestCombination.totalGames} Spiele abgedeckt
