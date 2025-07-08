@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from "react";
 import { Filter, Star, Check, X, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -142,11 +143,12 @@ const EnhancedVergleich = () => {
   };
 
   const toggleCompetition = (competitionId: string) => {
-    setSelectedCompetitions(prev =>
-      prev.includes(competitionId)
-        ? prev.filter(id => id !== competitionId)
-        : [...prev, competitionId]
-    );
+    setFilters(prev => ({
+      ...prev,
+      competitions: prev.competitions.includes(competitionId)
+        ? prev.competitions.filter(id => id !== competitionId)
+        : [...prev.competitions, competitionId]
+    }));
   };
 
   const selectedCompetitions = filters.competitions;
