@@ -8,6 +8,7 @@ import { navItems } from "./nav-items";
 import ClubDetail from "./pages/ClubDetail";
 import CompetitionDetail from "./pages/CompetitionDetail";
 import ProviderDetail from "./pages/ProviderDetail";
+import DetailVergleich from "./pages/DetailVergleich";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/club/:slug" element={<ClubDetail />} />
           <Route path="/competition/:slug" element={<CompetitionDetail />} />
           <Route path="/streaming-provider/:slug" element={<ProviderDetail />} />
+          <Route path="/detailvergleich" element={<DetailVergleich />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

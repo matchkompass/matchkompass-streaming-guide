@@ -22,7 +22,7 @@ export const navItems = [
   },
   {
     title: "Detail-Vergleich",
-    to: "/detail-vergleich",
+    to: "/detailvergleich",
     page: <DetailVergleich />,
   },
   {
