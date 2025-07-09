@@ -143,7 +143,7 @@ const EnhancedVergleich = () => {
       ...prev,
       competitions: prev.competitions.includes(competitionId)
         ? prev.competitions.filter(id => id !== competitionId)
-        : [...prev, competitionId]
+        : [...prev.competitions, competitionId]
     }));
   };
 

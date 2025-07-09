@@ -12,6 +12,9 @@ export interface StreamingProvider {
   yearly_price: string;
   affiliate_url: string;
   features: any;
+  highlight_1: string;
+  highlight_2: string;
+  highlight_3: string;
   bundesliga: number;
   second_bundesliga: number;
   dfb_pokal: number;
