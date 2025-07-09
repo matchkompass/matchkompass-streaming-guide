@@ -239,15 +239,36 @@ const EnhancedCompetitionSelector: React.FC<EnhancedCompetitionSelectorProps> = 
         </p>
       </div>
 
-      {/* Top row: selected leagues */}
-      <div className="mb-4 flex flex-wrap gap-2">
-        {selectedCompetitions.map(slug => (
-          <Badge key={slug} variant="secondary" className="flex items-center gap-1 text-xs px-2 py-1">
-            <span>{LEAGUE_SLUG_TO_FLAG[slug] || "🏆"}</span>
-            <span>{LEAGUE_SLUG_TO_NAME[slug] || slug.replace('_', ' ')}</span>
-          </Badge>
-        ))}
-      </div>
+      {/* Top row: selected leagues as cards */}
+      {selectedCompetitions.length > 0 && (
+        <div className="mb-4 flex flex-wrap gap-2">
+          {selectedCompetitions.map(slug => {
+            const comp = allCompetitions.find(c => c.id === slug);
+            if (!comp) return null;
+            return (
+              <div
+                key={slug}
+                className="rounded-lg border text-card-foreground shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md ring-2 ring-green-500 bg-green-50 min-w-[220px]"
+              >
+                <div className="p-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-xl">{LEAGUE_SLUG_TO_FLAG[comp.id] || comp.logo}</span>
+                      <div>
+                        <h4 className="font-medium text-sm">{LEAGUE_SLUG_TO_NAME[comp.id] || comp.name}</h4>
+                        <p className="text-xs text-gray-500">{comp.gameCount} Spiele</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <Check className="h-4 w-4 text-green-600" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Clustered Competitions */}
       {LEAGUE_CLUSTERS.map(cluster => {
@@ -262,20 +283,28 @@ const EnhancedCompetitionSelector: React.FC<EnhancedCompetitionSelectorProps> = 
               {comps.map(competition => (
                 <Card
                   key={competition.id}
-                  className={`cursor-pointer transition-all duration-200 hover:shadow-md w-full max-w-xs mx-auto ${
+                  className={`rounded-lg border text-card-foreground shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md ${
                     selectedCompetitions.includes(competition.id)
                       ? 'ring-2 ring-green-500 bg-green-50'
-                      : 'hover:bg-gray-50'
+                      : ''
                   }`}
                   onClick={() => onCompetitionToggle(competition.id)}
                 >
-                  <CardContent className="p-2 flex flex-col items-center">
-                    <div className="text-2xl mb-1">{LEAGUE_SLUG_TO_FLAG[competition.id] || competition.logo}</div>
-                    <h4 className="font-medium text-xs mb-1 text-center line-clamp-2">{LEAGUE_SLUG_TO_NAME[competition.id] || competition.name}</h4>
-                    <p className="text-xxs text-gray-500 mb-1">{competition.gameCount} Spiele</p>
-                    {selectedCompetitions.includes(competition.id) && (
-                      <Check className="h-4 w-4 text-green-600 mx-auto" />
-                    )}
+                  <CardContent className="p-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-xl">{LEAGUE_SLUG_TO_FLAG[competition.id] || competition.logo}</span>
+                        <div>
+                          <h4 className="font-medium text-sm">{LEAGUE_SLUG_TO_NAME[competition.id] || competition.name}</h4>
+                          <p className="text-xs text-gray-500">{competition.gameCount} Spiele</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        {selectedCompetitions.includes(competition.id) && (
+                          <Check className="h-4 w-4 text-green-600" />
+                        )}
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               ))}
