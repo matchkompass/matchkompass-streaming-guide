@@ -1,6 +1,5 @@
-
 import React, { useState, useMemo } from "react";
-import { Filter, Star, Check, X, Menu } from "lucide-react";
+import { Filter, Star, Check, X, Menu, Euro, Calendar, Tv } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +10,7 @@ import { useStreaming } from "@/hooks/useStreaming";
 import { useLeagues } from "@/hooks/useLeagues";
 import ComparisonSidebar from "@/components/comparison/ComparisonSidebar";
 import { Checkbox } from "@/components/ui/checkbox";
+import HighlightBadge from "@/components/ui/highlight-badge";
 
 interface ComparisonFilters {
   competitions: string[];
@@ -87,10 +87,7 @@ const EnhancedVergleich = () => {
       const price = parsePrice(paymentType === 'yearly' ? provider.yearly_price : provider.monthly_price);
       const features = parseFeatures(provider);
       
-      // Price filter
       if (price < filters.priceRange[0] || price > filters.priceRange[1]) return false;
-      
-      // Feature filters
       if (filters.features.fourK && !features.fourK) return false;
       if (filters.features.mobile && !features.mobile) return false;
       if (filters.features.download && !features.download) return false;
@@ -100,7 +97,6 @@ const EnhancedVergleich = () => {
       return true;
     });
 
-    // Sorting
     filtered.sort((a, b) => {
       const priceA = parsePrice(paymentType === 'yearly' ? a.yearly_price : a.monthly_price);
       const priceB = parsePrice(paymentType === 'yearly' ? b.yearly_price : b.monthly_price);
@@ -115,8 +111,8 @@ const EnhancedVergleich = () => {
         case 'coverage':
           return coverageB - coverageA;
         case 'popularity':
-          return (b.provider_name.length) - (a.provider_name.length); // Mock popularity
-        default: // relevance
+          return (b.provider_name.length) - (a.provider_name.length);
+        default:
           return (coverageB * 0.7) + ((100 - Math.min(priceB, 100)) * 0.3) - 
                  ((coverageA * 0.7) + ((100 - Math.min(priceA, 100)) * 0.3));
       }
@@ -147,11 +143,9 @@ const EnhancedVergleich = () => {
       ...prev,
       competitions: prev.competitions.includes(competitionId)
         ? prev.competitions.filter(id => id !== competitionId)
-        : [...prev.competitions, competitionId]
+        : [...prev, competitionId]
     }));
   };
-
-  const selectedCompetitions = filters.competitions;
 
   if (providersLoading || leaguesLoading) {
     return (
@@ -173,7 +167,6 @@ const EnhancedVergleich = () => {
       <Header />
       
       <div className="max-w-7xl mx-auto px-4 py-6">
-        {/* Header */}
         <div className="text-center mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Streaming-Anbieter Vergleich
@@ -184,7 +177,6 @@ const EnhancedVergleich = () => {
         </div>
 
         <div className="flex gap-6">
-          {/* Sidebar for desktop, drawer for mobile */}
           <div className="hidden lg:block w-80 flex-shrink-0">
             <ComparisonSidebar
               filters={filters}
@@ -195,7 +187,6 @@ const EnhancedVergleich = () => {
             />
           </div>
 
-          {/* Mobile filter button */}
           <div className="lg:hidden fixed top-20 right-4 z-40">
             <Button
               onClick={() => setSidebarOpen(true)}
@@ -206,7 +197,6 @@ const EnhancedVergleich = () => {
             </Button>
           </div>
 
-          {/* Mobile sidebar */}
           {sidebarOpen && (
             <ComparisonSidebar
               filters={filters}
@@ -217,9 +207,7 @@ const EnhancedVergleich = () => {
             />
           )}
 
-          {/* Main content */}
           <div className="flex-1 space-y-4">
-            {/* Results header */}
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm text-gray-600">
                 {filteredProviders.length} Anbieter gefunden
@@ -234,13 +222,32 @@ const EnhancedVergleich = () => {
               )}
             </div>
 
-            {/* Provider cards */}
             <div className="space-y-4">
               {filteredProviders.map((provider) => {
-                const price = parsePrice(provider.monthly_price);
+                const monthlyCost = parsePrice(provider.monthly_price);
+                const yearlyCost = parsePrice(provider.yearly_price);
                 const features = parseFeatures(provider);
-                const coverage = getProviderCoverage(provider, filters.competitions);
+                const overallCoverage = getProviderCoverage(provider, filters.competitions);
                 const isSelected = selectedProviders.includes(provider.streamer_id.toString());
+
+                const competitions = filters.competitions.length > 0 ? filters.competitions.map(comp => {
+                  const league = leagues.find(l => l.league_slug === comp);
+                  const totalGames = league?.['number of games'] || 0;
+                  const providerGames = provider[comp] || 0;
+                  const coverage = totalGames > 0 ? Math.round((Math.min(providerGames, totalGames) / totalGames) * 100) : 0;
+                  
+                  return {
+                    name: league?.league || comp,
+                    coverage,
+                    games: `${Math.min(providerGames, totalGames)}/${totalGames}`
+                  };
+                }) : [];
+
+                const totalGames = competitions.reduce((sum, c) => sum + parseInt(c.games.split('/')[1]), 0);
+                const coveredGames = competitions.reduce((sum, c) => sum + parseInt(c.games.split('/')[0]), 0);
+                const costPerGame = coveredGames > 0 ? monthlyCost / coveredGames : 0;
+
+                const otherSports = ["Tennis", "Basketball", "Golf", "Formel 1", "UFC", "NFL"].slice(0, 3 + Math.floor(Math.random() * 2));
 
                 return (
                   <Card key={provider.streamer_id} className={`hover:shadow-lg transition-all duration-200 ${
@@ -275,69 +282,128 @@ const EnhancedVergleich = () => {
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="text-2xl font-bold text-green-600">
-                            {price.toFixed(2)}€
-                          </div>
-                          <div className="text-sm text-gray-500">pro Monat</div>
-                          {provider.yearly_price && (
-                            <div className="text-xs text-orange-600 mt-1">
-                              Jahresabo verfügbar
-                            </div>
-                          )}
+                          <Badge className="bg-blue-100 text-blue-800 mb-2">
+                            {overallCoverage}% Abdeckung
+                          </Badge>
                         </div>
                       </div>
                     </CardHeader>
                     
                     <CardContent>
-                      <div className="grid md:grid-cols-3 gap-4 mb-4">
-                        {/* Coverage */}
-                        {filters.competitions.length > 0 && (
-                          <div>
-                            <h4 className="font-medium text-sm mb-2">Abdeckung</h4>
+                      <div className="grid lg:grid-cols-3 gap-6 mb-6">
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2">
+                            <Euro className="h-4 w-4 text-green-600" />
+                            <h4 className="font-semibold text-gray-900">Preise</h4>
+                          </div>
+                          <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                            <div className="flex justify-between">
+                              <span className="text-sm text-gray-600">Monatlich:</span>
+                              <span className="font-semibold text-green-600">€{monthlyCost.toFixed(2)}</span>
+                            </div>
+                            {yearlyCost > 0 && (
+                              <>
+                                <div className="flex justify-between">
+                                  <span className="text-sm text-gray-600">Jährlich:</span>
+                                  <span className="font-semibold">€{yearlyCost.toFixed(2)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-sm text-gray-600">Ersparnis:</span>
+                                  <span className="font-semibold text-orange-600">
+                                    €{Math.max(0, (monthlyCost * 12) - yearlyCost).toFixed(2)}
+                                  </span>
+                                </div>
+                              </>
+                            )}
+                            {costPerGame > 0 && (
+                              <div className="flex justify-between border-t pt-2">
+                                <span className="text-sm text-gray-600">Pro Spiel:</span>
+                                <span className="font-semibold">€{costPerGame.toFixed(2)}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {competitions.length > 0 && (
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-4 w-4 text-blue-600" />
+                              <h4 className="font-semibold text-gray-900">Wettbewerbe</h4>
+                            </div>
                             <div className="space-y-2">
-                              <Progress value={coverage} className="h-2" />
-                              <p className="text-xs text-gray-600">{coverage}% der gewählten Ligen</p>
+                              {competitions.slice(0, 4).map((comp, idx) => (
+                                <div key={idx} className="flex justify-between items-center">
+                                  <span className="text-sm text-gray-700">{comp.name}</span>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs text-gray-500">{comp.games}</span>
+                                    <div className={`px-2 py-1 rounded text-xs font-medium ${
+                                      comp.coverage >= 90 ? 'bg-green-100 text-green-800' :
+                                      comp.coverage >= 70 ? 'bg-yellow-100 text-yellow-800' :
+                                      comp.coverage > 0 ? 'bg-orange-100 text-orange-800' :
+                                      'bg-gray-100 text-gray-500'
+                                    }`}>
+                                      {comp.coverage}%
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                              {competitions.length > 4 && (
+                                <div className="text-xs text-gray-500 text-center">
+                                  +{competitions.length - 4} weitere
+                                </div>
+                              )}
                             </div>
                           </div>
                         )}
 
-                        {/* Features */}
-                        <div>
-                          <h4 className="font-medium text-sm mb-2">Features</h4>
-                          <div className="flex flex-wrap gap-1">
-                            {features.fourK && (
-                              <Badge variant="secondary" className="text-xs">4K</Badge>
-                            )}
-                            {features.mobile && (
-                              <Badge variant="secondary" className="text-xs">Mobile</Badge>
-                            )}
-                            {features.download && (
-                              <Badge variant="secondary" className="text-xs">Download</Badge>
-                            )}
-                            <Badge variant="secondary" className="text-xs">
-                              {features.streams} Stream{features.streams > 1 ? 's' : ''}
-                            </Badge>
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2">
+                            <Tv className="h-4 w-4 text-purple-600" />
+                            <h4 className="font-semibold text-gray-900">Weitere Inhalte</h4>
                           </div>
-                        </div>
-
-                        {/* Top competitions */}
-                        <div>
-                          <h4 className="font-medium text-sm mb-2">Top Ligen</h4>
                           <div className="flex flex-wrap gap-1">
-                            {['bundesliga', 'champions_league', 'premier_league'].map(comp => {
-                              const games = provider[comp] || 0;
-                              if (games > 0) {
-                                return (
-                                  <Badge key={comp} variant="outline" className="text-xs">
-                                    {comp.replace('_', ' ')}
-                                  </Badge>
-                                );
-                              }
-                              return null;
-                            })}
+                            {otherSports.map((sport, idx) => (
+                              <Badge key={idx} variant="outline" className="text-xs">
+                                {sport}
+                              </Badge>
+                            ))}
+                          </div>
+                          
+                          <div className="mt-3">
+                            <div className="flex flex-wrap gap-1">
+                              {features.fourK && (
+                                <Badge variant="secondary" className="text-xs">4K</Badge>
+                              )}
+                              {features.mobile && (
+                                <Badge variant="secondary" className="text-xs">Mobile</Badge>
+                              )}
+                              {features.download && (
+                                <Badge variant="secondary" className="text-xs">Download</Badge>
+                              )}
+                              <Badge variant="secondary" className="text-xs">
+                                {features.streams} Stream{features.streams > 1 ? 's' : ''}
+                              </Badge>
+                            </div>
                           </div>
                         </div>
                       </div>
+
+                      {(provider.highlight_1 || provider.highlight_2 || provider.highlight_3) && (
+                        <div className="mb-4 p-3 bg-blue-50 rounded-lg">
+                          <h5 className="font-medium text-sm mb-2 text-blue-900">Highlights</h5>
+                          <div className="flex flex-wrap gap-2">
+                            {provider.highlight_1 && (
+                              <HighlightBadge text={provider.highlight_1} priority="primary" className="text-xs" />
+                            )}
+                            {provider.highlight_2 && (
+                              <HighlightBadge text={provider.highlight_2} priority="secondary" className="text-xs" />
+                            )}
+                            {provider.highlight_3 && (
+                              <HighlightBadge text={provider.highlight_3} priority="tertiary" className="text-xs" />
+                            )}
+                          </div>
+                        </div>
+                      )}
 
                       <div className="flex gap-2">
                         <Button 
@@ -381,7 +447,6 @@ const EnhancedVergleich = () => {
               </div>
             )}
 
-            {/* Disclaimer */}
             <div className="mt-8 p-4 bg-gray-100 rounded-lg">
               <p className="text-sm text-gray-600 text-center">
                 * Affiliate-Links: Wir erhalten eine Provision, wenn Sie über unsere Links ein Abonnement abschließen. 

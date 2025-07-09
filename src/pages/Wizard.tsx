@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from "react";
 import { ChevronLeft, ChevronRight, Search, Check, Loader2, AlertCircle, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,6 +10,7 @@ import Footer from "@/components/Footer";
 import EnhancedCompetitionSelector from "@/components/wizard/EnhancedCompetitionSelector";
 import EnhancedStep3Providers from "@/components/wizard/EnhancedStep3Providers";
 import EnhancedStep4Results from "@/components/wizard/EnhancedStep4Results";
+import OptimizedStep4Results from "@/components/wizard/OptimizedStep4Results";
 import { useClubs, Club } from "@/hooks/useClubs";
 import { useStreamingEnhanced } from "@/hooks/useStreamingEnhanced";
 import { useLeaguesEnhanced } from "@/hooks/useLeaguesEnhanced";
@@ -258,7 +258,6 @@ const Wizard = () => {
                                     </div>
                                     <h3 className="font-medium text-sm mb-2 line-clamp-2">{club.name}</h3>
                                     
-                                    {/* Popularity Score */}
                                     {club.popularity_score && (
                                       <div className="flex items-center justify-center gap-1 mb-2">
                                         <div className="flex">
@@ -355,7 +354,7 @@ const Wizard = () => {
 
       case 4:
         return (
-          <EnhancedStep4Results
+          <OptimizedStep4Results
             selectedClubs={selectedClubs}
             selectedCompetitions={selectedCompetitions}
             existingProviders={existingProviders}
@@ -372,7 +371,7 @@ const Wizard = () => {
   const canProceed = () => {
     if (currentStep === 1) return selectedClubIds.length > 0;
     if (currentStep === 2) return selectedCompetitions.length > 0;
-    if (currentStep === 3) return true; // Can proceed with or without existing providers
+    if (currentStep === 3) return true;
     return true;
   };
 
@@ -381,7 +380,6 @@ const Wizard = () => {
       <Header />
       
       <div className="max-w-7xl mx-auto px-4 py-6">
-        {/* Progress Indicator */}
         <div className="mb-6">
           <div className="flex items-center justify-center space-x-4 mb-3">
             {[1, 2, 3, 4].map((step) => (
@@ -408,12 +406,10 @@ const Wizard = () => {
           </div>
         </div>
 
-        {/* Step Content */}
         <div className="mb-6">
           {renderStepContent()}
         </div>
 
-        {/* Navigation Buttons */}
         <div className="flex justify-between">
           <Button
             variant="outline"
