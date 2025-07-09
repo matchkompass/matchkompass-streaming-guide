@@ -16,37 +16,29 @@ import { useStreamingEnhanced } from "@/hooks/useStreamingEnhanced";
 import { useLeaguesEnhanced } from "@/hooks/useLeaguesEnhanced";
 import { getAllCompetitionsForClubs, getClubCompetitions } from "@/utils/enhancedCoverageCalculator";
 
-// Define the custom league ordering and grouping
-const LEAGUE_TIERS = {
-  tier1: {
+// Define the new league clusters
+const LEAGUE_CLUSTERS = [
+  {
     name: "🇩🇪 Deutschland",
     color: "bg-blue-50 border-blue-200",
     headerColor: "bg-blue-100 text-blue-800",
     leagues: [
       "Bundesliga",
-      "2. Bundesliga", 
+      "2. Bundesliga",
       "3. Bundesliga",
       "DFB Pokal"
     ],
     expandedByDefault: true
   },
-  tier2: {
+  {
     name: "🌍 Europa",
-    color: "bg-green-50 border-green-200", 
+    color: "bg-green-50 border-green-200",
     headerColor: "bg-green-100 text-green-800",
     leagues: [
       "Champions League",
       "Europa League",
       "Conference League",
-      "Klub Weltmeisterschaft"
-    ],
-    expandedByDefault: true
-  },
-  tier3: {
-    name: "🏆 Internationale Wettbewerbe",
-    color: "bg-yellow-50 border-yellow-200",
-    headerColor: "bg-yellow-100 text-yellow-800", 
-    leagues: [
+      "Klub Weltmeisterschaft",
       "Premier League",
       "La Liga",
       "Serie A",
@@ -55,61 +47,36 @@ const LEAGUE_TIERS = {
     ],
     expandedByDefault: false
   },
-  tier4: {
-    name: "⚽ Top-Ligen weltweit",
-    color: "bg-orange-50 border-orange-200",
-    headerColor: "bg-orange-100 text-orange-800",
+  {
+    name: "🏆 Internationale Wettbewerbe",
+    color: "bg-yellow-50 border-yellow-200",
+    headerColor: "bg-yellow-100 text-yellow-800",
     leagues: [
-      "FA Cup",
-      "EFL Cup", 
-      "Copa del Rey",
-      "Coppa Italia",
-      "Coupe de France",
-      "Eredivisie",
-      "Liga Portugal"
-    ],
-    expandedByDefault: false
-  },
-  tier5: {
-    name: "🧪 Alle anzeigen / Vergleichen",
-    color: "bg-red-50 border-red-200",
-    headerColor: "bg-red-100 text-red-800",
-    leagues: [
-      "Major Soccer League",
-      "Saudi Pro League"
+      "MLS",
+      "Saudi Pro League",
+      "Liga Portugal",
+      "Eredivisie"
     ],
     expandedByDefault: false
   }
-};
+];
 
 // Get all leagues that should be expanded by default
 const getDefaultExpandedLeagues = () => {
-  return Object.values(LEAGUE_TIERS)
-    .filter(tier => tier.expandedByDefault)
-    .flatMap(tier => tier.leagues);
-};
-
-// Get the tier for a league name
-const getLeagueTier = (leagueName: string) => {
-  for (const [tierKey, tier] of Object.entries(LEAGUE_TIERS)) {
-    if (tier.leagues.includes(leagueName)) {
-      return { tierKey, tier };
-    }
-  }
-  return null;
+  return LEAGUE_CLUSTERS.filter(cluster => cluster.expandedByDefault).flatMap(cluster => cluster.leagues);
 };
 
 // Get the order index for a league
 const getLeagueOrder = (leagueName: string) => {
   let order = 0;
-  for (const tier of Object.values(LEAGUE_TIERS)) {
-    const index = tier.leagues.indexOf(leagueName);
+  for (const cluster of LEAGUE_CLUSTERS) {
+    const index = cluster.leagues.indexOf(leagueName);
     if (index !== -1) {
       return order + index;
     }
-    order += tier.leagues.length;
+    order += cluster.leagues.length;
   }
-  return order; // For leagues not in our custom order
+  return order + 1000; // For leagues not in our custom clusters
 };
 
 const Wizard = () => {
@@ -302,270 +269,242 @@ const Wizard = () => {
               </div>
             ) : (
               <div className="space-y-8">
-                {Object.entries(LEAGUE_TIERS).map(([tierKey, tierConfig]) => {
-                  // Get leagues in this tier that have clubs
-                  const tierLeagues = tierConfig.leagues.filter(leagueName => 
-                    clubsByLeague[leagueName] && clubsByLeague[leagueName].clubs.length > 0
-                  );
-                  
-                  if (tierLeagues.length === 0) return null;
-                  
+                {LEAGUE_CLUSTERS.map((cluster, idx) => {
+                  const clusterLeagues = cluster.leagues.filter(leagueName => clubsByLeague[leagueName] && clubsByLeague[leagueName].clubs.length > 0);
+                  if (clusterLeagues.length === 0) return null;
                   return (
-                    <div key={tierKey} className={`border-2 rounded-lg ${tierConfig.color}`}>
-                      <div className={`px-6 py-3 ${tierConfig.headerColor} font-semibold text-lg`}>
-                        {tierConfig.name}
+                    <div key={cluster.name} className={`border-2 rounded-lg ${cluster.color}`}>
+                      <div className={`px-6 py-3 ${cluster.headerColor} font-semibold text-lg`}>
+                        {cluster.name}
                       </div>
-                      
                       <div className="p-6 space-y-4">
-                        {tierLeagues
-                          .sort((a, b) => getLeagueOrder(a) - getLeagueOrder(b))
-                          .map((leagueName) => {
-                            const leagueData = clubsByLeague[leagueName];
-                            if (!leagueData || leagueData.clubs.length === 0) return null;
-                            
-                            const isExpanded = expandedLeagues.includes(leagueName);
-                            const showAll = showAllClubs[leagueName] || false;
-                            const displayedClubs = showAll ? leagueData.clubs : leagueData.clubs.slice(0, 8);
-                            
-                            return (
-                              <div key={leagueName} className="border rounded-lg bg-white shadow-sm">
-                                <button
-                                  onClick={() => toggleLeague(leagueName)}
-                                  className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
-                                >
-                                  <div className="flex items-center gap-3">
-                                    <h3 className="text-lg font-semibold text-gray-800">
-                                      🏆 {leagueName}
-                                    </h3>
-                                    <Badge variant="secondary" className="text-xs">
-                                      {leagueData.clubs.length} Vereine
-                                    </Badge>
+                        {clusterLeagues.map(leagueName => {
+                          const leagueData = clubsByLeague[leagueName];
+                          if (!leagueData || leagueData.clubs.length === 0) return null;
+                          const isExpanded = expandedLeagues.includes(leagueName);
+                          const showAll = showAllClubs[leagueName] || false;
+                          const displayedClubs = showAll ? leagueData.clubs : leagueData.clubs.slice(0, 8);
+                          return (
+                            <div key={leagueName} className="border rounded-lg bg-white shadow-sm">
+                              <button
+                                onClick={() => toggleLeague(leagueName)}
+                                className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                              >
+                                <div className="flex items-center gap-3">
+                                  <h3 className="text-lg font-semibold text-gray-800">
+                                    🏆 {leagueName}
+                                  </h3>
+                                  <Badge variant="secondary" className="text-xs">
+                                    {leagueData.clubs.length} Vereine
+                                  </Badge>
+                                </div>
+                                {isExpanded ? 
+                                  <ChevronUp className="h-5 w-5 text-gray-500" /> : 
+                                  <ChevronDown className="h-5 w-5 text-gray-500" />
+                                }
+                              </button>
+                              {isExpanded && (
+                                <div className="px-6 pb-6">
+                                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                                    {displayedClubs.map((club) => (
+                                      <Card
+                                        key={club.club_id}
+                                        className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
+                                          selectedClubIds.includes(club.club_id)
+                                            ? 'ring-2 ring-green-500 bg-green-50'
+                                            : 'hover:bg-gray-50'
+                                        }`}
+                                        onClick={() => handleClubToggle(club.club_id)}
+                                      >
+                                        <CardContent className="p-3 text-center">
+                                          <div className="text-3xl mb-2">
+                                            {club.logo_url ? (
+                                              <img src={club.logo_url} alt={club.name} className="w-8 h-8 mx-auto object-contain" />
+                                            ) : (
+                                              "⚽"
+                                            )}
+                                          </div>
+                                          <h3 className="font-medium text-sm mb-2 line-clamp-2">{club.name}</h3>
+                                          {club.popularity_score && (
+                                            <div className="flex items-center justify-center gap-1 mb-2">
+                                              <div className="flex">
+                                                {[...Array(5)].map((_, i) => (
+                                                  <div
+                                                    key={i}
+                                                    className={`w-2 h-2 rounded-full ${
+                                                      i < Math.min(5, Math.floor((club.popularity_score || 0) / 20))
+                                                        ? 'bg-yellow-400'
+                                                        : 'bg-gray-200'
+                                                    }`}
+                                                  />
+                                                ))}
+                                              </div>
+                                              <span className="text-xs text-gray-500">
+                                                {club.popularity_score}
+                                              </span>
+                                            </div>
+                                          )}
+                                          <div className="flex flex-wrap gap-1 justify-center mb-2">
+                                            {getClubCompetitions(club).slice(0, 1).map((comp, idx) => (
+                                              <Badge key={idx} variant="secondary" className="text-xs">
+                                                {comp.replace('_', ' ')}
+                                              </Badge>
+                                            ))}
+                                            {getClubCompetitions(club).length > 1 && (
+                                              <Badge variant="secondary" className="text-xs">
+                                                +{getClubCompetitions(club).length - 1}
+                                              </Badge>
+                                            )}
+                                          </div>
+                                          {selectedClubIds.includes(club.club_id) && (
+                                            <div className="mt-2">
+                                              <Check className="h-5 w-5 text-green-600 mx-auto" />
+                                            </div>
+                                          )}
+                                        </CardContent>
+                                      </Card>
+                                    ))}
                                   </div>
-                                  {isExpanded ? 
-                                    <ChevronUp className="h-5 w-5 text-gray-500" /> : 
-                                    <ChevronDown className="h-5 w-5 text-gray-500" />
-                                  }
-                                </button>
-                                
-                                {isExpanded && (
-                                  <div className="px-6 pb-6">
-                                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                                      {displayedClubs.map((club) => (
-                                        <Card
-                                          key={club.club_id}
-                                          className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
-                                            selectedClubIds.includes(club.club_id)
-                                              ? 'ring-2 ring-green-500 bg-green-50'
-                                              : 'hover:bg-gray-50'
-                                          }`}
-                                          onClick={() => handleClubToggle(club.club_id)}
-                                        >
-                                          <CardContent className="p-3 text-center">
-                                            <div className="text-3xl mb-2">
-                                              {club.logo_url ? (
-                                                <img src={club.logo_url} alt={club.name} className="w-8 h-8 mx-auto object-contain" />
-                                              ) : (
-                                                "⚽"
-                                              )}
-                                            </div>
-                                            <h3 className="font-medium text-sm mb-2 line-clamp-2">{club.name}</h3>
-                                            
-                                            {club.popularity_score && (
-                                              <div className="flex items-center justify-center gap-1 mb-2">
-                                                <div className="flex">
-                                                  {[...Array(5)].map((_, i) => (
-                                                    <div
-                                                      key={i}
-                                                      className={`w-2 h-2 rounded-full ${
-                                                        i < Math.min(5, Math.floor((club.popularity_score || 0) / 20))
-                                                          ? 'bg-yellow-400'
-                                                          : 'bg-gray-200'
-                                                      }`}
-                                                    />
-                                                  ))}
-                                                </div>
-                                                <span className="text-xs text-gray-500">
-                                                  {club.popularity_score}
-                                                </span>
-                                              </div>
-                                            )}
-                                            
-                                            <div className="flex flex-wrap gap-1 justify-center mb-2">
-                                              {getClubCompetitions(club).slice(0, 1).map((comp, idx) => (
-                                                <Badge key={idx} variant="secondary" className="text-xs">
-                                                  {comp.replace('_', ' ')}
-                                                </Badge>
-                                              ))}
-                                              {getClubCompetitions(club).length > 1 && (
-                                                <Badge variant="secondary" className="text-xs">
-                                                  +{getClubCompetitions(club).length - 1}
-                                                </Badge>
-                                              )}
-                                            </div>
-                                            
-                                            {selectedClubIds.includes(club.club_id) && (
-                                              <div className="mt-2">
-                                                <Check className="h-5 w-5 text-green-600 mx-auto" />
-                                              </div>
-                                            )}
-                                          </CardContent>
-                                        </Card>
-                                      ))}
+                                  {leagueData.clubs.length > 8 && (
+                                    <div className="mt-4 text-center">
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => setShowAllClubs(prev => ({
+                                          ...prev,
+                                          [leagueName]: !showAll
+                                        }))}
+                                      >
+                                        {showAll ? 'Weniger anzeigen' : `Alle ${leagueData.clubs.length} Vereine anzeigen`}
+                                      </Button>
                                     </div>
-                                    
-                                    {leagueData.clubs.length > 8 && (
-                                      <div className="mt-4 text-center">
-                                        <Button
-                                          variant="outline"
-                                          size="sm"
-                                          onClick={() => setShowAllClubs(prev => ({
-                                            ...prev,
-                                            [leagueName]: !showAll
-                                          }))}
-                                        >
-                                          {showAll ? 'Weniger anzeigen' : `Alle ${leagueData.clubs.length} Vereine anzeigen`}
-                                        </Button>
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          })}
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   );
                 })}
-                
-                {/* Handle leagues not in predefined tiers */}
+                {/* Weitere Wettbewerbe cluster */}
                 {(() => {
-                  const allPredefinedLeagues = Object.values(LEAGUE_TIERS).flatMap(tier => tier.leagues);
-                  const otherLeagues = Object.keys(clubsByLeague).filter(leagueName => 
-                    !allPredefinedLeagues.includes(leagueName) && clubsByLeague[leagueName].clubs.length > 0
-                  );
-                  
-                  if (otherLeagues.length === 0) return null;
-                  
+                  const allClusterLeagues = LEAGUE_CLUSTERS.flatMap(cluster => cluster.leagues);
+                  const weitereLeagues = Object.keys(clubsByLeague).filter(leagueName => !allClusterLeagues.includes(leagueName) && clubsByLeague[leagueName].clubs.length > 0);
+                  if (weitereLeagues.length === 0) return null;
                   return (
                     <div className="border-2 rounded-lg bg-gray-50 border-gray-200">
                       <div className="px-6 py-3 bg-gray-100 text-gray-800 font-semibold text-lg">
-                        📋 Weitere Ligen
+                        📋 Weitere Wettbewerbe
                       </div>
-                      
                       <div className="p-6 space-y-4">
-                        {otherLeagues
-                          .sort((a, b) => (clubsByLeague[b].popularity || 0) - (clubsByLeague[a].popularity || 0))
-                          .map((leagueName) => {
-                            const leagueData = clubsByLeague[leagueName];
-                            const isExpanded = expandedLeagues.includes(leagueName);
-                            const showAll = showAllClubs[leagueName] || false;
-                            const displayedClubs = showAll ? leagueData.clubs : leagueData.clubs.slice(0, 8);
-                            
-                            return (
-                              <div key={leagueName} className="border rounded-lg bg-white shadow-sm">
-                                <button
-                                  onClick={() => toggleLeague(leagueName)}
-                                  className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
-                                >
-                                  <div className="flex items-center gap-3">
-                                    <h3 className="text-lg font-semibold text-gray-800">
-                                      🏆 {leagueName}
-                                    </h3>
-                                    <Badge variant="secondary" className="text-xs">
-                                      {leagueData.clubs.length} Vereine
-                                    </Badge>
+                        {weitereLeagues.map(leagueName => {
+                          const leagueData = clubsByLeague[leagueName];
+                          if (!leagueData || leagueData.clubs.length === 0) return null;
+                          const isExpanded = expandedLeagues.includes(leagueName);
+                          const showAll = showAllClubs[leagueName] || false;
+                          const displayedClubs = showAll ? leagueData.clubs : leagueData.clubs.slice(0, 8);
+                          return (
+                            <div key={leagueName} className="border rounded-lg bg-white shadow-sm">
+                              <button
+                                onClick={() => toggleLeague(leagueName)}
+                                className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                              >
+                                <div className="flex items-center gap-3">
+                                  <h3 className="text-lg font-semibold text-gray-800">
+                                    🏆 {leagueName}
+                                  </h3>
+                                  <Badge variant="secondary" className="text-xs">
+                                    {leagueData.clubs.length} Vereine
+                                  </Badge>
+                                </div>
+                                {isExpanded ? 
+                                  <ChevronUp className="h-5 w-5 text-gray-500" /> : 
+                                  <ChevronDown className="h-5 w-5 text-gray-500" />
+                                }
+                              </button>
+                              {isExpanded && (
+                                <div className="px-6 pb-6">
+                                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                                    {displayedClubs.map((club) => (
+                                      <Card
+                                        key={club.club_id}
+                                        className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
+                                          selectedClubIds.includes(club.club_id)
+                                            ? 'ring-2 ring-green-500 bg-green-50'
+                                            : 'hover:bg-gray-50'
+                                        }`}
+                                        onClick={() => handleClubToggle(club.club_id)}
+                                      >
+                                        <CardContent className="p-3 text-center">
+                                          <div className="text-3xl mb-2">
+                                            {club.logo_url ? (
+                                              <img src={club.logo_url} alt={club.name} className="w-8 h-8 mx-auto object-contain" />
+                                            ) : (
+                                              "⚽"
+                                            )}
+                                          </div>
+                                          <h3 className="font-medium text-sm mb-2 line-clamp-2">{club.name}</h3>
+                                          {club.popularity_score && (
+                                            <div className="flex items-center justify-center gap-1 mb-2">
+                                              <div className="flex">
+                                                {[...Array(5)].map((_, i) => (
+                                                  <div
+                                                    key={i}
+                                                    className={`w-2 h-2 rounded-full ${
+                                                      i < Math.min(5, Math.floor((club.popularity_score || 0) / 20))
+                                                        ? 'bg-yellow-400'
+                                                        : 'bg-gray-200'
+                                                    }`}
+                                                  />
+                                                ))}
+                                              </div>
+                                              <span className="text-xs text-gray-500">
+                                                {club.popularity_score}
+                                              </span>
+                                            </div>
+                                          )}
+                                          <div className="flex flex-wrap gap-1 justify-center mb-2">
+                                            {getClubCompetitions(club).slice(0, 1).map((comp, idx) => (
+                                              <Badge key={idx} variant="secondary" className="text-xs">
+                                                {comp.replace('_', ' ')}
+                                              </Badge>
+                                            ))}
+                                            {getClubCompetitions(club).length > 1 && (
+                                              <Badge variant="secondary" className="text-xs">
+                                                +{getClubCompetitions(club).length - 1}
+                                              </Badge>
+                                            )}
+                                          </div>
+                                          {selectedClubIds.includes(club.club_id) && (
+                                            <div className="mt-2">
+                                              <Check className="h-5 w-5 text-green-600 mx-auto" />
+                                            </div>
+                                          )}
+                                        </CardContent>
+                                      </Card>
+                                    ))}
                                   </div>
-                                  {isExpanded ? 
-                                    <ChevronUp className="h-5 w-5 text-gray-500" /> : 
-                                    <ChevronDown className="h-5 w-5 text-gray-500" />
-                                  }
-                                </button>
-                                
-                                {isExpanded && (
-                                  <div className="px-6 pb-6">
-                                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                                      {displayedClubs.map((club) => (
-                                        <Card
-                                          key={club.club_id}
-                                          className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
-                                            selectedClubIds.includes(club.club_id)
-                                              ? 'ring-2 ring-green-500 bg-green-50'
-                                              : 'hover:bg-gray-50'
-                                          }`}
-                                          onClick={() => handleClubToggle(club.club_id)}
-                                        >
-                                          <CardContent className="p-3 text-center">
-                                            <div className="text-3xl mb-2">
-                                              {club.logo_url ? (
-                                                <img src={club.logo_url} alt={club.name} className="w-8 h-8 mx-auto object-contain" />
-                                              ) : (
-                                                "⚽"
-                                              )}
-                                            </div>
-                                            <h3 className="font-medium text-sm mb-2 line-clamp-2">{club.name}</h3>
-                                            
-                                            {club.popularity_score && (
-                                              <div className="flex items-center justify-center gap-1 mb-2">
-                                                <div className="flex">
-                                                  {[...Array(5)].map((_, i) => (
-                                                    <div
-                                                      key={i}
-                                                      className={`w-2 h-2 rounded-full ${
-                                                        i < Math.min(5, Math.floor((club.popularity_score || 0) / 20))
-                                                          ? 'bg-yellow-400'
-                                                          : 'bg-gray-200'
-                                                      }`}
-                                                    />
-                                                  ))}
-                                                </div>
-                                                <span className="text-xs text-gray-500">
-                                                  {club.popularity_score}
-                                                </span>
-                                              </div>
-                                            )}
-                                            
-                                            <div className="flex flex-wrap gap-1 justify-center mb-2">
-                                              {getClubCompetitions(club).slice(0, 1).map((comp, idx) => (
-                                                <Badge key={idx} variant="secondary" className="text-xs">
-                                                  {comp.replace('_', ' ')}
-                                                </Badge>
-                                              ))}
-                                              {getClubCompetitions(club).length > 1 && (
-                                                <Badge variant="secondary" className="text-xs">
-                                                  +{getClubCompetitions(club).length - 1}
-                                                </Badge>
-                                              )}
-                                            </div>
-                                            
-                                            {selectedClubIds.includes(club.club_id) && (
-                                              <div className="mt-2">
-                                                <Check className="h-5 w-5 text-green-600 mx-auto" />
-                                              </div>
-                                            )}
-                                          </CardContent>
-                                        </Card>
-                                      ))}
+                                  {leagueData.clubs.length > 8 && (
+                                    <div className="mt-4 text-center">
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => setShowAllClubs(prev => ({
+                                          ...prev,
+                                          [leagueName]: !showAll
+                                        }))}
+                                      >
+                                        {showAll ? 'Weniger anzeigen' : `Alle ${leagueData.clubs.length} Vereine anzeigen`}
+                                      </Button>
                                     </div>
-                                    
-                                    {leagueData.clubs.length > 8 && (
-                                      <div className="mt-4 text-center">
-                                        <Button
-                                          variant="outline"
-                                          size="sm"
-                                          onClick={() => setShowAllClubs(prev => ({
-                                            ...prev,
-                                            [leagueName]: !showAll
-                                          }))}
-                                        >
-                                          {showAll ? 'Weniger anzeigen' : `Alle ${leagueData.clubs.length} Vereine anzeigen`}
-                                        </Button>
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          })}
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   );
