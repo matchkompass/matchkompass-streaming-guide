@@ -231,6 +231,7 @@ export type Database = {
           europa_league: number | null
           fa_cup: number | null
           features: Json | null
+          further_offers: Json | null
           highlight_1: string | null
           highlight_2: string | null
           highlight_3: string | null
@@ -267,6 +268,7 @@ export type Database = {
           europa_league?: number | null
           fa_cup?: number | null
           features?: Json | null
+          further_offers?: Json | null
           highlight_1?: string | null
           highlight_2?: string | null
           highlight_3?: string | null
@@ -303,6 +305,7 @@ export type Database = {
           europa_league?: number | null
           fa_cup?: number | null
           features?: Json | null
+          further_offers?: Json | null
           highlight_1?: string | null
           highlight_2?: string | null
           highlight_3?: string | null

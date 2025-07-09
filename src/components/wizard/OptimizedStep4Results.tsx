@@ -14,7 +14,6 @@ interface OptimizedRecommendation {
   providers: StreamingProviderEnhanced[];
   totalCost: number;
   yearlyCost: number;
-  savings: number;
   coveragePercentage: number;
   costPerGame: number;
   competitions: { name: string; coverage: number; games: string }[];
@@ -281,16 +280,10 @@ const OptimizedStep4Results = ({
                       <span className="text-sm text-gray-600">Monatlich:</span>
                       <span className="font-semibold text-green-600">€{rec.totalCost.toFixed(2)}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Jährlich:</span>
-                      <span className="font-semibold">€{rec.yearlyCost.toFixed(2)}</span>
-                    </div>
-                    {rec.savings > 0 && (
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Ersparnis:</span>
-                        <span className="font-semibold text-orange-600">€{rec.savings.toFixed(2)}</span>
-                      </div>
-                    )}
+                     <div className="flex justify-between">
+                       <span className="text-sm text-gray-600">Jährlich:</span>
+                       <span className="font-semibold">€{rec.yearlyCost.toFixed(2)}</span>
+                     </div>
                     <div className="flex justify-between border-t pt-2">
                       <span className="text-sm text-gray-600">Pro Spiel:</span>
                       <span className="font-semibold">€{rec.costPerGame.toFixed(2)}</span>

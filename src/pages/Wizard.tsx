@@ -53,7 +53,7 @@ const Wizard = () => {
           if (!acc[leagueName]) {
             acc[leagueName] = {
               clubs: [],
-              popularity: 0
+              popularity: (league as any).popularity || 0
             };
           }
           
@@ -405,6 +405,20 @@ const Wizard = () => {
             </p>
           </div>
         </div>
+
+        {/* Always visible next button at top */}
+        {currentStep < 4 && (
+          <div className="mb-4 flex justify-end">
+            <Button
+              onClick={() => setCurrentStep(prev => prev + 1)}
+              disabled={!canProceed()}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              Weiter
+              <ChevronRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        )}
 
         <div className="mb-6">
           {renderStepContent()}

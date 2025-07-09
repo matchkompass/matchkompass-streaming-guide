@@ -289,40 +289,75 @@ const EnhancedVergleich = () => {
                       </div>
                     </CardHeader>
                     
-                    <CardContent>
-                      <div className="grid lg:grid-cols-3 gap-6 mb-6">
-                        <div className="space-y-3">
-                          <div className="flex items-center gap-2">
-                            <Euro className="h-4 w-4 text-green-600" />
-                            <h4 className="font-semibold text-gray-900">Preise</h4>
-                          </div>
-                          <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-                            <div className="flex justify-between">
-                              <span className="text-sm text-gray-600">Monatlich:</span>
-                              <span className="font-semibold text-green-600">€{monthlyCost.toFixed(2)}</span>
-                            </div>
-                            {yearlyCost > 0 && (
-                              <>
-                                <div className="flex justify-between">
-                                  <span className="text-sm text-gray-600">Jährlich:</span>
-                                  <span className="font-semibold">€{yearlyCost.toFixed(2)}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-sm text-gray-600">Ersparnis:</span>
-                                  <span className="font-semibold text-orange-600">
-                                    €{Math.max(0, (monthlyCost * 12) - yearlyCost).toFixed(2)}
-                                  </span>
-                                </div>
-                              </>
-                            )}
-                            {costPerGame > 0 && (
-                              <div className="flex justify-between border-t pt-2">
-                                <span className="text-sm text-gray-600">Pro Spiel:</span>
-                                <span className="font-semibold">€{costPerGame.toFixed(2)}</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
+                     <CardContent>
+                       {/* Main overview section */}
+                       <div className="flex justify-between items-start mb-4">
+                         <div className="flex-1">
+                           <div className="mb-3">
+                             <div className="flex items-center gap-2 mb-2">
+                               <span className="text-gray-600">Durchschnittliche Abdeckung:</span>
+                               <div className="w-32 bg-gray-200 rounded-full h-2">
+                                 <div 
+                                   className="bg-green-600 h-2 rounded-full" 
+                                   style={{ width: `${overallCoverage}%` }}
+                                 ></div>
+                               </div>
+                               <span className="text-xl font-bold text-blue-600">{overallCoverage.toFixed(0)}%</span>
+                             </div>
+                           </div>
+                           <div className="mb-3">
+                             <h4 className="font-medium mb-2">Highlights</h4>
+                             <div className="flex flex-wrap gap-2">
+                               {provider.highlight_1 && (
+                                 <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                                   {provider.highlight_1}
+                                 </Badge>
+                               )}
+                               {provider.highlight_2 && (
+                                 <Badge variant="secondary" className="bg-green-100 text-green-800">
+                                   {provider.highlight_2}
+                                 </Badge>
+                               )}
+                               {provider.highlight_3 && (
+                                 <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                                   {provider.highlight_3}
+                                 </Badge>
+                               )}
+                             </div>
+                           </div>
+                         </div>
+                         <div className="text-right">
+                           <div className="text-3xl font-bold mb-1">€{monthlyCost.toFixed(2)}</div>
+                           <div className="text-gray-600">pro Monat</div>
+                         </div>
+                       </div>
+                       
+                       {/* Collapsible details section */}
+                       <div className="grid lg:grid-cols-3 gap-6 mb-6">
+                         <div className="space-y-3">
+                           <div className="flex items-center gap-2">
+                             <Euro className="h-4 w-4 text-green-600" />
+                             <h4 className="font-semibold text-gray-900">Preise</h4>
+                           </div>
+                           <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                             <div className="flex justify-between">
+                               <span className="text-sm text-gray-600">Monatlich:</span>
+                               <span className="font-semibold text-green-600">€{monthlyCost.toFixed(2)}</span>
+                             </div>
+                             {yearlyCost > 0 && (
+                               <div className="flex justify-between">
+                                 <span className="text-sm text-gray-600">Jährlich:</span>
+                                 <span className="font-semibold">€{yearlyCost.toFixed(2)}</span>
+                               </div>
+                             )}
+                             {costPerGame > 0 && (
+                               <div className="flex justify-between border-t pt-2">
+                                 <span className="text-sm text-gray-600">Pro Spiel:</span>
+                                 <span className="font-semibold">€{costPerGame.toFixed(2)}</span>
+                               </div>
+                             )}
+                           </div>
+                         </div>
 
                         {competitions.length > 0 && (
                           <div className="space-y-3">
@@ -405,28 +440,21 @@ const EnhancedVergleich = () => {
                         </div>
                       )}
 
-                      <div className="flex gap-2">
-                        <Button 
-                          className="flex-1 bg-green-600 hover:bg-green-700"
-                          onClick={() => handleAffiliateClick(provider)}
-                        >
-                          Zum Anbieter
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          onClick={() => handleProviderToggle(provider.streamer_id.toString())}
-                          className={isSelected ? 'bg-blue-50 border-blue-300' : ''}
-                        >
-                          {isSelected ? (
-                            <>
-                              <Check className="h-4 w-4 mr-2" />
-                              Ausgewählt
-                            </>
-                          ) : (
-                            'Vergleichen'
-                          )}
-                        </Button>
-                      </div>
+                       <div className="flex gap-2">
+                         <Button 
+                           variant="outline"
+                           className="flex-1"
+                           onClick={() => console.log('Show details for:', provider.provider_name)}
+                         >
+                           Details anzeigen
+                         </Button>
+                         <Button 
+                           className="flex-1 bg-blue-600 hover:bg-blue-700"
+                           onClick={() => handleAffiliateClick(provider)}
+                         >
+                           Zum Angebot
+                         </Button>
+                       </div>
                     </CardContent>
                   </Card>
                 );
