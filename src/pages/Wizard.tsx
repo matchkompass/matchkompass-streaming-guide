@@ -16,61 +16,88 @@ import { useStreamingEnhanced } from "@/hooks/useStreamingEnhanced";
 import { useLeaguesEnhanced } from "@/hooks/useLeaguesEnhanced";
 import { getAllCompetitionsForClubs, getClubCompetitions } from "@/utils/enhancedCoverageCalculator";
 
-// Define the new league clusters
+// Shared cluster structure for both steps
 const LEAGUE_CLUSTERS = [
   {
     name: "🇩🇪 Deutschland",
+    key: "deutschland",
     color: "bg-blue-50 border-blue-200",
     headerColor: "bg-blue-100 text-blue-800",
+    expandedByDefault: true,
     leagues: [
-      "Bundesliga",
-      "2. Bundesliga",
-      "3. Bundesliga",
-      "DFB Pokal"
-    ],
-    expandedByDefault: true
+      { slug: "bundesliga", name: "Bundesliga", flag: "🇩🇪" },
+      { slug: "second_bundesliga", name: "2. Bundesliga", flag: "🇩🇪" },
+      { slug: "third_bundesliga", name: "3. Bundesliga", flag: "🇩🇪" },
+      { slug: "dfb_pokal", name: "DFB Pokal", flag: "🇩🇪" }
+    ]
   },
   {
-    name: "🌍 Europa",
+    name: "🌐 Internationale Wettbewerbe",
+    key: "int_wettbewerbe",
     color: "bg-green-50 border-green-200",
     headerColor: "bg-green-100 text-green-800",
+    expandedByDefault: true,
     leagues: [
-      "Champions League",
-      "Europa League",
-      "Conference League",
-      "Klub Weltmeisterschaft",
-      "Premier League",
-      "La Liga",
-      "Serie A",
-      "Ligue 1",
-      "Süper Lig"
-    ],
-    expandedByDefault: false
+      { slug: "champions_league", name: "Champions League", flag: "⭐" },
+      { slug: "europa_league", name: "Europa League", flag: "🏅" },
+      { slug: "conference_league", name: "Conference League", flag: "🏅" },
+      { slug: "klub_weltmeisterschaft", name: "Klub-Weltmeisterschaft", flag: "🌍" }
+    ]
   },
   {
-    name: "🏆 Internationale Wettbewerbe",
+    name: "🌍 Internationale Ligen",
+    key: "int_ligen",
     color: "bg-yellow-50 border-yellow-200",
     headerColor: "bg-yellow-100 text-yellow-800",
+    expandedByDefault: false,
     leagues: [
-      "MLS",
-      "Saudi Pro League",
-      "Liga Portugal",
-      "Eredivisie"
-    ],
-    expandedByDefault: false
+      { slug: "premier_league", name: "Premier League", flag: "🏴" },
+      { slug: "la_liga", name: "La Liga", flag: "🇪🇸" },
+      { slug: "serie_a", name: "Serie A", flag: "🇮🇹" },
+      { slug: "ligue_1", name: "Ligue 1", flag: "🇫🇷" },
+      { slug: "sueper_lig", name: "Süper Lig", flag: "🇹🇷" },
+      { slug: "eredivisie", name: "Eredivisie", flag: "🇳🇱" },
+      { slug: "liga_portugal", name: "Liga Portugal", flag: "🇵🇹" },
+      { slug: "saudi_pro_league", name: "Saudi Pro League", flag: "🇸🇦" },
+      { slug: "mls", name: "Major Soccer League", flag: "🇺🇸" }
+    ]
+  },
+  {
+    name: "🏆 Nationale Pokalwettbewerbe (international)",
+    key: "pokale",
+    color: "bg-orange-50 border-orange-200",
+    headerColor: "bg-orange-100 text-orange-800",
+    expandedByDefault: false,
+    leagues: [
+      { slug: "fa_cup", name: "FA Cup", flag: "🏴" },
+      { slug: "efl_cup", name: "EFL Cup", flag: "🏴" },
+      { slug: "copa_del_rey", name: "Copa del Rey", flag: "🇪🇸" },
+      { slug: "coppa_italia", name: "Coppa Italia", flag: "🇮🇹" },
+      { slug: "coupe_de_france", name: "Coupe de France", flag: "🇫🇷" }
+    ]
   }
 ];
 
+// Helper: slug to real name
+const LEAGUE_SLUG_TO_NAME = Object.fromEntries(
+  LEAGUE_CLUSTERS.flatMap(cluster => cluster.leagues.map(l => [l.slug, l.name]))
+);
+
+// Helper: slug to flag
+const LEAGUE_SLUG_TO_FLAG = Object.fromEntries(
+  LEAGUE_CLUSTERS.flatMap(cluster => cluster.leagues.map(l => [l.slug, l.flag]))
+);
+
 // Get all leagues that should be expanded by default
 const getDefaultExpandedLeagues = () => {
-  return LEAGUE_CLUSTERS.filter(cluster => cluster.expandedByDefault).flatMap(cluster => cluster.leagues);
+  return LEAGUE_CLUSTERS.filter(cluster => cluster.expandedByDefault).flatMap(cluster => cluster.leagues.map(l => l.name));
 };
 
 // Get the order index for a league
 const getLeagueOrder = (leagueName: string) => {
   let order = 0;
   for (const cluster of LEAGUE_CLUSTERS) {
-    const index = cluster.leagues.indexOf(leagueName);
+    const index = cluster.leagues.findIndex(l => l.name === leagueName);
     if (index !== -1) {
       return order + index;
     }
@@ -270,7 +297,7 @@ const Wizard = () => {
             ) : (
               <div className="space-y-8">
                 {LEAGUE_CLUSTERS.map((cluster, idx) => {
-                  const clusterLeagues = cluster.leagues.filter(leagueName => clubsByLeague[leagueName] && clubsByLeague[leagueName].clubs.length > 0);
+                  const clusterLeagues = cluster.leagues.filter(league => clubsByLeague[league.name] && clubsByLeague[league.name].clubs.length > 0);
                   if (clusterLeagues.length === 0) return null;
                   return (
                     <div key={cluster.name} className={`border-2 rounded-lg ${cluster.color}`}>
@@ -278,21 +305,21 @@ const Wizard = () => {
                         {cluster.name}
                       </div>
                       <div className="p-6 space-y-4">
-                        {clusterLeagues.map(leagueName => {
-                          const leagueData = clubsByLeague[leagueName];
+                        {clusterLeagues.map(league => {
+                          const leagueData = clubsByLeague[league.name];
                           if (!leagueData || leagueData.clubs.length === 0) return null;
-                          const isExpanded = expandedLeagues.includes(leagueName);
-                          const showAll = showAllClubs[leagueName] || false;
+                          const isExpanded = expandedLeagues.includes(league.name);
+                          const showAll = showAllClubs[league.name] || false;
                           const displayedClubs = showAll ? leagueData.clubs : leagueData.clubs.slice(0, 8);
                           return (
-                            <div key={leagueName} className="border rounded-lg bg-white shadow-sm">
+                            <div key={league.name} className="border rounded-lg bg-white shadow-sm">
                               <button
-                                onClick={() => toggleLeague(leagueName)}
+                                onClick={() => toggleLeague(league.name)}
                                 className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
                               >
                                 <div className="flex items-center gap-3">
                                   <h3 className="text-lg font-semibold text-gray-800">
-                                    🏆 {leagueName}
+                                    🏆 {league.name}
                                   </h3>
                                   <Badge variant="secondary" className="text-xs">
                                     {leagueData.clubs.length} Vereine
@@ -309,56 +336,33 @@ const Wizard = () => {
                                     {displayedClubs.map((club) => (
                                       <Card
                                         key={club.club_id}
-                                        className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
+                                        className={`cursor-pointer transition-all duration-200 hover:shadow-md w-full max-w-xs mx-auto ${
                                           selectedClubIds.includes(club.club_id)
                                             ? 'ring-2 ring-green-500 bg-green-50'
                                             : 'hover:bg-gray-50'
                                         }`}
                                         onClick={() => handleClubToggle(club.club_id)}
                                       >
-                                        <CardContent className="p-3 text-center">
-                                          <div className="text-3xl mb-2">
+                                        <CardContent className="p-2 flex flex-col items-center">
+                                          <div className="text-2xl mb-1">
                                             {club.logo_url ? (
-                                              <img src={club.logo_url} alt={club.name} className="w-8 h-8 mx-auto object-contain" />
+                                              <img src={club.logo_url} alt={club.name} className="w-8 h-8 object-contain" />
                                             ) : (
                                               "⚽"
                                             )}
                                           </div>
-                                          <h3 className="font-medium text-sm mb-2 line-clamp-2">{club.name}</h3>
-                                          {club.popularity_score && (
-                                            <div className="flex items-center justify-center gap-1 mb-2">
-                                              <div className="flex">
-                                                {[...Array(5)].map((_, i) => (
-                                                  <div
-                                                    key={i}
-                                                    className={`w-2 h-2 rounded-full ${
-                                                      i < Math.min(5, Math.floor((club.popularity_score || 0) / 20))
-                                                        ? 'bg-yellow-400'
-                                                        : 'bg-gray-200'
-                                                    }`}
-                                                  />
-                                                ))}
-                                              </div>
-                                              <span className="text-xs text-gray-500">
-                                                {club.popularity_score}
-                                              </span>
-                                            </div>
-                                          )}
-                                          <div className="flex flex-wrap gap-1 justify-center mb-2">
-                                            {getClubCompetitions(club).slice(0, 1).map((comp, idx) => (
-                                              <Badge key={idx} variant="secondary" className="text-xs">
-                                                {comp.replace('_', ' ')}
+                                          <h3 className="font-medium text-xs mb-1 text-center line-clamp-2">{club.name}</h3>
+                                          <div className="flex flex-wrap gap-1 justify-center mb-1">
+                                            {getClubCompetitions(club).map((slug, idx) => (
+                                              <Badge key={idx} variant="secondary" className="text-xxs flex items-center gap-1">
+                                                <span>{LEAGUE_SLUG_TO_FLAG[slug] || "🏆"}</span>
+                                                <span>{LEAGUE_SLUG_TO_NAME[slug] || slug.replace('_', ' ')}</span>
                                               </Badge>
                                             ))}
-                                            {getClubCompetitions(club).length > 1 && (
-                                              <Badge variant="secondary" className="text-xs">
-                                                +{getClubCompetitions(club).length - 1}
-                                              </Badge>
-                                            )}
                                           </div>
                                           {selectedClubIds.includes(club.club_id) && (
-                                            <div className="mt-2">
-                                              <Check className="h-5 w-5 text-green-600 mx-auto" />
+                                            <div className="mt-1">
+                                              <Check className="h-4 w-4 text-green-600 mx-auto" />
                                             </div>
                                           )}
                                         </CardContent>
@@ -372,7 +376,7 @@ const Wizard = () => {
                                         size="sm"
                                         onClick={() => setShowAllClubs(prev => ({
                                           ...prev,
-                                          [leagueName]: !showAll
+                                          [league.name]: !showAll
                                         }))}
                                       >
                                         {showAll ? 'Weniger anzeigen' : `Alle ${leagueData.clubs.length} Vereine anzeigen`}
@@ -390,7 +394,7 @@ const Wizard = () => {
                 })}
                 {/* Weitere Wettbewerbe cluster */}
                 {(() => {
-                  const allClusterLeagues = LEAGUE_CLUSTERS.flatMap(cluster => cluster.leagues);
+                  const allClusterLeagues = LEAGUE_CLUSTERS.flatMap(cluster => cluster.leagues.map(l => l.name));
                   const weitereLeagues = Object.keys(clubsByLeague).filter(leagueName => !allClusterLeagues.includes(leagueName) && clubsByLeague[leagueName].clubs.length > 0);
                   if (weitereLeagues.length === 0) return null;
                   return (
@@ -430,56 +434,33 @@ const Wizard = () => {
                                     {displayedClubs.map((club) => (
                                       <Card
                                         key={club.club_id}
-                                        className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
+                                        className={`cursor-pointer transition-all duration-200 hover:shadow-md w-full max-w-xs mx-auto ${
                                           selectedClubIds.includes(club.club_id)
                                             ? 'ring-2 ring-green-500 bg-green-50'
                                             : 'hover:bg-gray-50'
                                         }`}
                                         onClick={() => handleClubToggle(club.club_id)}
                                       >
-                                        <CardContent className="p-3 text-center">
-                                          <div className="text-3xl mb-2">
+                                        <CardContent className="p-2 flex flex-col items-center">
+                                          <div className="text-2xl mb-1">
                                             {club.logo_url ? (
-                                              <img src={club.logo_url} alt={club.name} className="w-8 h-8 mx-auto object-contain" />
+                                              <img src={club.logo_url} alt={club.name} className="w-8 h-8 object-contain" />
                                             ) : (
                                               "⚽"
                                             )}
                                           </div>
-                                          <h3 className="font-medium text-sm mb-2 line-clamp-2">{club.name}</h3>
-                                          {club.popularity_score && (
-                                            <div className="flex items-center justify-center gap-1 mb-2">
-                                              <div className="flex">
-                                                {[...Array(5)].map((_, i) => (
-                                                  <div
-                                                    key={i}
-                                                    className={`w-2 h-2 rounded-full ${
-                                                      i < Math.min(5, Math.floor((club.popularity_score || 0) / 20))
-                                                        ? 'bg-yellow-400'
-                                                        : 'bg-gray-200'
-                                                    }`}
-                                                  />
-                                                ))}
-                                              </div>
-                                              <span className="text-xs text-gray-500">
-                                                {club.popularity_score}
-                                              </span>
-                                            </div>
-                                          )}
-                                          <div className="flex flex-wrap gap-1 justify-center mb-2">
-                                            {getClubCompetitions(club).slice(0, 1).map((comp, idx) => (
-                                              <Badge key={idx} variant="secondary" className="text-xs">
-                                                {comp.replace('_', ' ')}
+                                          <h3 className="font-medium text-xs mb-1 text-center line-clamp-2">{club.name}</h3>
+                                          <div className="flex flex-wrap gap-1 justify-center mb-1">
+                                            {getClubCompetitions(club).map((slug, idx) => (
+                                              <Badge key={idx} variant="secondary" className="text-xxs flex items-center gap-1">
+                                                <span>{LEAGUE_SLUG_TO_FLAG[slug] || "🏆"}</span>
+                                                <span>{LEAGUE_SLUG_TO_NAME[slug] || slug.replace('_', ' ')}</span>
                                               </Badge>
                                             ))}
-                                            {getClubCompetitions(club).length > 1 && (
-                                              <Badge variant="secondary" className="text-xs">
-                                                +{getClubCompetitions(club).length - 1}
-                                              </Badge>
-                                            )}
                                           </div>
                                           {selectedClubIds.includes(club.club_id) && (
-                                            <div className="mt-2">
-                                              <Check className="h-5 w-5 text-green-600 mx-auto" />
+                                            <div className="mt-1">
+                                              <Check className="h-4 w-4 text-green-600 mx-auto" />
                                             </div>
                                           )}
                                         </CardContent>

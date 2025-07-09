@@ -149,6 +149,46 @@ const EnhancedCompetitionSelector: React.FC<EnhancedCompetitionSelectorProps> = 
     eredevise: "Eredivisie"
   };
 
+  const LEAGUE_CLUSTERS = [
+    {
+      name: "🇩🇪 Deutschland",
+      competitions: [
+        { slug: "bundesliga", name: "Bundesliga", flag: "🏆" },
+        { slug: "second_bundesliga", name: "2. Bundesliga", flag: "🥈" },
+        { slug: "dfb_pokal", name: "DFB Pokal", flag: "🏆" }
+      ]
+    },
+    {
+      name: "🌍 Europa",
+      competitions: [
+        { slug: "champions_league", name: "Champions League", flag: "⭐" },
+        { slug: "europa_league", name: "Europa League", flag: "🏅" },
+        { slug: "conference_league", name: "Conference League", flag: "🏅" },
+        { slug: "premier_league", name: "Premier League", flag: "👑" },
+        { slug: "la_liga", name: "La Liga", flag: "🇪🇸" },
+        { slug: "serie_a", name: "Serie A", flag: "🇮🇹" },
+        { slug: "ligue_1", name: "Ligue 1", flag: "🇫🇷" },
+        { slug: "sueper_lig", name: "Süper Lig", flag: "🇹🇷" }
+      ]
+    },
+    {
+      name: "🏆 Internationale Wettbewerbe",
+      competitions: [
+        { slug: "mls", name: "MLS", flag: "🇺🇸" },
+        { slug: "saudi_pro_league", name: "Saudi Pro League", flag: "🇸🇦" },
+        { slug: "liga_portugal", name: "Liga Portugal", flag: "🇵🇹" },
+        { slug: "eredevise", name: "Eredivisie", flag: "🇳🇱" }
+      ]
+    }
+  ];
+
+  const LEAGUE_SLUG_TO_NAME = Object.fromEntries(
+    LEAGUE_CLUSTERS.flatMap(cluster => cluster.competitions.map(l => [l.slug, l.name]))
+  );
+  const LEAGUE_SLUG_TO_FLAG = Object.fromEntries(
+    LEAGUE_CLUSTERS.flatMap(cluster => cluster.competitions.map(l => [l.slug, l.flag]))
+  );
+
   const CompetitionCard = ({ competition, isSelected }: { competition: Competition; isSelected: boolean }) => (
     <Card
       key={competition.id}
@@ -199,22 +239,47 @@ const EnhancedCompetitionSelector: React.FC<EnhancedCompetitionSelectorProps> = 
         </p>
       </div>
 
+      {/* Top row: selected leagues */}
+      <div className="mb-4 flex flex-wrap gap-2">
+        {selectedCompetitions.map(slug => (
+          <Badge key={slug} variant="secondary" className="flex items-center gap-1 text-xs px-2 py-1">
+            <span>{LEAGUE_SLUG_TO_FLAG[slug] || "🏆"}</span>
+            <span>{LEAGUE_SLUG_TO_NAME[slug] || slug.replace('_', ' ')}</span>
+          </Badge>
+        ))}
+      </div>
+
       {/* Clustered Competitions */}
-      {COMPETITION_CLUSTERS.map(cluster => {
-        const comps = allCompetitions.filter(comp => cluster.competitions.includes(slugToName[comp.id] || comp.name));
+      {LEAGUE_CLUSTERS.map(cluster => {
+        const comps = allCompetitions.filter(comp => cluster.competitions.some(l => slugToName[comp.id] === l.name));
         if (comps.length === 0) return null;
         return (
           <div key={cluster.name} className="mb-6">
-            <h3 className="text-lg font-semibold mb-3 text-blue-800">
+            <h3 className="text-lg font-semibold mb-3 text-blue-800 flex items-center gap-2">
               {cluster.name}
+              {/* Optional: Alle vergleichen button */}
+              <Button variant="outline" size="sm" className="ml-2">Alle vergleichen</Button>
             </h3>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
               {comps.map(competition => (
-                <CompetitionCard
+                <Card
                   key={competition.id}
-                  competition={competition}
-                  isSelected={selectedCompetitions.includes(competition.id)}
-                />
+                  className={`cursor-pointer transition-all duration-200 hover:shadow-md w-full max-w-xs mx-auto ${
+                    selectedCompetitions.includes(competition.id)
+                      ? 'ring-2 ring-green-500 bg-green-50'
+                      : 'hover:bg-gray-50'
+                  }`}
+                  onClick={() => onCompetitionToggle(competition.id)}
+                >
+                  <CardContent className="p-2 flex flex-col items-center">
+                    <div className="text-2xl mb-1">{LEAGUE_SLUG_TO_FLAG[competition.id] || competition.logo}</div>
+                    <h4 className="font-medium text-xs mb-1 text-center line-clamp-2">{LEAGUE_SLUG_TO_NAME[competition.id] || competition.name}</h4>
+                    <p className="text-xxs text-gray-500 mb-1">{competition.gameCount} Spiele</p>
+                    {selectedCompetitions.includes(competition.id) && (
+                      <Check className="h-4 w-4 text-green-600 mx-auto" />
+                    )}
+                  </CardContent>
+                </Card>
               ))}
             </div>
           </div>
@@ -223,7 +288,7 @@ const EnhancedCompetitionSelector: React.FC<EnhancedCompetitionSelectorProps> = 
 
       {/* Weitere Wettbewerbe cluster */}
       {(() => {
-        const allClusterNames = COMPETITION_CLUSTERS.flatMap(cluster => cluster.competitions);
+        const allClusterNames = LEAGUE_CLUSTERS.flatMap(cluster => cluster.competitions.map(l => l.name));
         const weitereComps = allCompetitions.filter(comp => !allClusterNames.includes(slugToName[comp.id] || comp.name));
         if (weitereComps.length === 0) return null;
         return (
