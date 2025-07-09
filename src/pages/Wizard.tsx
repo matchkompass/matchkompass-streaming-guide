@@ -89,9 +89,10 @@ const LEAGUE_SLUG_TO_FLAG = Object.fromEntries(
 );
 
 // Get all leagues that should be expanded by default
-const getDefaultExpandedLeagues = () => {
-  return LEAGUE_CLUSTERS.filter(cluster => cluster.expandedByDefault).flatMap(cluster => cluster.leagues.map(l => l.name));
-};
+const getDefaultExpandedLeagues = () => [
+  'Bundesliga',
+  'Champions League'
+];
 
 // Get the order index for a league
 const getLeagueOrder = (leagueName: string) => {

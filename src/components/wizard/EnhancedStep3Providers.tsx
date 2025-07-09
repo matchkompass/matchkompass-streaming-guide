@@ -85,65 +85,56 @@ const EnhancedStep3Providers = ({
                   .map((provider) => (
                     <Card
                       key={provider.streamer_id}
-                      className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
+                      className={`cursor-pointer transition-all duration-200 hover:shadow-md w-full max-w-xs mx-auto ${
                         existingProviders.includes(provider.streamer_id)
                           ? 'ring-2 ring-blue-500 bg-blue-50'
                           : 'hover:bg-gray-50'
                       }`}
                       onClick={() => onToggleProvider(provider.streamer_id)}
                     >
-                      <CardContent className="p-3">
-                        <div className="text-center">
-                          <div className="mb-3">
-                            {provider.logo_url ? (
-                              <img 
-                                src={provider.logo_url} 
-                                alt={provider.name || provider.provider_name} 
-                                className="w-10 h-10 mx-auto object-contain" 
-                              />
-                            ) : (
-                              <div className="w-10 h-10 bg-gray-200 rounded-lg mx-auto flex items-center justify-center text-xs">
-                                📺
-                              </div>
-                            )}
-                          </div>
-                          
-                          <h4 className="font-medium text-xs mb-2 min-h-[2rem] flex items-center justify-center text-center">
-                            {provider.name || provider.provider_name}
-                          </h4>
-                          
-                          <div className="mb-2">
-                            <p className="text-xs font-semibold text-green-600">
-                              {provider.monthly_price}/Monat
-                            </p>
-                          </div>
-
-                          {/* Highlights */}
-                          <div className="flex flex-wrap gap-1 justify-center mb-2 min-h-[2rem]">
-                            {provider.highlights.highlight_1 && (
-                              <HighlightBadge
-                                text={provider.highlights.highlight_1}
-                                priority="primary"
-                                tooltip={true}
-                                className="text-[10px] px-1 py-0.5"
-                              />
-                            )}
-                            {provider.highlights.highlight_2 && (
-                              <HighlightBadge
-                                text={provider.highlights.highlight_2}
-                                priority="secondary"
-                                tooltip={true}
-                                className="text-[10px] px-1 py-0.5"
-                              />
-                            )}
-                          </div>
-                          
-                          {existingProviders.includes(provider.streamer_id) && (
-                            <div className="mt-2">
-                              <Check className="h-5 w-5 text-blue-600 mx-auto" />
-                            </div>
+                      <CardContent className="p-2 flex flex-col items-center">
+                        <div className="mb-1 text-2xl">
+                          {provider.logo_url ? (
+                            <img 
+                              src={provider.logo_url} 
+                              alt={provider.name || provider.provider_name} 
+                              className="w-8 h-8 object-contain" 
+                            />
+                          ) : (
+                            <span role="img" aria-label="Provider">📺</span>
                           )}
                         </div>
+                        <h4 className="font-medium text-xs mb-1 text-center line-clamp-2 min-h-[1.5rem] flex items-center justify-center">
+                          {provider.name || provider.provider_name}
+                        </h4>
+                        <div className="mb-1">
+                          <p className="text-xxs font-semibold text-green-600">
+                            {provider.monthly_price}/Monat
+                          </p>
+                        </div>
+                        <div className="flex flex-wrap gap-1 justify-center mb-1 min-h-[1.5rem]">
+                          {provider.highlights.highlight_1 && (
+                            <HighlightBadge
+                              text={provider.highlights.highlight_1}
+                              priority="primary"
+                              tooltip={true}
+                              className="text-[10px] px-1 py-0.5"
+                            />
+                          )}
+                          {provider.highlights.highlight_2 && (
+                            <HighlightBadge
+                              text={provider.highlights.highlight_2}
+                              priority="secondary"
+                              tooltip={true}
+                              className="text-[10px] px-1 py-0.5"
+                            />
+                          )}
+                        </div>
+                        {existingProviders.includes(provider.streamer_id) && (
+                          <div className="mt-1">
+                            <Check className="h-4 w-4 text-blue-600 mx-auto" />
+                          </div>
+                        )}
                       </CardContent>
                     </Card>
                   ))}

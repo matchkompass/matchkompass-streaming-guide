@@ -257,8 +257,6 @@ const EnhancedCompetitionSelector: React.FC<EnhancedCompetitionSelectorProps> = 
           <div key={cluster.name} className="mb-6">
             <h3 className="text-lg font-semibold mb-3 text-blue-800 flex items-center gap-2">
               {cluster.name}
-              {/* Optional: Alle vergleichen button */}
-              <Button variant="outline" size="sm" className="ml-2">Alle vergleichen</Button>
             </h3>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
               {comps.map(competition => (
