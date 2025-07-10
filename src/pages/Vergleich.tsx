@@ -12,6 +12,7 @@ import { useLeagues } from "@/hooks/useLeagues";
 import ComparisonSidebar from "@/components/comparison/ComparisonSidebar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useNavigate } from "react-router-dom";
+import { LEAGUE_CLUSTERS } from "./Wizard";
 
 interface ComparisonFilters {
   competitions: string[];
@@ -144,6 +145,9 @@ const Vergleich = () => {
     window.open(affiliateUrl, '_blank');
   };
 
+  // Helper to get flag for a league_slug
+  const getFlagForLeague = (league_slug: string) => LEAGUE_CLUSTERS.flatMap(c => c.leagues).find(l => l.slug === league_slug)?.flag || "🏆";
+
   if (providersLoading || leaguesLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -215,6 +219,14 @@ const Vergleich = () => {
                 const price = parsePrice(provider.monthly_price);
                 const features = parseFeatures(provider);
                 const isSelected = selectedProviders.includes(provider.streamer_id?.toString());
+                // Get competitions this provider actually covers (coveredGames > 0)
+                const coveredCompetitions = filters.competitions
+                  .map(slug => {
+                    const league = leagues.find(l => l.league_slug === slug);
+                    const coveredGames = provider[slug] || 0;
+                    return coveredGames > 0 && league ? { league, coveredGames } : null;
+                  })
+                  .filter(Boolean);
                 return (
                   <Card key={provider.streamer_id} className={`relative ${isSelected ? 'ring-2 ring-blue-500' : ''}`}>
                     <div className="absolute top-2 left-2 z-10">
@@ -240,6 +252,18 @@ const Vergleich = () => {
                           {features.streams > 1 && <Badge>Multi</Badge>}
                         </div>
                         <div className="text-sm text-gray-600">{price.toFixed(2)}€ / Monat</div>
+                        {/* Dynamic league/flag tiles */}
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {coveredCompetitions.map(({ league }) => (
+                            <div key={league.league_slug} className="flex items-center space-x-2 bg-gray-50 rounded px-2 py-1">
+                              <span className="text-sm">{league.icon || getFlagForLeague(league.league_slug)}</span>
+                              <span className="text-xs text-gray-600 flex-1">{league.league}</span>
+                              <div className="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs bg-gray-100 cursor-pointer">
+                                <X className="h-4 w-4 text-gray-400" />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                         <Button
                           size="sm"
                           className="w-full bg-green-600 hover:bg-green-700 text-white mt-2"
