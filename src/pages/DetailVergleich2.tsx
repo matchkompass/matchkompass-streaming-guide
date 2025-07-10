@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Download, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,10 +9,24 @@ import { useStreamingEnhanced } from "@/hooks/useStreamingEnhanced";
 import { useLeaguesEnhanced } from "@/hooks/useLeaguesEnhanced";
 
 const DetailVergleich2 = () => {
-  const [selectedLeagues, setSelectedLeagues] = useState<string[]>(['bundesliga', 'champions_league']);
+  const [selectedLeagues, setSelectedLeagues] = useState<string[]>([]);
   const [selectedProviders, setSelectedProviders] = useState<number[]>([]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 100]);
+  const [featureFilters, setFeatureFilters] = useState({
+    fourK: false,
+    mobile: false,
+    download: false,
+    multiStream: false,
+  });
   const { providers, loading: providersLoading } = useStreamingEnhanced();
   const { leagues, loading: leaguesLoading } = useLeaguesEnhanced();
+
+  // Preselect all leagues after leagues are loaded
+  useEffect(() => {
+    if (leagues.length > 0 && selectedLeagues.length === 0) {
+      setSelectedLeagues(leagues.map(l => l.league_slug));
+    }
+  }, [leagues]);
 
   const parsePrice = (priceString?: string): number => {
     if (!priceString) return 0;
@@ -52,12 +66,23 @@ const DetailVergleich2 = () => {
 
   const filteredProviders = useMemo(() => {
     let filtered = providers.filter(provider => {
-      // Only show providers that have coverage for at least one selected league
+      // Price filter
+      const monthly = parsePrice(provider.monthly_price);
+      const yearly = parsePrice(provider.yearly_price);
+      if (monthly < priceRange[0] || monthly > priceRange[1]) return false;
+      // Feature filters
+      const features = parseFeatures(provider);
+      if (featureFilters.fourK && !features.fourK) return false;
+      if (featureFilters.mobile && !features.mobile) return false;
+      if (featureFilters.download && !features.download) return false;
+      if (featureFilters.multiStream && !features.multiStream) return false;
+      // Provider filter
       if (selectedProviders.length > 0 && !selectedProviders.includes(provider.streamer_id)) return false;
+      // League filter
       return selectedLeagues.some(league => (provider[league] || 0) > 0);
     });
     return filtered;
-  }, [providers, selectedLeagues, selectedProviders]);
+  }, [providers, selectedLeagues, selectedProviders, priceRange, featureFilters]);
 
   const toggleLeague = (leagueSlug: string) => {
     setSelectedLeagues(prev => 
@@ -144,28 +169,53 @@ const DetailVergleich2 = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
+                {/* Pricing Section */}
                 <div className="mb-6">
-                  <div className="font-semibold mb-2">Anbieter</div>
-                  <div className="space-y-2 max-h-40 overflow-y-auto">
-                    {providers.map((provider) => (
-                      <div key={provider.streamer_id} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`provider-${provider.streamer_id}`}
-                          checked={selectedProviders.length === 0 || selectedProviders.includes(provider.streamer_id)}
-                          onCheckedChange={() => toggleProvider(provider.streamer_id)}
-                        />
-                        <label htmlFor={`provider-${provider.streamer_id}`} className="text-sm cursor-pointer flex-1">
-                          <span className="inline-flex items-center gap-1">
-                            {provider.logo_url && (
-                              <img src={provider.logo_url} alt={provider.name} className="w-5 h-5 object-contain rounded bg-white border" />
-                            )}
-                            {provider.name}
-                          </span>
-                        </label>
-                      </div>
-                    ))}
+                  <div className="font-semibold mb-2">Preis (Monatlich)</div>
+                  <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    step={1}
+                    value={priceRange[0]}
+                    onChange={e => setPriceRange([Number(e.target.value), priceRange[1]])}
+                  />
+                  <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    step={1}
+                    value={priceRange[1]}
+                    onChange={e => setPriceRange([priceRange[0], Number(e.target.value)])}
+                  />
+                  <div className="flex justify-between text-xs text-gray-600">
+                    <span>{priceRange[0]}€</span>
+                    <span>{priceRange[1]}€</span>
                   </div>
                 </div>
+                {/* Features Section */}
+                <div className="mb-6">
+                  <div className="font-semibold mb-2">Features</div>
+                  <div className="space-y-2">
+                    <label className="flex items-center gap-2 text-sm">
+                      <Checkbox checked={featureFilters.fourK} onCheckedChange={() => setFeatureFilters(f => ({ ...f, fourK: !f.fourK }))} />
+                      4K Streaming
+                    </label>
+                    <label className="flex items-center gap-2 text-sm">
+                      <Checkbox checked={featureFilters.mobile} onCheckedChange={() => setFeatureFilters(f => ({ ...f, mobile: !f.mobile }))} />
+                      Mobile App
+                    </label>
+                    <label className="flex items-center gap-2 text-sm">
+                      <Checkbox checked={featureFilters.download} onCheckedChange={() => setFeatureFilters(f => ({ ...f, download: !f.download }))} />
+                      Download/Offline
+                    </label>
+                    <label className="flex items-center gap-2 text-sm">
+                      <Checkbox checked={featureFilters.multiStream} onCheckedChange={() => setFeatureFilters(f => ({ ...f, multiStream: !f.multiStream }))} />
+                      Multi-Stream
+                    </label>
+                  </div>
+                </div>
+                {/* League/Competition Section */}
                 <div className="font-semibold mb-2">Ligen</div>
                 <div className="space-y-3 max-h-40 overflow-y-auto">
                   {leagues.map((league) => (
@@ -204,7 +254,7 @@ const DetailVergleich2 = () => {
           </div>
           {/* Vertical Table */}
           <div className="lg:col-span-3 overflow-x-auto">
-            <div className="rounded-lg border bg-white shadow-sm overflow-x-auto">
+            <div className="rounded-lg border bg-white shadow-sm overflow-x-auto relative">
               <table className="min-w-full text-sm">
                 <thead>
                   <tr>
@@ -222,19 +272,6 @@ const DetailVergleich2 = () => {
                             {provider.highlights?.highlight_1 && (
                               <span className="text-xs text-green-700 bg-green-100 rounded px-2 py-0.5 mt-1">{provider.highlights.highlight_1}</span>
                             )}
-                            <Button
-                              size="sm"
-                              className="mt-2 w-full bg-green-600 hover:bg-green-700 text-white"
-                              onClick={() => window.open(provider.affiliate_url, '_blank')}
-                            >
-                              Zum Angebot
-                            </Button>
-                            <div className="flex gap-1 mt-2">
-                              {features.fourK && <span className="text-xs bg-gray-200 rounded px-1">4K</span>}
-                              {features.mobile && <span className="text-xs bg-gray-200 rounded px-1">Mobile</span>}
-                              {features.download && <span className="text-xs bg-gray-200 rounded px-1">Download</span>}
-                              {features.multiStream && <span className="text-xs bg-gray-200 rounded px-1">Multi</span>}
-                            </div>
                           </div>
                         </th>
                       );
@@ -242,6 +279,26 @@ const DetailVergleich2 = () => {
                   </tr>
                 </thead>
                 <tbody>
+                  {/* Features Row */}
+                  <tr>
+                    <td className="px-4 py-2 font-medium bg-gray-50">Features</td>
+                    {filteredProviders.map(provider => {
+                      const features = parseFeatures(provider);
+                      return (
+                        <td key={provider.streamer_id} className="px-4 py-2 text-center">
+                          <div className="flex flex-col gap-1 items-center">
+                            <div className="flex gap-1">
+                              <span title="4K Streaming" className={`text-xs px-2 py-0.5 rounded ${features.fourK ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-400'}`}>4K</span>
+                              <span title="Mobile App" className={`text-xs px-2 py-0.5 rounded ${features.mobile ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-400'}`}>Mobile</span>
+                              <span title="Download/Offline" className={`text-xs px-2 py-0.5 rounded ${features.download ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-400'}`}>Download</span>
+                              <span title="Multi-Stream" className={`text-xs px-2 py-0.5 rounded ${features.multiStream ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-400'}`}>Multi</span>
+                            </div>
+                          </div>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                  {/* League Rows */}
                   {selectedLeagues.map(leagueSlug => {
                     const league = leagues.find(l => l.league_slug === leagueSlug);
                     return (
@@ -263,6 +320,24 @@ const DetailVergleich2 = () => {
                   })}
                 </tbody>
               </table>
+              {/* Sticky Conversion Section */}
+              <div className="sticky bottom-0 left-0 w-full bg-white border-t z-10 shadow flex px-4 py-3 gap-4 overflow-x-auto">
+                <div className="w-48 font-semibold text-gray-700 flex items-center">Jetzt Angebot sichern:</div>
+                {filteredProviders.map(provider => (
+                  <div key={provider.streamer_id} className="min-w-[220px] flex flex-col items-center">
+                    <Button
+                      size="sm"
+                      className="w-full bg-green-600 hover:bg-green-700 text-white"
+                      onClick={() => window.open(provider.affiliate_url, '_blank')}
+                    >
+                      Zum Angebot
+                    </Button>
+                    {provider.highlights?.highlight_1 && (
+                      <span className="text-xs text-green-700 bg-green-100 rounded px-2 py-0.5 mt-1">{provider.highlights.highlight_1}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
