@@ -9,10 +9,12 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FAQSection from "@/components/FAQSection";
 import { useLeagues } from "@/hooks/useLeagues";
+import { useStreaming } from "@/hooks/useStreaming";
 
 const Leagues = () => {
   const { leagues, loading } = useLeagues();
   const [searchTerm, setSearchTerm] = useState("");
+  const { providers, loading: providersLoading } = useStreaming();
 
   const filteredLeagues = leagues.filter(league =>
     league.league?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -26,6 +28,20 @@ const Leagues = () => {
     acc[type].push(league);
     return acc;
   }, {} as Record<string, typeof leagues>);
+
+  // Helper to compute provider coverage for a league
+  const getProviderCoverage = (provider, league) => {
+    const leagueKey = league.league_slug as keyof typeof provider;
+    const coveredGames = (provider[leagueKey] as number) || 0;
+    const totalGames = league['number of games'] || 0;
+    const percentage = totalGames > 0 ? Math.round((coveredGames / totalGames) * 100) : 0;
+    return {
+      provider,
+      coveredGames,
+      totalGames,
+      percentage,
+    };
+  };
 
   const leagueFAQs = [
     {
@@ -166,18 +182,36 @@ const Leagues = () => {
                         )}
                       </div>
                       
-                      <div className="flex items-center justify-between text-sm">
-                        <div className="flex items-center text-gray-600">
-                          <Users className="h-4 w-4 mr-1" />
-                          <span>{league['number of games']} Spiele</span>
-                        </div>
-                        {(league as any).popularity && (
-                          <div className="text-green-600 font-semibold">
-                            ★ {(league as any).popularity}/10
-                          </div>
-                        )}
+                      <div className="flex items-center text-gray-600 text-xs mb-2">
+                        <Users className="h-4 w-4 mr-1" />
+                        <span>{league['number of games']} Spiele</span>
                       </div>
                       
+                      {/* Streaming Providers Coverage */}
+                      <div className="space-y-1">
+                        {providersLoading ? (
+                          <div className="text-xs text-gray-400">Lade Anbieter...</div>
+                        ) : (
+                          providers
+                            .map((provider) => getProviderCoverage(provider, league))
+                            .filter((item) => item.coveredGames > 0)
+                            .sort((a, b) => b.percentage - a.percentage)
+                            .map((item) => (
+                              <div key={item.provider.streamer_id} className="flex items-center justify-between border rounded px-2 py-1 text-xs">
+                                <div className="flex items-center gap-2">
+                                  {item.provider.logo_url ? (
+                                    <img src={item.provider.logo_url} alt={item.provider.provider_name} className="w-4 h-4 object-contain" />
+                                  ) : (
+                                    <span className="w-4 h-4 bg-gray-200 rounded flex items-center justify-center">📺</span>
+                                  )}
+                                  <span>{item.provider.provider_name}</span>
+                                </div>
+                                <span className="font-mono text-xs bg-gray-100 rounded px-2 py-0.5">{item.percentage}%</span>
+                                <span className="text-xs text-gray-500">ab {parseFloat(item.provider.monthly_price).toFixed(2)}€</span>
+                              </div>
+                            ))
+                        )}
+                      </div>
                       <Button 
                         variant="outline" 
                         size="sm" 

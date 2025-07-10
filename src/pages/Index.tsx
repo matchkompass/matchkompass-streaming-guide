@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { LEAGUE_CLUSTERS } from "./Wizard";
+import { useLeagues } from "@/hooks/useLeagues";
+import { useStreaming } from "@/hooks/useStreaming";
 
 const Index = () => {
   const topClubs = [
@@ -39,6 +41,23 @@ const Index = () => {
     { home: "Barcelona", away: "Real Madrid", time: "21:00", provider: "DAZN" },
     { home: "Hertha", away: "Hamburg", time: "13:30", provider: "Sky" }
   ];
+
+  const { leagues, loading: leaguesLoading } = useLeagues();
+  const { providers, loading: providersLoading } = useStreaming();
+
+  // Helper to compute provider coverage for a league
+  const getProviderCoverage = (provider, league) => {
+    const leagueKey = league.league_slug as keyof typeof provider;
+    const coveredGames = (provider[leagueKey] as number) || 0;
+    const totalGames = league['number of games'] || 0;
+    const percentage = totalGames > 0 ? Math.round((coveredGames / totalGames) * 100) : 0;
+    return {
+      provider,
+      coveredGames,
+      totalGames,
+      percentage,
+    };
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-green-50">
@@ -103,82 +122,49 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Today's Matches */}
-      <section className="py-16 px-4 bg-gray-50">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-3xl font-bold text-gray-900">
-              <Calendar className="inline mr-3 h-8 w-8 text-green-600" />
-              Heute im TV
-            </h2>
-            <Button asChild variant="outline">
-              <Link to="/news">Alle Spiele anzeigen</Link>
-            </Button>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-6">
-            {todaysMatches.map((match, index) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex justify-between items-center mb-4">
-                    <span className="text-sm text-gray-500">{match.time}</span>
-                    <Badge className="bg-blue-100 text-blue-800">{match.provider}</Badge>
-                  </div>
-                  <div className="text-center">
-                    <div className="font-semibold text-lg">
-                      {match.home} vs {match.away}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Popular Clubs */}
+      {/* Leagues Section (moved and redesigned) */}
       <section className="py-16 px-4 bg-white">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
-            Beliebte Vereine
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {topClubs.map((club, index) => (
-              <Link 
-                key={index} 
-                to={`/verein/${club.name.toLowerCase().replace(' ', '-')}`}
-                className="group"
-              >
-                <Card className="text-center hover:shadow-lg transition-all duration-300 group-hover:scale-105 cursor-pointer">
-                  <CardContent className="p-6">
-                    <div className="text-4xl mb-3">{club.logo}</div>
-                    <h3 className="font-semibold text-lg mb-2">{club.name}</h3>
-                    <Badge variant="secondary">{club.league}</Badge>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Top-Ligen Section */}
-      <section className="py-16 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Top-Ligen</h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            {LEAGUE_CLUSTERS.flatMap(cluster =>
-              cluster.leagues.map(league => (
-                <Card key={league.slug} className="flex items-center gap-3 p-4">
-                  <span className="text-2xl">{league.flag}</span>
-                  <div>
-                    <h3 className="font-semibold text-lg">{league.name}</h3>
-                    <p className="text-xs text-gray-500">{cluster.name}</p>
-                  </div>
-                </Card>
-              ))
-            )}
-          </div>
+          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Alle Ligen & Streaming-Anbieter</h2>
+          {(leaguesLoading || providersLoading) ? (
+            <div className="text-center py-12 text-gray-500">Lade Ligen und Anbieter...</div>
+          ) : (
+            <div className="grid md:grid-cols-3 gap-6">
+              {leagues.map((league) => (
+                <Link key={league.league_id} to={`/competition/${league.league_slug}`} className="group">
+                  <Card className="hover:shadow-lg transition-all duration-300 group-hover:scale-105 cursor-pointer">
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="text-2xl">{league['country code']}</span>
+                        <h3 className="font-semibold text-lg">{league.league}</h3>
+                      </div>
+                      <div className="text-xs text-gray-500 mb-2">{league['number of games']} Spiele pro Saison</div>
+                      <div className="space-y-2">
+                        {providers
+                          .map((provider) => getProviderCoverage(provider, league))
+                          .filter((item) => item.coveredGames > 0)
+                          .sort((a, b) => b.percentage - a.percentage)
+                          .map((item, idx) => (
+                            <div key={item.provider.streamer_id} className="flex items-center justify-between border rounded px-2 py-1 text-sm">
+                              <div className="flex items-center gap-2">
+                                {item.provider.logo_url ? (
+                                  <img src={item.provider.logo_url} alt={item.provider.provider_name} className="w-5 h-5 object-contain" />
+                                ) : (
+                                  <span className="w-5 h-5 bg-gray-200 rounded flex items-center justify-center">📺</span>
+                                )}
+                                <span>{item.provider.provider_name}</span>
+                              </div>
+                              <span className="font-mono text-xs bg-gray-100 rounded px-2 py-0.5">{item.percentage}%</span>
+                              <span className="text-xs text-gray-500">ab {parseFloat(item.provider.monthly_price).toFixed(2)}€</span>
+                            </div>
+                          ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
