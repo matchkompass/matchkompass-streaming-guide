@@ -8,6 +8,7 @@ export interface LeagueEnhanced {
   league_slug: string;
   country: string; // Using country instead of country_code
   'number of games': number;
+  popularity?: number;
 }
 
 const fetchEnhancedLeagues = async (): Promise<LeagueEnhanced[]> => {
@@ -15,8 +16,8 @@ const fetchEnhancedLeagues = async (): Promise<LeagueEnhanced[]> => {
   
   const { data, error } = await supabase
     .from('leagues')
-    .select('league_id, league, league_slug, country, "number of games"')
-    .order('country, league');
+    .select('league_id, league, league_slug, country, "number of games", popularity')
+    .order('popularity', { ascending: true, nullsFirst: false });
 
   if (error) {
     console.error('Error fetching enhanced leagues:', error);
