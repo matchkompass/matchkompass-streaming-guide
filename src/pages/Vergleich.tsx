@@ -230,126 +230,120 @@ const Vergleich = () => {
                 const isSelected = selectedProviders.includes(provider.streamer_id.toString());
 
                 return (
-                  <Card key={provider.streamer_id} className={`hover:shadow-lg transition-all duration-200 ${
+                  <div key={provider.streamer_id} className={`bg-white rounded-lg shadow-md p-6 ${
                     isSelected ? 'ring-2 ring-blue-500' : ''
                   }`}>
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center space-x-4">
-                          <div className="text-3xl">
-                            {provider.logo_url ? (
-                              <img src={provider.logo_url} alt={provider.provider_name} className="w-12 h-12 object-contain" />
-                            ) : (
-                              "📺"
-                            )}
-                          </div>
-                          <div>
-                            <CardTitle className="text-xl">{provider.provider_name}</CardTitle>
-                            <CardDescription>{provider.name}</CardDescription>
-                            <div className="flex items-center space-x-2 mt-2">
-                              <div className="flex items-center">
-                                {[...Array(5)].map((_, i) => (
-                                  <Star
-                                    key={i}
-                                    className={`h-4 w-4 ${
-                                      i < 4 ? 'text-yellow-400 fill-current' : 'text-gray-300'
-                                    }`}
-                                  />
-                                ))}
-                              </div>
-                              <span className="text-sm text-gray-600">(4.0)</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-2xl font-bold text-green-600">
-                            {price.toFixed(2)}€
-                          </div>
-                          <div className="text-sm text-gray-500">pro Monat</div>
-                          {provider.yearly_price && (
-                            <div className="text-xs text-orange-600 mt-1">
-                              Jahresabo verfügbar
-                            </div>
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center space-x-4">
+                        <div className="text-3xl">
+                          {provider.logo_url ? (
+                            <img src={provider.logo_url} alt={provider.provider_name} className="w-12 h-12 object-contain" />
+                          ) : (
+                            "📺"
                           )}
                         </div>
-                      </div>
-                    </CardHeader>
-                    
-                    <CardContent>
-                      <div className="grid md:grid-cols-3 gap-4 mb-4">
-                        {/* Coverage */}
-                        {filters.competitions.length > 0 && (
-                          <div>
-                            <h4 className="font-medium text-sm mb-2">Abdeckung</h4>
-                            <div className="space-y-2">
-                              <Progress value={coverage} className="h-2" />
-                              <p className="text-xs text-gray-600">{coverage}% der gewählten Ligen</p>
+                        <div>
+                          <h3 className="text-2xl font-bold text-gray-900">{provider.provider_name}</h3>
+                          <p className="text-lg text-gray-600">{provider.name}</p>
+                          <div className="flex items-center space-x-2 mt-2">
+                            <div className="flex items-center">
+                              {[...Array(5)].map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className={`h-4 w-4 ${
+                                    i < 4 ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                                  }`}
+                                />
+                              ))}
                             </div>
+                            <span className="text-sm text-gray-600">(4.0)</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-3xl font-bold text-green-600">
+                          {price.toFixed(2)}€
+                        </div>
+                        <p className="text-lg text-gray-500">pro Monat</p>
+                        {provider.yearly_price && (
+                          <div className="text-sm text-orange-600 mt-1">
+                            Jahresabo verfügbar
                           </div>
                         )}
-
-                        {/* Features */}
-                        <div>
-                          <h4 className="font-medium text-sm mb-2">Features</h4>
-                          <div className="flex flex-wrap gap-1">
-                            {features.fourK && (
-                              <Badge variant="secondary" className="text-xs">4K</Badge>
-                            )}
-                            {features.mobile && (
-                              <Badge variant="secondary" className="text-xs">Mobile</Badge>
-                            )}
-                            {features.download && (
-                              <Badge variant="secondary" className="text-xs">Download</Badge>
-                            )}
-                            <Badge variant="secondary" className="text-xs">
-                              {features.streams} Stream{features.streams > 1 ? 's' : ''}
-                            </Badge>
-                          </div>
-                        </div>
-
-                        {/* Top competitions */}
-                        <div>
-                          <h4 className="font-medium text-sm mb-2">Top Ligen</h4>
-                          <div className="flex flex-wrap gap-1">
-                            {['bundesliga', 'champions_league', 'premier_league'].map(comp => {
-                              const games = provider[comp] || 0;
-                              if (games > 0) {
-                                return (
-                                  <Badge key={comp} variant="outline" className="text-xs">
-                                    {comp.replace('_', ' ')}
-                                  </Badge>
-                                );
-                              }
-                              return null;
-                            })}
-                          </div>
-                        </div>
                       </div>
+                    </div>
 
-                      <div className="flex gap-2">
-                        <Button 
-                          className="flex-1 bg-green-600 hover:bg-green-700"
-                          onClick={() => handleAffiliateClick(provider)}
-                        >
-                          Zum Anbieter
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          onClick={() => handleProviderToggle(provider.streamer_id.toString())}
-                          className={isSelected ? 'bg-blue-50 border-blue-300' : ''}
-                        >
-                          {isSelected ? (
-                            <>
-                              <Check className="h-4 w-4 mr-2" />
-                              Ausgewählt
-                            </>
-                          ) : (
-                            'Vergleichen'
+                    <div className="mt-4 grid grid-cols-2 gap-3">
+                      {/* Coverage */}
+                      {filters.competitions.length > 0 && (
+                        <div>
+                          <h4 className="font-medium text-sm mb-1">Abdeckung</h4>
+                          <Progress value={coverage} className="h-2" />
+                          <p className="text-xs text-gray-600 mt-1">{coverage}% der gewählten Ligen</p>
+                        </div>
+                      )}
+
+                      {/* Features */}
+                      <div>
+                        <h4 className="font-medium text-sm mb-1">Features</h4>
+                        <div className="flex flex-wrap gap-1">
+                          {features.fourK && (
+                            <Badge variant="secondary" className="text-xs">4K</Badge>
                           )}
-                        </Button>
+                          {features.mobile && (
+                            <Badge variant="secondary" className="text-xs">Mobile</Badge>
+                          )}
+                          {features.download && (
+                            <Badge variant="secondary" className="text-xs">Download</Badge>
+                          )}
+                          <Badge variant="secondary" className="text-xs">
+                            {features.streams} Stream{features.streams > 1 ? 's' : ''}
+                          </Badge>
+                        </div>
                       </div>
-                    </CardContent>
-                  </Card>
+
+                      {/* Top competitions */}
+                      <div>
+                        <h4 className="font-medium text-sm mb-1">Top Ligen</h4>
+                        <div className="flex flex-wrap gap-1">
+                          {['bundesliga', 'champions_league', 'premier_league'].map(comp => {
+                            const games = provider[comp] || 0;
+                            if (games > 0) {
+                              return (
+                                <Badge key={comp} variant="outline" className="text-xs">
+                                  {comp.replace('_', ' ')}
+                                </Badge>
+                              );
+                            }
+                            return null;
+                          })}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 flex gap-2">
+                      <Button 
+                        className="flex-1 bg-green-600 hover:bg-green-700"
+                        onClick={() => handleAffiliateClick(provider)}
+                      >
+                        Zum Anbieter
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => handleProviderToggle(provider.streamer_id.toString())}
+                        className={isSelected ? 'bg-blue-50 border-blue-300' : ''}
+                      >
+                        {isSelected ? (
+                          <>
+                            <Check className="h-4 w-4 mr-2" />
+                            Ausgewählt
+                          </>
+                        ) : (
+                          'Vergleichen'
+                        )}
+                      </Button>
+                    </div>
+                  </div>
                 );
               })}
             </div>
