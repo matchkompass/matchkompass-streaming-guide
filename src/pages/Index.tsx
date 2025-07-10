@@ -10,6 +10,11 @@ import { LEAGUE_CLUSTERS } from "./Wizard";
 import { useLeagues } from "@/hooks/useLeagues";
 import { useStreaming } from "@/hooks/useStreaming";
 
+// Helper: slug to flag
+const LEAGUE_SLUG_TO_FLAG = Object.fromEntries(
+  LEAGUE_CLUSTERS.flatMap(cluster => cluster.leagues.map(l => [l.slug, l.flag]))
+);
+
 const Index = () => {
   const topClubs = [
     { name: "Bayern München", logo: "⚽", league: "Bundesliga" },
@@ -139,19 +144,16 @@ const Index = () => {
                   .filter((item) => item.coveredGames > 0)
                   .sort((a, b) => a.price - b.price)
                   .slice(0, 4);
+                const flag = LEAGUE_SLUG_TO_FLAG[league.league_slug] || "🏆";
                 return (
                   <Link key={league.league_id} to={`/competition/${league.league_slug}`} className="group">
                     <Card className="hover:shadow-lg transition-all duration-300 group-hover:scale-105 cursor-pointer">
                       <CardContent className="p-6">
                         {/* League Header */}
                         <div className="flex items-center gap-3 mb-2">
-                          <span className="text-2xl">{league['country code']}</span>
+                          <span className="text-2xl">{flag}</span>
                           <div>
                             <h3 className="font-bold text-lg mb-0.5">{league.league}</h3>
-                            <div className="text-xs text-gray-500 font-medium leading-tight">
-                              {/* Subtitle placeholder, adapt as needed */}
-                              {league.league_slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                            </div>
                           </div>
                         </div>
                         <div className="text-xs text-gray-500 mb-2">{league['number of games']} Spiele pro Saison</div>
@@ -171,13 +173,21 @@ const Index = () => {
                                   )}
                                   <span className="font-medium" style={{ color: item.provider.highlight_color || undefined }}>{item.provider.provider_name}</span>
                                 </div>
-                                <span className="font-mono text-xs font-bold bg-gray-900 text-white rounded px-2 py-0.5" style={{ minWidth: 44, textAlign: 'center' }}>{item.percentage}%</span>
+                                {/* Percentage badge styled as in CompetitionDetail */}
+                                <Badge
+                                  className={
+                                    item.percentage >= 90 ? 'bg-green-500' :
+                                    item.percentage >= 50 ? 'bg-orange-500' :
+                                    'bg-red-500'
+                                  }
+                                >
+                                  {item.percentage}%
+                                </Badge>
                                 <span className="text-xs text-gray-700 font-semibold min-w-[60px] text-right">€{item.price.toFixed(2)}</span>
                               </div>
                             ))
                           )}
                         </div>
-                        {/* Optional: Add quick changes input or other elements here */}
                       </CardContent>
                     </Card>
                   </Link>
