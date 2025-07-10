@@ -36,6 +36,7 @@ const EnhancedVergleich = () => {
     sortBy: 'relevance'
   });
   const [paymentType, setPaymentType] = useState<'monthly' | 'yearly'>('monthly');
+  const [expandedProvider, setExpandedProvider] = useState<number | null>(null);
 
   const { providers, loading: providersLoading, error: providersError } = useStreaming();
   const { leagues, loading: leaguesLoading, error: leaguesError } = useLeagues();
@@ -223,242 +224,78 @@ const EnhancedVergleich = () => {
             </div>
 
             <div className="space-y-4">
-              {filteredProviders.map((provider) => {
-                const monthlyCost = parsePrice(provider.monthly_price);
-                const yearlyCost = parsePrice(provider.yearly_price);
-                const features = parseFeatures(provider);
-                const overallCoverage = getProviderCoverage(provider, filters.competitions);
-                const isSelected = selectedProviders.includes(provider.streamer_id.toString());
-
-                const competitions = filters.competitions.length > 0 ? filters.competitions.map(comp => {
-                  const league = leagues.find(l => l.league_slug === comp);
-                  const totalGames = league?.['number of games'] || 0;
-                  const providerGames = provider[comp] || 0;
-                  const coverage = totalGames > 0 ? Math.round((Math.min(providerGames, totalGames) / totalGames) * 100) : 0;
-                  
-                  return {
-                    name: league?.league || comp,
-                    coverage,
-                    games: `${Math.min(providerGames, totalGames)}/${totalGames}`
-                  };
-                }) : [];
-
-                const totalGames = competitions.reduce((sum, c) => sum + parseInt(c.games.split('/')[1]), 0);
-                const coveredGames = competitions.reduce((sum, c) => sum + parseInt(c.games.split('/')[0]), 0);
-                const costPerGame = coveredGames > 0 ? monthlyCost / coveredGames : 0;
-
-                const otherSports = ["Tennis", "Basketball", "Golf", "Formel 1", "UFC", "NFL"].slice(0, 3 + Math.floor(Math.random() * 2));
-
-                return (
-                  <Card key={provider.streamer_id} className={`hover:shadow-lg transition-all duration-200 ${
-                    isSelected ? 'ring-2 ring-blue-500' : ''
-                  }`}>
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center space-x-4">
-                          <div className="text-3xl">
-                            {provider.logo_url ? (
-                              <img src={provider.logo_url} alt={provider.provider_name} className="w-12 h-12 object-contain" />
-                            ) : (
-                              "📺"
-                            )}
-                          </div>
-                          <div>
-                            <CardTitle className="text-xl">{provider.provider_name}</CardTitle>
-                            <CardDescription>{provider.name}</CardDescription>
-                            <div className="flex items-center space-x-2 mt-2">
-                              <div className="flex items-center">
-                                {[...Array(5)].map((_, i) => (
-                                  <Star
-                                    key={i}
-                                    className={`h-4 w-4 ${
-                                      i < 4 ? 'text-yellow-400 fill-current' : 'text-gray-300'
-                                    }`}
-                                  />
-                                ))}
+              <div className="flex-1">
+                <div className="flex flex-col gap-6">
+                  {filteredProviders.map((provider) => {
+                    const isExpanded = expandedProvider === provider.streamer_id;
+                    return (
+                      <Card key={provider.streamer_id} className="p-0 overflow-hidden">
+                        <div className="flex flex-col md:flex-row items-center md:items-stretch gap-4 p-4">
+                          {/* Logo and Name */}
+                          <div className="flex items-center gap-4 flex-1 min-w-0">
+                            <img src={provider.logo_url} alt={provider.provider_name} className="w-14 h-14 object-contain rounded bg-white border" />
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <h3 className="font-bold text-lg truncate">{provider.provider_name}</h3>
+                                {/* Optional: Rating/Badge */}
                               </div>
-                              <span className="text-sm text-gray-600">(4.0)</span>
+                              <div className="flex flex-wrap gap-2 mb-1">
+                                {provider.highlight_1 && <Badge variant="secondary">{provider.highlight_1}</Badge>}
+                                {provider.highlight_2 && <Badge variant="secondary">{provider.highlight_2}</Badge>}
+                                {provider.highlight_3 && <Badge variant="secondary">{provider.highlight_3}</Badge>}
+                              </div>
+                              <div className="text-sm text-gray-600">ab {provider.monthly_price}/Monat</div>
                             </div>
                           </div>
+                          {/* Expand/Collapse Button */}
+                          <div className="flex flex-col items-end gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setExpandedProvider(isExpanded ? null : provider.streamer_id)}
+                              className="min-w-[120px]"
+                            >
+                              {isExpanded ? 'Details ausblenden' : 'Details anzeigen'}
+                            </Button>
+                            <Button
+                              asChild
+                              size="sm"
+                              className="bg-green-600 text-white hover:bg-green-700 w-full"
+                            >
+                              <a href={provider.affiliate_url} target="_blank" rel="noopener noreferrer">
+                                Zum Angebot
+                              </a>
+                            </Button>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <Badge className="bg-blue-100 text-blue-800 mb-2">
-                            {overallCoverage}% Abdeckung
-                          </Badge>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    
-                     <CardContent>
-                       {/* Main overview section */}
-                       <div className="flex justify-between items-start mb-4">
-                         <div className="flex-1">
-                           <div className="mb-3">
-                             <div className="flex items-center gap-2 mb-2">
-                               <span className="text-gray-600">Durchschnittliche Abdeckung:</span>
-                               <div className="w-32 bg-gray-200 rounded-full h-2">
-                                 <div 
-                                   className="bg-green-600 h-2 rounded-full" 
-                                   style={{ width: `${overallCoverage}%` }}
-                                 ></div>
-                               </div>
-                               <span className="text-xl font-bold text-blue-600">{overallCoverage.toFixed(0)}%</span>
-                             </div>
-                           </div>
-                           <div className="mb-3">
-                             <h4 className="font-medium mb-2">Highlights</h4>
-                             <div className="flex flex-wrap gap-2">
-                               {provider.highlight_1 && (
-                                 <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                                   {provider.highlight_1}
-                                 </Badge>
-                               )}
-                               {provider.highlight_2 && (
-                                 <Badge variant="secondary" className="bg-green-100 text-green-800">
-                                   {provider.highlight_2}
-                                 </Badge>
-                               )}
-                               {provider.highlight_3 && (
-                                 <Badge variant="secondary" className="bg-purple-100 text-purple-800">
-                                   {provider.highlight_3}
-                                 </Badge>
-                               )}
-                             </div>
-                           </div>
-                         </div>
-                         <div className="text-right">
-                           <div className="text-3xl font-bold mb-1">€{monthlyCost.toFixed(2)}</div>
-                           <div className="text-gray-600">pro Monat</div>
-                         </div>
-                       </div>
-                       
-                       {/* Collapsible details section */}
-                       <div className="grid lg:grid-cols-3 gap-6 mb-6">
-                         <div className="space-y-3">
-                           <div className="flex items-center gap-2">
-                             <Euro className="h-4 w-4 text-green-600" />
-                             <h4 className="font-semibold text-gray-900">Preise</h4>
-                           </div>
-                           <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-                             <div className="flex justify-between">
-                               <span className="text-sm text-gray-600">Monatlich:</span>
-                               <span className="font-semibold text-green-600">€{monthlyCost.toFixed(2)}</span>
-                             </div>
-                             {yearlyCost > 0 && (
-                               <div className="flex justify-between">
-                                 <span className="text-sm text-gray-600">Jährlich:</span>
-                                 <span className="font-semibold">€{yearlyCost.toFixed(2)}</span>
-                               </div>
-                             )}
-                             {costPerGame > 0 && (
-                               <div className="flex justify-between border-t pt-2">
-                                 <span className="text-sm text-gray-600">Pro Spiel:</span>
-                                 <span className="font-semibold">€{costPerGame.toFixed(2)}</span>
-                               </div>
-                             )}
-                           </div>
-                         </div>
-
-                        {competitions.length > 0 && (
-                          <div className="space-y-3">
-                            <div className="flex items-center gap-2">
-                              <Calendar className="h-4 w-4 text-blue-600" />
-                              <h4 className="font-semibold text-gray-900">Wettbewerbe</h4>
-                            </div>
-                            <div className="space-y-2">
-                              {competitions.slice(0, 4).map((comp, idx) => (
-                                <div key={idx} className="flex justify-between items-center">
-                                  <span className="text-sm text-gray-700">{comp.name}</span>
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-xs text-gray-500">{comp.games}</span>
-                                    <div className={`px-2 py-1 rounded text-xs font-medium ${
-                                      comp.coverage >= 90 ? 'bg-green-100 text-green-800' :
-                                      comp.coverage >= 70 ? 'bg-yellow-100 text-yellow-800' :
-                                      comp.coverage > 0 ? 'bg-orange-100 text-orange-800' :
-                                      'bg-gray-100 text-gray-500'
-                                    }`}>
-                                      {comp.coverage}%
-                                    </div>
-                                  </div>
+                        {/* Details Section */}
+                        {isExpanded && (
+                          <div className="bg-gray-50 border-t px-6 py-4 animate-fade-in">
+                            <div className="grid md:grid-cols-2 gap-4">
+                              <div>
+                                <h4 className="font-semibold mb-2">Leistungs-Highlights</h4>
+                                <ul className="list-disc pl-5 space-y-1 text-sm">
+                                  {provider.highlight_1 && <li>{provider.highlight_1}</li>}
+                                  {provider.highlight_2 && <li>{provider.highlight_2}</li>}
+                                  {provider.highlight_3 && <li>{provider.highlight_3}</li>}
+                                </ul>
+                              </div>
+                              <div>
+                                <h4 className="font-semibold mb-2">Weitere Details</h4>
+                                <div className="flex flex-col gap-1 text-sm">
+                                  <div>Monatspreis: <span className="font-medium">{provider.monthly_price}</span></div>
+                                  <div>Jahrespreis: <span className="font-medium">{provider.yearly_price}</span></div>
+                                  {/* Add more details as needed */}
                                 </div>
-                              ))}
-                              {competitions.length > 4 && (
-                                <div className="text-xs text-gray-500 text-center">
-                                  +{competitions.length - 4} weitere
-                                </div>
-                              )}
+                              </div>
                             </div>
                           </div>
                         )}
-
-                        <div className="space-y-3">
-                          <div className="flex items-center gap-2">
-                            <Tv className="h-4 w-4 text-purple-600" />
-                            <h4 className="font-semibold text-gray-900">Weitere Inhalte</h4>
-                          </div>
-                          <div className="flex flex-wrap gap-1">
-                            {otherSports.map((sport, idx) => (
-                              <Badge key={idx} variant="outline" className="text-xs">
-                                {sport}
-                              </Badge>
-                            ))}
-                          </div>
-                          
-                          <div className="mt-3">
-                            <div className="flex flex-wrap gap-1">
-                              {features.fourK && (
-                                <Badge variant="secondary" className="text-xs">4K</Badge>
-                              )}
-                              {features.mobile && (
-                                <Badge variant="secondary" className="text-xs">Mobile</Badge>
-                              )}
-                              {features.download && (
-                                <Badge variant="secondary" className="text-xs">Download</Badge>
-                              )}
-                              <Badge variant="secondary" className="text-xs">
-                                {features.streams} Stream{features.streams > 1 ? 's' : ''}
-                              </Badge>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {(provider.highlight_1 || provider.highlight_2 || provider.highlight_3) && (
-                        <div className="mb-4 p-3 bg-blue-50 rounded-lg">
-                          <h5 className="font-medium text-sm mb-2 text-blue-900">Highlights</h5>
-                          <div className="flex flex-wrap gap-2">
-                            {provider.highlight_1 && (
-                              <HighlightBadge text={provider.highlight_1} priority="primary" className="text-xs" />
-                            )}
-                            {provider.highlight_2 && (
-                              <HighlightBadge text={provider.highlight_2} priority="secondary" className="text-xs" />
-                            )}
-                            {provider.highlight_3 && (
-                              <HighlightBadge text={provider.highlight_3} priority="tertiary" className="text-xs" />
-                            )}
-                          </div>
-                        </div>
-                      )}
-
-                       <div className="flex gap-2">
-                         <Button 
-                           variant="outline"
-                           className="flex-1"
-                           onClick={() => console.log('Show details for:', provider.provider_name)}
-                         >
-                           Details anzeigen
-                         </Button>
-                         <Button 
-                           className="flex-1 bg-blue-600 hover:bg-blue-700"
-                           onClick={() => handleAffiliateClick(provider)}
-                         >
-                           Zum Angebot
-                         </Button>
-                       </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
+                      </Card>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
 
             {filteredProviders.length === 0 && (
