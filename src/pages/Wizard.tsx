@@ -17,7 +17,7 @@ import { useLeaguesEnhanced } from "@/hooks/useLeaguesEnhanced";
 import { getAllCompetitionsForClubs, getClubCompetitions } from "@/utils/enhancedCoverageCalculator";
 
 // Shared cluster structure for both steps
-const LEAGUE_CLUSTERS = [
+export const LEAGUE_CLUSTERS = [
   {
     name: "🇩🇪 Deutschland",
     key: "deutschland",

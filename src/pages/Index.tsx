@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { LEAGUE_CLUSTERS } from "./Wizard";
 
 const Index = () => {
   const topClubs = [
@@ -157,6 +158,26 @@ const Index = () => {
                 </Card>
               </Link>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Top-Ligen Section */}
+      <section className="py-16 px-4 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">Top-Ligen</h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            {LEAGUE_CLUSTERS.flatMap(cluster =>
+              cluster.leagues.map(league => (
+                <Card key={league.slug} className="flex items-center gap-3 p-4">
+                  <span className="text-2xl">{league.flag}</span>
+                  <div>
+                    <h3 className="font-semibold text-lg">{league.name}</h3>
+                    <p className="text-xs text-gray-500">{cluster.name}</p>
+                  </div>
+                </Card>
+              ))
+            )}
           </div>
         </div>
       </section>
