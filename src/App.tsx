@@ -11,6 +11,7 @@ import ProviderDetail from "./pages/ProviderDetail";
 import DetailVergleich from "./pages/DetailVergleich";
 import NotFound from "./pages/NotFound";
 import Vergleich from "./pages/Vergleich";
+import DetailVergleich2 from "./pages/DetailVergleich2";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/streaming-provider/:slug" element={<ProviderDetail />} />
           <Route path="/detailvergleich" element={<DetailVergleich />} />
           <Route path="/classic-vergleich" element={<Vergleich />} />
+          <Route path="/detailvergleich2" element={<DetailVergleich2 />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
