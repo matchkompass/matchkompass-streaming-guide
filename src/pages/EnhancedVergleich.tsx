@@ -311,7 +311,7 @@ const EnhancedVergleich = () => {
                               </span>
                               <div>
                                 <div className="flex items-center space-x-2">
-                                  <h3 className="font-semibold tracking-tight text-xl">{provider.provider_name}</h3>
+                                  <h3 className="font-semibold tracking-tight text-xl">{provider.name}</h3>
                                 </div>
                                 <div className="flex items-center space-x-4 mt-1">
                                   <div className="text-lg font-bold text-green-600">€{price.toFixed(2)}/Monat</div>

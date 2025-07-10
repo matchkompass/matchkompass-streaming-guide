@@ -34,6 +34,7 @@ const Vergleich = () => {
     simultaneousStreams: 1,
     sortBy: 'relevance'
   });
+  const [expandedProvider, setExpandedProvider] = useState<string | null>(null);
 
   const { providers, loading: providersLoading, error: providersError } = useStreaming();
   const { leagues, loading: leaguesLoading, error: leaguesError } = useLeagues();
@@ -228,6 +229,7 @@ const Vergleich = () => {
                 const yearlyPrice = parsePrice(provider.yearly_price);
                 const features = parseFeatures(provider);
                 const isSelected = selectedProviders.includes(provider.streamer_id.toString());
+                const isExpanded = expandedProvider === provider.streamer_id.toString();
                 // Define leagues and icons
                 const leaguesList = [
                   { key: 'bundesliga', label: 'Bundesliga', icon: '🇩🇪' },
@@ -260,6 +262,10 @@ const Vergleich = () => {
                 const StarIcon = (
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-star h-4 w-4 text-yellow-500 fill-current"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path></svg>
                 );
+                // Helper for expand/collapse icon
+                const ChevronIcon = (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-up h-4 w-4"><path d="m18 15-6-6-6 6"></path></svg>
+                );
                 return (
                   <div key={provider.streamer_id} className="rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden">
                     <div className="flex flex-col space-y-1.5 p-6 pb-4">
@@ -290,6 +296,9 @@ const Vergleich = () => {
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-external-link h-4 w-4 mr-1"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>
                             Zum Anbieter
                           </button>
+                          <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3" onClick={() => setExpandedProvider(isExpanded ? null : provider.streamer_id.toString())}>
+                            {ChevronIcon}
+                          </button>
                         </div>
                       </div>
                       {/* Leagues row */}
@@ -304,49 +313,53 @@ const Vergleich = () => {
                           </div>
                         ))}
                       </div>
-                      {/* Features and Coverage */}
-                      <div className="border-t pt-4 space-y-4">
-                        <div>
-                          <h4 className="font-medium mb-2">Alle Features:</h4>
-                          <div className="grid grid-cols-2 gap-2">
-                            {featuresList.map(feature => (
-                              <div key={feature.key} className="flex items-center justify-between text-sm">
-                                <span>{feature.label}</span>
-                                {feature.value ? CheckIcon : CrossIcon}
+                      {isExpanded && (
+                        <>
+                          {/* Features and Coverage */}
+                          <div className="border-t pt-4 space-y-4">
+                            <div>
+                              <h4 className="font-medium mb-2">Alle Features:</h4>
+                              <div className="grid grid-cols-2 gap-2">
+                                {featuresList.map(feature => (
+                                  <div key={feature.key} className="flex items-center justify-between text-sm">
+                                    <span>{feature.label}</span>
+                                    {feature.value ? CheckIcon : CrossIcon}
+                                  </div>
+                                ))}
                               </div>
-                            ))}
-                          </div>
-                        </div>
-                        <div>
-                          <h4 className="font-medium mb-2">Vollständige Liga-Abdeckung:</h4>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                            {leaguesList.map(league => (
-                              <div key={league.key} className="flex items-center justify-between text-sm">
-                                <div className="flex items-center space-x-2">
-                                  <span>{league.icon}</span>
-                                  <span>{league.label}</span>
-                                </div>
-                                <div className={`px-2 py-1 rounded text-xs font-medium ${provider[league.key] && provider[league.key] > 0 ? (provider[league.key] >= 100 ? 'text-green-600 bg-green-100' : 'text-orange-600 bg-orange-100') : 'text-gray-400 bg-gray-100'}`}>
-                                  {provider[league.key] ? `${provider[league.key]}%` : '0%'}
-                                </div>
+                            </div>
+                            <div>
+                              <h4 className="font-medium mb-2">Vollständige Liga-Abdeckung:</h4>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                {leaguesList.map(league => (
+                                  <div key={league.key} className="flex items-center justify-between text-sm">
+                                    <div className="flex items-center space-x-2">
+                                      <span>{league.icon}</span>
+                                      <span>{league.label}</span>
+                                    </div>
+                                    <div className={`px-2 py-1 rounded text-xs font-medium ${provider[league.key] && provider[league.key] > 0 ? (provider[league.key] >= 100 ? 'text-green-600 bg-green-100' : 'text-orange-600 bg-orange-100') : 'text-gray-400 bg-gray-100'}`}>
+                                      {provider[league.key] ? `${provider[league.key]}%` : '0%'}
+                                    </div>
+                                  </div>
+                                ))}
                               </div>
-                            ))}
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                      {/* Price row */}
-                      <div className="border-t pt-4">
-                        <div className="grid grid-cols-2 gap-4 text-center">
-                          <div>
-                            <div className="text-lg font-bold">€{price.toFixed(2)}</div>
-                            <div className="text-xs text-gray-500">Monatlich</div>
+                          {/* Price row */}
+                          <div className="border-t pt-4">
+                            <div className="grid grid-cols-2 gap-4 text-center">
+                              <div>
+                                <div className="text-lg font-bold">€{price.toFixed(2)}</div>
+                                <div className="text-xs text-gray-500">Monatlich</div>
+                              </div>
+                              <div>
+                                <div className="text-lg font-bold text-green-600">€{yearlyPrice ? (yearlyPrice / 12).toFixed(2) : '-'}</div>
+                                <div className="text-xs text-gray-500">Mit Jahresabo</div>
+                              </div>
+                            </div>
                           </div>
-                          <div>
-                            <div className="text-lg font-bold text-green-600">€{yearlyPrice ? (yearlyPrice / 12).toFixed(2) : '-'}</div>
-                            <div className="text-xs text-gray-500">Mit Jahresabo</div>
-                          </div>
-                        </div>
-                      </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 );
