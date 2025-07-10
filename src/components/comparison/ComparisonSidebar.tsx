@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { X, Filter } from "lucide-react";
+import { LEAGUE_CLUSTERS } from "@/pages/Wizard";
+import { useLeagues } from "@/hooks/useLeagues";
 
 interface ComparisonFilters {
   competitions: string[];
@@ -37,6 +39,7 @@ const ComparisonSidebar: React.FC<ComparisonSidebarProps> = ({
   isOpen,
   onClose
 }) => {
+  const { leagues } = useLeagues();
   const competitionCategories = {
     'Deutschland': ['Bundesliga', '2. Bundesliga', 'DFB-Pokal'],
     'Europa': ['Champions League', 'Europa League', 'Conference League'],
@@ -77,6 +80,9 @@ const ComparisonSidebar: React.FC<ComparisonSidebarProps> = ({
       sortBy: 'relevance'
     });
   };
+
+  // Helper to get flag for a league_slug
+  const getFlagForLeague = (league_slug: string) => LEAGUE_CLUSTERS.flatMap(c => c.leagues).find(l => l.slug === league_slug)?.flag || "🏆";
 
   if (!isOpen) return null;
 
@@ -198,38 +204,49 @@ const ComparisonSidebar: React.FC<ComparisonSidebarProps> = ({
           <div>
             <h4 className="font-medium mb-3">Wettbewerbe</h4>
             <div className="space-y-4">
-              {Object.entries(competitionCategories).map(([category, competitions]) => (
-                <div key={category}>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium flex items-center">
-                      {category === 'Deutschland' ? '🇩🇪' : category === 'Europa' ? '🇪🇺' : '🌍'}
-                      <span className="ml-2">{category}</span>
-                    </span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-xs px-2 py-1 h-auto"
-                      onClick={() => toggleAllInCategory(category, competitions)}
-                    >
-                      {competitions.every(comp => filters.competitions.includes(comp)) ? 'Alle ab' : 'Alle'}
-                    </Button>
+              {LEAGUE_CLUSTERS.map((cluster) => {
+                // Get leagues in this cluster that exist in the fetched leagues data
+                const clusterLeagues = cluster.leagues
+                  .map((cl) => leagues.find((l) => l.league_slug === cl.slug))
+                  .filter(Boolean);
+                if (clusterLeagues.length === 0) return null;
+                return (
+                  <div key={cluster.key}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium flex items-center">
+                        {/* Use first league's icon/flag as cluster icon, else fallback */}
+                        {clusterLeagues[0]?.icon || getFlagForLeague(clusterLeagues[0]?.league_slug)}
+                        <span className="ml-2">{cluster.name}</span>
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-xs px-2 py-1 h-auto"
+                        onClick={() => toggleAllInCategory(cluster.name, clusterLeagues.map(l => l.league_slug))}
+                      >
+                        {clusterLeagues.every(l => filters.competitions.includes(l.league_slug)) ? 'Alle ab' : 'Alle'}
+                      </Button>
+                    </div>
+                    <div className="space-y-2 pl-2">
+                      {clusterLeagues.map((league) => (
+                        <div key={league.league_slug} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={league.league_slug}
+                            checked={filters.competitions.includes(league.league_slug)}
+                            onCheckedChange={() => toggleCompetition(league.league_slug)}
+                          />
+                          <span className="text-xl">
+                            {league.icon || getFlagForLeague(league.league_slug)}
+                          </span>
+                          <label htmlFor={league.league_slug} className="text-sm cursor-pointer flex-1">
+                            {league.league}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div className="space-y-2 pl-2">
-                    {competitions.map((competition) => (
-                      <div key={competition} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={competition}
-                          checked={filters.competitions.includes(competition)}
-                          onCheckedChange={() => toggleCompetition(competition)}
-                        />
-                        <label htmlFor={competition} className="text-sm cursor-pointer flex-1">
-                          {competition}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
