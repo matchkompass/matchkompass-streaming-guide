@@ -10,6 +10,7 @@ import DealsSection from "@/components/DealsSection";
 import FAQSection from "@/components/FAQSection";
 import { useClubs } from "@/hooks/useClubs";
 import { useLeagues } from "@/hooks/useLeagues";
+import { LEAGUE_CLUSTERS } from "./Wizard";
 
 const Index = () => {
   const { clubs } = useClubs();
@@ -168,63 +169,27 @@ const Index = () => {
       </section>
 
       {/* Popular Leagues */}
-      <section className="py-16 px-4 bg-gray-50">
+      <section className="py-16 px-4 bg-white">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Top-Ligen
-            </h2>
-            <p className="text-gray-600">
-              Die wichtigsten Fußballligen weltweit
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {popularLeagues.map((league) => (
-              <Link 
-                key={league.league_id} 
-                to={`/competition/${league.league_slug}`}
-                className="group"
-              >
-                <Card className="hover:shadow-lg transition-all duration-300 group-hover:scale-105 cursor-pointer border-0 shadow-md">
-                  <CardHeader className="pb-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="w-12 h-12 bg-gradient-to-br from-orange-100 to-red-100 rounded-full flex items-center justify-center">
-                        🏆
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">Top-Ligen</h2>
+          {LEAGUE_CLUSTERS.map(cluster => (
+            <div key={cluster.key} className="mb-8">
+              <h3 className="text-xl font-semibold mb-3 flex items-center gap-2">{cluster.name}</h3>
+              <div className="grid md:grid-cols-3 gap-6">
+                {cluster.leagues.map(league => (
+                  <Link key={league.slug} to={`/competition/${league.slug}`} className="group">
+                    <Card className="flex items-center gap-3 p-4 hover:shadow-lg transition-all duration-300 group-hover:scale-105 cursor-pointer">
+                      <span className="text-2xl">{league.flag}</span>
+                      <div>
+                        <h3 className="font-semibold text-lg group-hover:text-green-600 transition-colors">{league.name}</h3>
+                        <p className="text-xs text-gray-500">{cluster.name}</p>
                       </div>
-                      <Badge className="bg-yellow-100 text-yellow-800">
-                        Top Liga
-                      </Badge>
-                    </div>
-                    <CardTitle className="text-lg group-hover:text-green-600 transition-colors">
-                      {league.league}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600">{(league as any).country || 'International'}</span>
-                        <span className="font-semibold text-green-600">
-                          ★ {(league as any).popularity}/10
-                        </span>
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        {league['number of games']} Spiele pro Saison
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-          
-          <div className="text-center mt-8">
-            <Button asChild variant="outline" size="lg">
-              <Link to="/ligen">
-                Alle Ligen anzeigen
-              </Link>
-            </Button>
-          </div>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
