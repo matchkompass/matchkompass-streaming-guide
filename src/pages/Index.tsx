@@ -136,64 +136,78 @@ const Index = () => {
           {(leaguesLoading || providersLoading) ? (
             <div className="text-center py-12 text-gray-500">Lade Ligen und Anbieter...</div>
           ) : (
-            <div className="grid md:grid-cols-3 gap-6">
-              {leagues.map((league) => {
-                // Get top 4 cheapest providers with coverage > 0
-                const providerCoverages = providers
-                  .map((provider) => getProviderCoverage(provider, league))
-                  .filter((item) => item.coveredGames > 0)
-                  .sort((a, b) => a.price - b.price)
-                  .slice(0, 4);
-                const flag = LEAGUE_SLUG_TO_FLAG[league.league_slug] || "🏆";
+            <>
+              {LEAGUE_CLUSTERS.map((cluster) => {
+                // Get leagues in this cluster that exist in the fetched leagues data
+                const clusterLeagues = cluster.leagues
+                  .map((cl) => leagues.find((l) => l.league_slug === cl.slug))
+                  .filter(Boolean);
+                if (clusterLeagues.length === 0) return null;
                 return (
-                  <Link key={league.league_id} to={`/competition/${league.league_slug}`} className="group">
-                    <Card className="hover:shadow-lg transition-all duration-300 group-hover:scale-105 cursor-pointer">
-                      <CardContent className="p-6">
-                        {/* League Header */}
-                        <div className="flex items-center gap-3 mb-2">
-                          <span className="text-2xl">{flag}</span>
-                          <div>
-                            <h3 className="font-bold text-lg mb-0.5">{league.league}</h3>
-                          </div>
-                        </div>
-                        <div className="text-xs text-gray-500 mb-2">{league['number of games']} Spiele pro Saison</div>
-                        {/* Provider List Styled Box */}
-                        <div className="border border-dashed rounded-lg p-2 bg-white mb-2">
-                          <div className="text-xs text-gray-700 font-semibold mb-1">Verfügbar bei:</div>
-                          {providerCoverages.length === 0 ? (
-                            <div className="text-xs text-gray-400 italic">Kein Anbieter verfügbar</div>
-                          ) : (
-                            providerCoverages.map((item) => (
-                              <div key={item.provider.streamer_id} className="flex items-center justify-between border-b last:border-b-0 border-dotted border-gray-200 px-2 py-1 text-sm">
-                                <div className="flex items-center gap-2">
-                                  {item.provider.logo_url ? (
-                                    <img src={item.provider.logo_url} alt={item.provider.provider_name} className="w-4 h-4 object-contain rounded-full" />
-                                  ) : (
-                                    <span className="w-4 h-4 bg-gray-200 rounded-full flex items-center justify-center">📺</span>
-                                  )}
-                                  <span className="font-medium" style={{ color: item.provider.highlight_color || undefined }}>{item.provider.provider_name}</span>
+                  <div key={cluster.key} className="mb-10">
+                    <h3 className={`text-xl font-bold mb-4 ${cluster.headerColor}`}>{cluster.name}</h3>
+                    <div className="grid md:grid-cols-3 gap-6">
+                      {clusterLeagues.map((league) => {
+                        // Get top 4 cheapest providers with coverage > 0
+                        const providerCoverages = providers
+                          .map((provider) => getProviderCoverage(provider, league))
+                          .filter((item) => item.coveredGames > 0)
+                          .sort((a, b) => a.price - b.price)
+                          .slice(0, 4);
+                        // Use icon from league data, else flag, else trophy
+                        const flag = league.icon || LEAGUE_CLUSTERS.flatMap(c => c.leagues).find(l => l.slug === league.league_slug)?.flag || "🏆";
+                        return (
+                          <Link key={league.league_id} to={`/competition/${league.league_slug}`} className="group">
+                            <Card className="hover:shadow-lg transition-all duration-300 group-hover:scale-105 cursor-pointer">
+                              <CardContent className="p-6">
+                                {/* League Header */}
+                                <div className="flex items-center gap-3 mb-2">
+                                  <span className="text-2xl">{flag}</span>
+                                  <div>
+                                    <h3 className="font-bold text-lg mb-0.5">{league.league}</h3>
+                                  </div>
                                 </div>
-                                {/* Percentage badge styled as in CompetitionDetail */}
-                                <Badge
-                                  className={
-                                    item.percentage >= 90 ? 'bg-green-500' :
-                                    item.percentage >= 50 ? 'bg-orange-500' :
-                                    'bg-red-500'
-                                  }
-                                >
-                                  {item.percentage}%
-                                </Badge>
-                                <span className="text-xs text-gray-700 font-semibold min-w-[60px] text-right">€{item.price.toFixed(2)}</span>
-                              </div>
-                            ))
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
+                                <div className="text-xs text-gray-500 mb-2">{league['number of games']} Spiele pro Saison</div>
+                                {/* Provider List Styled Box */}
+                                <div className="border border-dashed rounded-lg p-2 bg-white mb-2">
+                                  <div className="text-xs text-gray-700 font-semibold mb-1">Verfügbar bei:</div>
+                                  {providerCoverages.length === 0 ? (
+                                    <div className="text-xs text-gray-400 italic">Kein Anbieter verfügbar</div>
+                                  ) : (
+                                    providerCoverages.map((item) => (
+                                      <div key={item.provider.streamer_id} className="flex items-center justify-between border-b last:border-b-0 border-dotted border-gray-200 px-2 py-1 text-sm">
+                                        <div className="flex items-center gap-2">
+                                          {item.provider.logo_url ? (
+                                            <img src={item.provider.logo_url} alt={item.provider.provider_name} className="w-4 h-4 object-contain rounded-full" />
+                                          ) : (
+                                            <span className="w-4 h-4 bg-gray-200 rounded-full flex items-center justify-center">📺</span>
+                                          )}
+                                          <span className="font-medium" style={{ color: item.provider.highlight_color || undefined }}>{item.provider.provider_name}</span>
+                                        </div>
+                                        <Badge
+                                          className={
+                                            item.percentage >= 90 ? 'bg-green-500' :
+                                            item.percentage >= 50 ? 'bg-orange-500' :
+                                            'bg-red-500'
+                                          }
+                                        >
+                                          {item.percentage}%
+                                        </Badge>
+                                        <span className="text-xs text-gray-700 font-semibold min-w-[60px] text-right">€{item.price.toFixed(2)}</span>
+                                      </div>
+                                    ))
+                                  )}
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
                 );
               })}
-            </div>
+            </>
           )}
         </div>
       </section>

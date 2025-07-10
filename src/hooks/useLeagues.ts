@@ -8,6 +8,7 @@ export interface League {
   league_slug: string;
   'country code': string;
   'number of games': number;
+  icon?: string; // Add icon column
 }
 
 const fetchLeagues = async (): Promise<League[]> => {
@@ -15,7 +16,7 @@ const fetchLeagues = async (): Promise<League[]> => {
   
   const { data, error } = await supabase
     .from('leagues')
-    .select('*')
+    .select('*') // Select all columns, including icon if present
     .order('popularity', { ascending: false, nullsFirst: false });
 
   if (error) {

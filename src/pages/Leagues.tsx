@@ -144,21 +144,31 @@ const Leagues = () => {
         </div>
 
         {/* Leagues by Category */}
-        {Object.entries(groupedLeagues).map(([category, categoryLeagues]) => (
-          <div key={category} className="mb-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-              <Trophy className="h-6 w-6 text-green-600 mr-2" />
-              {category}
-              <Badge variant="secondary" className="ml-3">
-                {categoryLeagues.length} Ligen
-              </Badge>
-            </h2>
-            
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {categoryLeagues
-                .sort((a, b) => ((b as any).popularity || 0) - ((a as any).popularity || 0))
-                .map((league) => {
-                  const flag = LEAGUE_SLUG_TO_FLAG[league.league_slug] || "🏆";
+        {/* Render clusters and leagues as in the wizard step 1 */}
+        {LEAGUE_CLUSTERS.map((cluster) => {
+          // Get leagues in this cluster that exist in the fetched leagues data
+          const clusterLeagues = cluster.leagues
+            .map((cl) => leagues.find((l) => l.league_slug === cl.slug))
+            .filter(Boolean);
+          if (clusterLeagues.length === 0) return null;
+          return (
+            <div key={cluster.key} className="mb-12">
+              <h2 className={`text-2xl font-bold mb-6 flex items-center ${cluster.headerColor}`}>
+                {cluster.name}
+                <Badge variant="secondary" className="ml-3">
+                  {clusterLeagues.length} Ligen
+                </Badge>
+              </h2>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {clusterLeagues.map((league) => {
+                  // Get top 4 cheapest providers with coverage > 0
+                  const providerCoverages = providers
+                    .map((provider) => getProviderCoverage(provider, league))
+                    .filter((item) => item.coveredGames > 0)
+                    .sort((a, b) => a.price - b.price)
+                    .slice(0, 4);
+                  // Use icon from league data, else flag, else trophy
+                  const flag = league.icon || LEAGUE_CLUSTERS.flatMap(c => c.leagues).find(l => l.slug === league.league_slug)?.flag || "🏆";
                   return (
                     <Link 
                       key={league.league_id}
@@ -194,34 +204,28 @@ const Leagues = () => {
                             {providersLoading ? (
                               <div className="text-xs text-gray-400">Lade Anbieter...</div>
                             ) : (
-                              providers
-                                .map((provider) => getProviderCoverage(provider, league))
-                                .filter((item) => item.coveredGames > 0)
-                                .sort((a, b) => a.price - b.price)
-                                .slice(0, 4)
-                                .map((item) => (
-                                  <div key={item.provider.streamer_id} className="flex items-center justify-between border-b last:border-b-0 border-dotted border-gray-200 px-2 py-1 text-xs">
-                                    <div className="flex items-center gap-2">
-                                      {item.provider.logo_url ? (
-                                        <img src={item.provider.logo_url} alt={item.provider.provider_name} className="w-4 h-4 object-contain rounded-full" />
-                                      ) : (
-                                        <span className="w-4 h-4 bg-gray-200 rounded-full flex items-center justify-center">📺</span>
-                                      )}
-                                      <span className="font-medium" style={{ color: item.provider.highlight_color || undefined }}>{item.provider.provider_name}</span>
-                                    </div>
-                                    {/* Percentage badge styled as in CompetitionDetail */}
-                                    <Badge
-                                      className={
-                                        item.percentage >= 90 ? 'bg-green-500' :
-                                        item.percentage >= 50 ? 'bg-orange-500' :
-                                        'bg-red-500'
-                                      }
-                                    >
-                                      {item.percentage}%
-                                    </Badge>
-                                    <span className="text-xs text-gray-700 font-semibold min-w-[60px] text-right">€{item.price.toFixed(2)}</span>
+                              providerCoverages.map((item) => (
+                                <div key={item.provider.streamer_id} className="flex items-center justify-between border-b last:border-b-0 border-dotted border-gray-200 px-2 py-1 text-xs">
+                                  <div className="flex items-center gap-2">
+                                    {item.provider.logo_url ? (
+                                      <img src={item.provider.logo_url} alt={item.provider.provider_name} className="w-4 h-4 object-contain rounded-full" />
+                                    ) : (
+                                      <span className="w-4 h-4 bg-gray-200 rounded-full flex items-center justify-center">📺</span>
+                                    )}
+                                    <span className="font-medium" style={{ color: item.provider.highlight_color || undefined }}>{item.provider.provider_name}</span>
                                   </div>
-                                ))
+                                  <Badge
+                                    className={
+                                      item.percentage >= 90 ? 'bg-green-500' :
+                                      item.percentage >= 50 ? 'bg-orange-500' :
+                                      'bg-red-500'
+                                    }
+                                  >
+                                    {item.percentage}%
+                                  </Badge>
+                                  <span className="text-xs text-gray-700 font-semibold min-w-[60px] text-right">€{item.price.toFixed(2)}</span>
+                                </div>
+                              ))
                             )}
                           </div>
                           <Button 
@@ -236,9 +240,10 @@ const Leagues = () => {
                     </Link>
                   );
                 })}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
 
         {filteredLeagues.length === 0 && searchTerm && (
           <div className="text-center py-12">
