@@ -47,17 +47,23 @@ const EnhancedVergleich = () => {
   };
 
   const parseFeatures = (provider: any) => {
-    const features = { fourK: false, mobile: false, download: false, streams: 1 };
+    const features = {
+      fourK: false,
+      mobile: false,
+      download: false,
+      multiStream: false,
+      streams: 1,
+    };
     if (provider.features) {
       try {
-        const featureObj = typeof provider.features === 'string' 
-          ? JSON.parse(provider.features) 
+        const featureObj = typeof provider.features === 'string'
+          ? JSON.parse(provider.features)
           : provider.features;
-        
-        features.fourK = featureObj['4K'] || false;
-        features.mobile = featureObj.mobile || false;
-        features.download = featureObj.download || false;
-        features.streams = featureObj.streams || 1;
+        features.fourK = featureObj['has_4k_streaming'] || false;
+        features.mobile = featureObj['has_mobile_app'] || false;
+        features.download = featureObj['has_offline_viewing'] || false;
+        features.streams = featureObj['max_simultaneous_streams'] || 1;
+        features.multiStream = features.streams > 1;
       } catch (e) {
         // Fallback features
       }
@@ -83,26 +89,50 @@ const EnhancedVergleich = () => {
     return totalPossible > 0 ? Math.round((totalCovered / totalPossible) * 100) : 0;
   };
 
+  // Mapping from sidebar competition names to provider keys
+  const competitionKeyMap: Record<string, string> = {
+    'Bundesliga': 'bundesliga',
+    '2. Bundesliga': 'second_bundesliga',
+    'DFB-Pokal': 'dfb_pokal',
+    'Champions League': 'champions_league',
+    'Europa League': 'europa_league',
+    'Conference League': 'conference_league',
+    'Premier League': 'premier_league',
+    'La Liga': 'la_liga',
+    'Serie A': 'serie_a',
+    'Ligue 1': 'ligue_1',
+    'Nationalmannschaft': 'nationalmannschaft',
+  };
+
   const filteredProviders = useMemo(() => {
     let filtered = providers.filter(provider => {
       const price = parsePrice(paymentType === 'yearly' ? provider.yearly_price : provider.monthly_price);
       const features = parseFeatures(provider);
-      
+      // Price filter
       if (price < filters.priceRange[0] || price > filters.priceRange[1]) return false;
+      // Feature filters
       if (filters.features.fourK && !features.fourK) return false;
       if (filters.features.mobile && !features.mobile) return false;
       if (filters.features.download && !features.download) return false;
-      if (filters.features.multiStream && features.streams < 2) return false;
+      if (filters.features.multiStream && !features.multiStream) return false;
       if (features.streams < filters.simultaneousStreams) return false;
-      
+      // Competition filter (map sidebar names to provider keys)
+      if (filters.competitions.length > 0) {
+        for (const compName of filters.competitions) {
+          const key = competitionKeyMap[compName];
+          if (!key || !provider[key] || provider[key] <= 0) {
+            return false;
+          }
+        }
+      }
       return true;
     });
 
     filtered.sort((a, b) => {
       const priceA = parsePrice(paymentType === 'yearly' ? a.yearly_price : a.monthly_price);
       const priceB = parsePrice(paymentType === 'yearly' ? b.yearly_price : b.monthly_price);
-      const coverageA = getProviderCoverage(a, filters.competitions);
-      const coverageB = getProviderCoverage(b, filters.competitions);
+      const coverageA = getProviderCoverage(a, filters.competitions.map(c => competitionKeyMap[c] || c));
+      const coverageB = getProviderCoverage(b, filters.competitions.map(c => competitionKeyMap[c] || c));
       
       switch (filters.sortBy) {
         case 'price-asc':
@@ -234,7 +264,8 @@ const EnhancedVergleich = () => {
                     // Define leagues and icons
                     const leaguesList = [
                       { key: 'bundesliga', label: 'Bundesliga', icon: '🇩🇪' },
-                      { key: '2_bundesliga', label: '2. Bundesliga', icon: '🇩🇪' },
+                      { key: 'second_bundesliga', label: '2. Bundesliga', icon: '🇩🇪' },
+                      { key: 'dfb_pokal', label: 'DFB-Pokal', icon: '🏆' },
                       { key: 'champions_league', label: 'Champions League', icon: '🏆' },
                       { key: 'europa_league', label: 'Europa League', icon: '🥈' },
                       { key: 'conference_league', label: 'Conference League', icon: '🥉' },
@@ -242,7 +273,6 @@ const EnhancedVergleich = () => {
                       { key: 'la_liga', label: 'La Liga', icon: '🇪🇸' },
                       { key: 'serie_a', label: 'Serie A', icon: '🇮🇹' },
                       { key: 'ligue_1', label: 'Ligue 1', icon: '🇫🇷' },
-                      { key: 'dfb_pokal', label: 'DFB-Pokal', icon: '🏆' },
                       { key: 'nationalmannschaft', label: 'Nationalmannschaft', icon: '🇩🇪' },
                     ];
                     // Define features
