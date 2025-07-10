@@ -92,6 +92,103 @@ const EnhancedCompetitionSelector: React.FC<EnhancedCompetitionSelectorProps> = 
     );
   };
 
+  // Define the new competition clusters
+  const COMPETITION_CLUSTERS = [
+    {
+      name: "🇩🇪 Deutschland",
+      competitions: [
+        "Bundesliga",
+        "2. Bundesliga",
+        "3. Bundesliga",
+        "DFB Pokal"
+      ]
+    },
+    {
+      name: "🌍 Europa",
+      competitions: [
+        "Champions League",
+        "Europa League",
+        "Conference League",
+        "Klub Weltmeisterschaft",
+        "Premier League",
+        "La Liga",
+        "Serie A",
+        "Ligue 1",
+        "Süper Lig"
+      ]
+    },
+    {
+      name: "🏆 Internationale Wettbewerbe",
+      competitions: [
+        "MLS",
+        "Saudi Pro League",
+        "Liga Portugal",
+        "Eredivisie"
+      ]
+    }
+  ];
+
+  // Map league_slug to display name for cluster matching
+  const slugToName = {
+    bundesliga: "Bundesliga",
+    second_bundesliga: "2. Bundesliga",
+    third_bundesliga: "3. Bundesliga",
+    dfb_pokal: "DFB Pokal",
+    champions_league: "Champions League",
+    europa_league: "Europa League",
+    conference_league: "Conference League",
+    klub_weltmeisterschaft: "Klub Weltmeisterschaft",
+    premier_league: "Premier League",
+    la_liga: "La Liga",
+    serie_a: "Serie A",
+    ligue_1: "Ligue 1",
+    sueper_lig: "Süper Lig",
+    mls: "MLS",
+    saudi_pro_league: "Saudi Pro League",
+    liga_portugal: "Liga Portugal",
+    eredevise: "Eredivisie"
+  };
+
+  const LEAGUE_CLUSTERS = [
+    {
+      name: "🇩🇪 Deutschland",
+      competitions: [
+        { slug: "bundesliga", name: "Bundesliga", flag: "🏆" },
+        { slug: "second_bundesliga", name: "2. Bundesliga", flag: "🥈" },
+        { slug: "dfb_pokal", name: "DFB Pokal", flag: "🏆" }
+      ]
+    },
+    {
+      name: "🌍 Europa",
+      competitions: [
+        { slug: "champions_league", name: "Champions League", flag: "⭐" },
+        { slug: "europa_league", name: "Europa League", flag: "🏅" },
+        { slug: "conference_league", name: "Conference League", flag: "🏅" },
+        { slug: "premier_league", name: "Premier League", flag: "👑" },
+        { slug: "la_liga", name: "La Liga", flag: "🇪🇸" },
+        { slug: "serie_a", name: "Serie A", flag: "🇮🇹" },
+        { slug: "ligue_1", name: "Ligue 1", flag: "🇫🇷" },
+        { slug: "sueper_lig", name: "Süper Lig", flag: "🇹🇷" }
+      ]
+    },
+    {
+      name: "🏆 Internationale Wettbewerbe",
+      competitions: [
+        { slug: "mls", name: "MLS", flag: "🇺🇸" },
+        { slug: "saudi_pro_league", name: "Saudi Pro League", flag: "🇸🇦" },
+        { slug: "liga_portugal", name: "Liga Portugal", flag: "🇵🇹" },
+        { slug: "eredevise", name: "Eredivisie", flag: "🇳🇱" }
+      ]
+    }
+  ];
+
+  const LEAGUE_SLUG_TO_NAME = Object.fromEntries(
+    LEAGUE_CLUSTERS.flatMap(cluster => cluster.competitions.map(l => [l.slug, l.name]))
+  );
+  const LEAGUE_SLUG_TO_FLAG = Object.fromEntries(
+    LEAGUE_CLUSTERS.flatMap(cluster => cluster.competitions.map(l => [l.slug, l.flag]))
+  );
+
   const CompetitionCard = ({ competition, isSelected }: { competition: Competition; isSelected: boolean }) => (
     <Card
       key={competition.id}
@@ -130,6 +227,7 @@ const EnhancedCompetitionSelector: React.FC<EnhancedCompetitionSelectorProps> = 
     </Card>
   );
 
+  // Instead of region grouping, use clusters for rendering
   return (
     <div className="space-y-6">
       <div className="text-center">
@@ -141,120 +239,102 @@ const EnhancedCompetitionSelector: React.FC<EnhancedCompetitionSelectorProps> = 
         </p>
       </div>
 
-      {/* Recommended Competitions */}
-      {recommendedComps.length > 0 && (
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold mb-3 text-blue-800">
-            Empfohlene Wettbewerbe
-          </h3>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {recommendedComps.map((competition) => (
-              <CompetitionCard
-                key={competition.id}
-                competition={competition}
-                isSelected={selectedCompetitions.includes(competition.id)}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Initial Additional Competitions */}
-      {initialAdditionalComps.length > 0 && (
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold mb-3 text-gray-700">
-            Weitere beliebte Wettbewerbe
-          </h3>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {initialAdditionalComps.map((competition) => (
-              <CompetitionCard
-                key={competition.id}
-                competition={competition}
-                isSelected={selectedCompetitions.includes(competition.id)}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Show More Button / All Remaining Competitions */}
-      {remainingAdditionalComps.length > 0 && (
-        <div>
-          {!showAllCompetitions ? (
-            <div className="text-center">
-              <Button
-                variant="outline"
-                onClick={() => setShowAllCompetitions(true)}
-                className="text-blue-600 border-blue-300 hover:bg-blue-50"
+      {/* Top row: selected leagues as cards */}
+      {selectedCompetitions.length > 0 && (
+        <div className="mb-4 flex flex-wrap gap-2">
+          {selectedCompetitions.map(slug => {
+            const comp = allCompetitions.find(c => c.id === slug);
+            if (!comp) return null;
+            return (
+              <div
+                key={slug}
+                className="rounded-lg border text-card-foreground shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md ring-2 ring-green-500 bg-green-50 min-w-[220px]"
               >
-                Weitere Wettbewerbe anzeigen ({remainingAdditionalComps.length} weitere)
-                <ChevronDown className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {/* Search */}
-              <div className="relative max-w-md mx-auto">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Wettbewerb suchen..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-
-              {/* Grouped Competitions */}
-              {Object.entries(groupedRemainingComps).map(([region, competitions]) => (
-                <div key={region} className="space-y-2">
-                  <div
-                    className="flex items-center justify-between cursor-pointer p-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                    onClick={() => toggleRegion(region)}
-                  >
-                    <h4 className="font-medium text-gray-800 flex items-center">
-                      <span className="mr-2">
-                        {region === 'Deutschland' ? '🇩🇪' : region === 'Europa' ? '🇪🇺' : '🌍'}
-                      </span>
-                      {region}
-                      <Badge variant="secondary" className="ml-2 text-xs">
-                        {competitions.length}
-                      </Badge>
-                    </h4>
-                    {expandedRegions.includes(region) ? (
-                      <ChevronUp className="h-4 w-4 text-gray-600" />
-                    ) : (
-                      <ChevronDown className="h-4 w-4 text-gray-600" />
-                    )}
-                  </div>
-
-                  {expandedRegions.includes(region) && (
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3 pl-2">
-                      {competitions.map((competition) => (
-                        <CompetitionCard
-                          key={competition.id}
-                          competition={competition}
-                          isSelected={selectedCompetitions.includes(competition.id)}
-                        />
-                      ))}
+                <div className="p-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-xl">{LEAGUE_SLUG_TO_FLAG[comp.id] || comp.logo}</span>
+                      <div>
+                        <h4 className="font-medium text-sm">{LEAGUE_SLUG_TO_NAME[comp.id] || comp.name}</h4>
+                        <p className="text-xs text-gray-500">{comp.gameCount} Spiele</p>
+                      </div>
                     </div>
-                  )}
+                    <div className="text-right">
+                      <Check className="h-4 w-4 text-green-600" />
+                    </div>
+                  </div>
                 </div>
-              ))}
-
-              <div className="text-center pt-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setShowAllCompetitions(false)}
-                  className="text-gray-600"
-                >
-                  Weniger anzeigen
-                  <ChevronUp className="ml-2 h-4 w-4" />
-                </Button>
               </div>
-            </div>
-          )}
+            );
+          })}
         </div>
       )}
+
+      {/* Clustered Competitions */}
+      {LEAGUE_CLUSTERS.map(cluster => {
+        const comps = allCompetitions.filter(comp => cluster.competitions.some(l => slugToName[comp.id] === l.name));
+        if (comps.length === 0) return null;
+        return (
+          <div key={cluster.name} className="mb-6">
+            <h3 className="text-lg font-semibold mb-3 text-blue-800 flex items-center gap-2">
+              {cluster.name}
+            </h3>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {comps.map(competition => (
+                <Card
+                  key={competition.id}
+                  className={`rounded-lg border text-card-foreground shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md ${
+                    selectedCompetitions.includes(competition.id)
+                      ? 'ring-2 ring-green-500 bg-green-50'
+                      : ''
+                  }`}
+                  onClick={() => onCompetitionToggle(competition.id)}
+                >
+                  <CardContent className="p-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-xl">{LEAGUE_SLUG_TO_FLAG[competition.id] || competition.logo}</span>
+                        <div>
+                          <h4 className="font-medium text-sm">{LEAGUE_SLUG_TO_NAME[competition.id] || competition.name}</h4>
+                          <p className="text-xs text-gray-500">{competition.gameCount} Spiele</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        {selectedCompetitions.includes(competition.id) && (
+                          <Check className="h-4 w-4 text-green-600" />
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+
+      {/* Weitere Wettbewerbe cluster */}
+      {(() => {
+        const allClusterNames = LEAGUE_CLUSTERS.flatMap(cluster => cluster.competitions.map(l => l.name));
+        const weitereComps = allCompetitions.filter(comp => !allClusterNames.includes(slugToName[comp.id] || comp.name));
+        if (weitereComps.length === 0) return null;
+        return (
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold mb-3 text-gray-700">
+              📋 Weitere Wettbewerbe
+            </h3>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {weitereComps.map(competition => (
+                <CompetitionCard
+                  key={competition.id}
+                  competition={competition}
+                  isSelected={selectedCompetitions.includes(competition.id)}
+                />
+              ))}
+            </div>
+          </div>
+        );
+      })()}
 
       {selectedCompetitions.length > 0 && (
         <div className="text-center">

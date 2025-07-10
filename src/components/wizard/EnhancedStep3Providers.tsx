@@ -17,15 +17,7 @@ const EnhancedStep3Providers = ({
   existingProviders, 
   onToggleProvider 
 }: EnhancedStep3ProvidersProps) => {
-  // Group providers by provider_name
-  const providerGroups = providers.reduce((acc, provider) => {
-    const groupName = provider.provider_name || 'Other';
-    if (!acc[groupName]) {
-      acc[groupName] = [];
-    }
-    acc[groupName].push(provider);
-    return acc;
-  }, {} as Record<string, StreamingProviderEnhanced[]>);
+  const [expanded, setExpanded] = useState(existingProviders.length === 0);
 
   return (
     <div className="space-y-6">
@@ -56,100 +48,73 @@ const EnhancedStep3Providers = ({
       </div>
 
       <div className="space-y-8">
-        {Object.entries(providerGroups)
-          .sort(([a], [b]) => a.localeCompare(b))
-          .map(([groupName, groupProviders]) => (
-            <div key={groupName} className="space-y-4">
-              <div className="flex items-center gap-3 border-b pb-2">
-                {/* Provider Group Logo - use first provider's logo */}
-                {groupProviders[0]?.logo_url ? (
-                  <img 
-                    src={groupProviders[0].logo_url} 
-                    alt={groupName} 
-                    className="w-8 h-8 object-contain" 
-                  />
-                ) : (
-                  <div className="w-8 h-8 bg-gray-200 rounded flex items-center justify-center text-sm">
-                    📺
-                  </div>
-                )}
-                <h3 className="text-xl font-semibold text-gray-800">{groupName}</h3>
-                <Badge variant="secondary" className="text-xs">
-                  {groupProviders.length} {groupProviders.length === 1 ? 'Paket' : 'Pakete'}
-                </Badge>
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-                {groupProviders
-                  .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
-                  .map((provider) => (
-                    <Card
-                      key={provider.streamer_id}
-                      className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
-                        existingProviders.includes(provider.streamer_id)
-                          ? 'ring-2 ring-blue-500 bg-blue-50'
-                          : 'hover:bg-gray-50'
-                      }`}
-                      onClick={() => onToggleProvider(provider.streamer_id)}
-                    >
-                      <CardContent className="p-3">
-                        <div className="text-center">
-                          <div className="mb-3">
-                            {provider.logo_url ? (
-                              <img 
-                                src={provider.logo_url} 
-                                alt={provider.name || provider.provider_name} 
-                                className="w-10 h-10 mx-auto object-contain" 
-                              />
-                            ) : (
-                              <div className="w-10 h-10 bg-gray-200 rounded-lg mx-auto flex items-center justify-center text-xs">
-                                📺
-                              </div>
-                            )}
-                          </div>
-                          
-                          <h4 className="font-medium text-xs mb-2 min-h-[2rem] flex items-center justify-center text-center">
-                            {provider.name || provider.provider_name}
-                          </h4>
-                          
-                          <div className="mb-2">
-                            <p className="text-xs font-semibold text-green-600">
-                              {provider.monthly_price}/Monat
-                            </p>
-                          </div>
-
-                          {/* Highlights */}
-                          <div className="flex flex-wrap gap-1 justify-center mb-2 min-h-[2rem]">
-                            {provider.highlights.highlight_1 && (
-                              <HighlightBadge
-                                text={provider.highlights.highlight_1}
-                                priority="primary"
-                                tooltip={true}
-                                className="text-[10px] px-1 py-0.5"
-                              />
-                            )}
-                            {provider.highlights.highlight_2 && (
-                              <HighlightBadge
-                                text={provider.highlights.highlight_2}
-                                priority="secondary"
-                                tooltip={true}
-                                className="text-[10px] px-1 py-0.5"
-                              />
-                            )}
-                          </div>
-                          
-                          {existingProviders.includes(provider.streamer_id) && (
-                            <div className="mt-2">
-                              <Check className="h-5 w-5 text-blue-600 mx-auto" />
-                            </div>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-              </div>
-            </div>
-          ))}
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-lg font-semibold text-gray-800">Streaming-Anbieter</h3>
+          {existingProviders.length > 0 && (
+            <button
+              className="text-blue-600 text-xs underline"
+              onClick={() => setExpanded(e => !e)}
+            >
+              {expanded ? 'Liste einklappen' : 'Liste anzeigen'}
+            </button>
+          )}
+        </div>
+        {expanded && (
+          <div className="flex flex-col gap-2">
+            {providers
+              .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+              .map((provider) => (
+                <Card
+                  key={provider.streamer_id}
+                  className={`cursor-pointer transition-all duration-200 hover:shadow-md w-full max-w-lg mx-auto ${
+                    existingProviders.includes(provider.streamer_id)
+                      ? 'ring-2 ring-blue-500 bg-blue-50'
+                      : 'hover:bg-gray-50'
+                  }`}
+                  onClick={() => onToggleProvider(provider.streamer_id)}
+                >
+                  <CardContent className="p-2 flex items-center gap-3">
+                    <div className="text-2xl">
+                      {provider.logo_url ? (
+                        <img 
+                          src={provider.logo_url} 
+                          alt={provider.name || provider.provider_name} 
+                          className="w-8 h-8 object-contain" 
+                        />
+                      ) : (
+                        <span role="img" aria-label="Provider">📺</span>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium text-xs mb-1 line-clamp-2">{provider.name || provider.provider_name}</h4>
+                      <p className="text-xxs font-semibold text-green-600">{provider.monthly_price}/Monat</p>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {provider.highlights.highlight_1 && (
+                          <HighlightBadge
+                            text={provider.highlights.highlight_1}
+                            priority="primary"
+                            tooltip={true}
+                            className="text-[10px] px-1 py-0.5"
+                          />
+                        )}
+                        {provider.highlights.highlight_2 && (
+                          <HighlightBadge
+                            text={provider.highlights.highlight_2}
+                            priority="secondary"
+                            tooltip={true}
+                            className="text-[10px] px-1 py-0.5"
+                          />
+                        )}
+                      </div>
+                    </div>
+                    {existingProviders.includes(provider.streamer_id) && (
+                      <Check className="h-4 w-4 text-blue-600" />
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+          </div>
+        )}
       </div>
 
       {existingProviders.length > 0 && (
