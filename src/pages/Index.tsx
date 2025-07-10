@@ -51,11 +51,13 @@ const Index = () => {
     const coveredGames = (provider[leagueKey] as number) || 0;
     const totalGames = league['number of games'] || 0;
     const percentage = totalGames > 0 ? Math.round((coveredGames / totalGames) * 100) : 0;
+    const price = parseFloat(provider.monthly_price) || 0;
     return {
       provider,
       coveredGames,
       totalGames,
       percentage,
+      price,
     };
   };
 
@@ -130,39 +132,57 @@ const Index = () => {
             <div className="text-center py-12 text-gray-500">Lade Ligen und Anbieter...</div>
           ) : (
             <div className="grid md:grid-cols-3 gap-6">
-              {leagues.map((league) => (
-                <Link key={league.league_id} to={`/competition/${league.league_slug}`} className="group">
-                  <Card className="hover:shadow-lg transition-all duration-300 group-hover:scale-105 cursor-pointer">
-                    <CardContent className="p-6">
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="text-2xl">{league['country code']}</span>
-                        <h3 className="font-semibold text-lg">{league.league}</h3>
-                      </div>
-                      <div className="text-xs text-gray-500 mb-2">{league['number of games']} Spiele pro Saison</div>
-                      <div className="space-y-2">
-                        {providers
-                          .map((provider) => getProviderCoverage(provider, league))
-                          .filter((item) => item.coveredGames > 0)
-                          .sort((a, b) => b.percentage - a.percentage)
-                          .map((item, idx) => (
-                            <div key={item.provider.streamer_id} className="flex items-center justify-between border rounded px-2 py-1 text-sm">
-                              <div className="flex items-center gap-2">
-                                {item.provider.logo_url ? (
-                                  <img src={item.provider.logo_url} alt={item.provider.provider_name} className="w-5 h-5 object-contain" />
-                                ) : (
-                                  <span className="w-5 h-5 bg-gray-200 rounded flex items-center justify-center">📺</span>
-                                )}
-                                <span>{item.provider.provider_name}</span>
-                              </div>
-                              <span className="font-mono text-xs bg-gray-100 rounded px-2 py-0.5">{item.percentage}%</span>
-                              <span className="text-xs text-gray-500">ab {parseFloat(item.provider.monthly_price).toFixed(2)}€</span>
+              {leagues.map((league) => {
+                // Get top 4 cheapest providers with coverage > 0
+                const providerCoverages = providers
+                  .map((provider) => getProviderCoverage(provider, league))
+                  .filter((item) => item.coveredGames > 0)
+                  .sort((a, b) => a.price - b.price)
+                  .slice(0, 4);
+                return (
+                  <Link key={league.league_id} to={`/competition/${league.league_slug}`} className="group">
+                    <Card className="hover:shadow-lg transition-all duration-300 group-hover:scale-105 cursor-pointer">
+                      <CardContent className="p-6">
+                        {/* League Header */}
+                        <div className="flex items-center gap-3 mb-2">
+                          <span className="text-2xl">{league['country code']}</span>
+                          <div>
+                            <h3 className="font-bold text-lg mb-0.5">{league.league}</h3>
+                            <div className="text-xs text-gray-500 font-medium leading-tight">
+                              {/* Subtitle placeholder, adapt as needed */}
+                              {league.league_slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                             </div>
-                          ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
+                          </div>
+                        </div>
+                        <div className="text-xs text-gray-500 mb-2">{league['number of games']} Spiele pro Saison</div>
+                        {/* Provider List Styled Box */}
+                        <div className="border border-dashed rounded-lg p-2 bg-white mb-2">
+                          <div className="text-xs text-gray-700 font-semibold mb-1">Verfügbar bei:</div>
+                          {providerCoverages.length === 0 ? (
+                            <div className="text-xs text-gray-400 italic">Kein Anbieter verfügbar</div>
+                          ) : (
+                            providerCoverages.map((item) => (
+                              <div key={item.provider.streamer_id} className="flex items-center justify-between border-b last:border-b-0 border-dotted border-gray-200 px-2 py-1 text-sm">
+                                <div className="flex items-center gap-2">
+                                  {item.provider.logo_url ? (
+                                    <img src={item.provider.logo_url} alt={item.provider.provider_name} className="w-4 h-4 object-contain rounded-full" />
+                                  ) : (
+                                    <span className="w-4 h-4 bg-gray-200 rounded-full flex items-center justify-center">📺</span>
+                                  )}
+                                  <span className="font-medium" style={{ color: item.provider.highlight_color || undefined }}>{item.provider.provider_name}</span>
+                                </div>
+                                <span className="font-mono text-xs font-bold bg-gray-900 text-white rounded px-2 py-0.5" style={{ minWidth: 44, textAlign: 'center' }}>{item.percentage}%</span>
+                                <span className="text-xs text-gray-700 font-semibold min-w-[60px] text-right">€{item.price.toFixed(2)}</span>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                        {/* Optional: Add quick changes input or other elements here */}
+                      </CardContent>
+                    </Card>
+                  </Link>
+                );
+              })}
             </div>
           )}
         </div>
