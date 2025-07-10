@@ -10,12 +10,36 @@ import { useLeaguesEnhanced } from "@/hooks/useLeaguesEnhanced";
 
 const DetailVergleich2 = () => {
   const [selectedLeagues, setSelectedLeagues] = useState<string[]>(['bundesliga', 'champions_league']);
+  const [selectedProviders, setSelectedProviders] = useState<number[]>([]);
   const { providers, loading: providersLoading } = useStreamingEnhanced();
   const { leagues, loading: leaguesLoading } = useLeaguesEnhanced();
 
   const parsePrice = (priceString?: string): number => {
     if (!priceString) return 0;
     return parseFloat(priceString.replace(/[^\d.,]/g, '').replace(',', '.')) || 0;
+  };
+
+  const parseFeatures = (provider: any) => {
+    const features = {
+      fourK: false,
+      mobile: false,
+      download: false,
+      multiStream: false,
+      streams: 1,
+    };
+    if (provider.features) {
+      try {
+        const featureObj = typeof provider.features === 'string'
+          ? JSON.parse(provider.features)
+          : provider.features;
+        features.fourK = featureObj['has_4k_streaming'] || false;
+        features.mobile = featureObj['has_mobile_app'] || false;
+        features.download = featureObj['has_offline_viewing'] || false;
+        features.streams = featureObj['max_simultaneous_streams'] || 1;
+        features.multiStream = features.streams > 1;
+      } catch (e) {}
+    }
+    return features;
   };
 
   const getProviderCoverage = (provider: any, leagueSlug: string) => {
@@ -27,17 +51,27 @@ const DetailVergleich2 = () => {
   };
 
   const filteredProviders = useMemo(() => {
-    return providers.filter(provider => {
+    let filtered = providers.filter(provider => {
       // Only show providers that have coverage for at least one selected league
+      if (selectedProviders.length > 0 && !selectedProviders.includes(provider.streamer_id)) return false;
       return selectedLeagues.some(league => (provider[league] || 0) > 0);
     });
-  }, [providers, selectedLeagues]);
+    return filtered;
+  }, [providers, selectedLeagues, selectedProviders]);
 
   const toggleLeague = (leagueSlug: string) => {
     setSelectedLeagues(prev => 
       prev.includes(leagueSlug)
         ? prev.filter(l => l !== leagueSlug)
         : [...prev, leagueSlug]
+    );
+  };
+
+  const toggleProvider = (providerId: number) => {
+    setSelectedProviders(prev =>
+      prev.includes(providerId)
+        ? prev.filter(id => id !== providerId)
+        : [...prev, providerId]
     );
   };
 
@@ -106,11 +140,34 @@ const DetailVergleich2 = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Filter className="h-5 w-5" />
-                  Liga-Filter
+                  Filter
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3 max-h-96 overflow-y-auto">
+                <div className="mb-6">
+                  <div className="font-semibold mb-2">Anbieter</div>
+                  <div className="space-y-2 max-h-40 overflow-y-auto">
+                    {providers.map((provider) => (
+                      <div key={provider.streamer_id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`provider-${provider.streamer_id}`}
+                          checked={selectedProviders.length === 0 || selectedProviders.includes(provider.streamer_id)}
+                          onCheckedChange={() => toggleProvider(provider.streamer_id)}
+                        />
+                        <label htmlFor={`provider-${provider.streamer_id}`} className="text-sm cursor-pointer flex-1">
+                          <span className="inline-flex items-center gap-1">
+                            {provider.logo_url && (
+                              <img src={provider.logo_url} alt={provider.name} className="w-5 h-5 object-contain rounded bg-white border" />
+                            )}
+                            {provider.name}
+                          </span>
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="font-semibold mb-2">Ligen</div>
+                <div className="space-y-3 max-h-40 overflow-y-auto">
                   {leagues.map((league) => (
                     <div key={league.league_slug} className="flex items-center space-x-2">
                       <Checkbox
@@ -152,17 +209,36 @@ const DetailVergleich2 = () => {
                 <thead>
                   <tr>
                     <th className="px-4 py-2 text-left font-semibold bg-gray-50">Liga / Anbieter</th>
-                    {filteredProviders.map(provider => (
-                      <th key={provider.streamer_id} className="px-4 py-2 text-center font-semibold bg-gray-50">
-                        <div className="flex flex-col items-center">
-                          {provider.logo_url && (
-                            <img src={provider.logo_url} alt={provider.name} className="w-10 h-10 object-contain mb-1" />
-                          )}
-                          <span className="font-medium truncate max-w-[100px]">{provider.name}</span>
-                          <span className="text-xs text-gray-500">{parsePrice(provider.monthly_price).toFixed(2)}€</span>
-                        </div>
-                      </th>
-                    ))}
+                    {filteredProviders.map(provider => {
+                      const features = parseFeatures(provider);
+                      return (
+                        <th key={provider.streamer_id} className="px-4 py-2 text-center font-semibold bg-gray-50 min-w-[220px]">
+                          <div className="flex flex-col items-center gap-1">
+                            {provider.logo_url && (
+                              <img src={provider.logo_url} alt={provider.name} className="w-10 h-10 object-contain mb-1 rounded bg-white border" />
+                            )}
+                            <span className="font-medium truncate max-w-[100px]">{provider.name}</span>
+                            <span className="text-xs text-gray-500">{parsePrice(provider.monthly_price).toFixed(2)}€ / Monat</span>
+                            {provider.highlights?.highlight_1 && (
+                              <span className="text-xs text-green-700 bg-green-100 rounded px-2 py-0.5 mt-1">{provider.highlights.highlight_1}</span>
+                            )}
+                            <Button
+                              size="sm"
+                              className="mt-2 w-full bg-green-600 hover:bg-green-700 text-white"
+                              onClick={() => window.open(provider.affiliate_url, '_blank')}
+                            >
+                              Zum Angebot
+                            </Button>
+                            <div className="flex gap-1 mt-2">
+                              {features.fourK && <span className="text-xs bg-gray-200 rounded px-1">4K</span>}
+                              {features.mobile && <span className="text-xs bg-gray-200 rounded px-1">Mobile</span>}
+                              {features.download && <span className="text-xs bg-gray-200 rounded px-1">Download</span>}
+                              {features.multiStream && <span className="text-xs bg-gray-200 rounded px-1">Multi</span>}
+                            </div>
+                          </div>
+                        </th>
+                      );
+                    })}
                   </tr>
                 </thead>
                 <tbody>
