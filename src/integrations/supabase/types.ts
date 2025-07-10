@@ -179,6 +179,45 @@ export type Database = {
         }
         Relationships: []
       }
+      deals: {
+        Row: {
+          active: boolean | null
+          affiliate_link: string | null
+          created_at: string
+          end_date: string | null
+          headline: string | null
+          id: number
+          name: string | null
+          provider_name: string | null
+          streamer_id: number | null
+          text: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          affiliate_link?: string | null
+          created_at?: string
+          end_date?: string | null
+          headline?: string | null
+          id?: number
+          name?: string | null
+          provider_name?: string | null
+          streamer_id?: number | null
+          text?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          affiliate_link?: string | null
+          created_at?: string
+          end_date?: string | null
+          headline?: string | null
+          id?: number
+          name?: string | null
+          provider_name?: string | null
+          streamer_id?: number | null
+          text?: string | null
+        }
+        Relationships: []
+      }
       leagues: {
         Row: {
           competition_type: string | null
