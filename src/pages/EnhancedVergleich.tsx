@@ -266,7 +266,8 @@ const EnhancedVergleich = () => {
                     const features = parseFeatures(provider);
                     const isExpanded = expandedProvider === provider.streamer_id;
                     // Dynamic leagues list from DB
-                    const dynamicLeaguesList = leagues.map(league => ({
+                    const sortedLeagues = [...leagues].sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
+                    const dynamicLeaguesList = sortedLeagues.map(league => ({
                       key: league.league_slug,
                       label: league.league,
                       icon: league.icon || getFlagForLeague(league.league_slug),
@@ -331,7 +332,7 @@ const EnhancedVergleich = () => {
                           </div>
                           {/* Leagues row - dynamic */}
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4 mt-4">
-                            {dynamicLeaguesList.map(league => (
+                            {dynamicLeaguesList.slice(0, 8).map(league => (
                               <div key={league.key} className="flex items-center space-x-2">
                                 <span className="text-sm">{league.icon}</span>
                                 <span className="text-xs text-gray-600 flex-1">{league.label}</span>

@@ -9,6 +9,7 @@ export interface League {
   'country code': string;
   'number of games': number;
   icon?: string; // Add icon column
+  popularity?: number;
 }
 
 const fetchLeagues = async (): Promise<League[]> => {
