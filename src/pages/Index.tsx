@@ -1,32 +1,20 @@
 
 import { Link } from "react-router-dom";
-import { Search, Shield, TrendingUp, Users, Star } from "lucide-react";
+import { Search, Shield, TrendingUp, Users, Calendar, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import DealsSection from "@/components/DealsSection";
-import FAQSection from "@/components/FAQSection";
-import { useClubs } from "@/hooks/useClubs";
-import { useLeagues } from "@/hooks/useLeagues";
 import { LEAGUE_CLUSTERS } from "./Wizard";
 
 const Index = () => {
-  const { clubs } = useClubs();
-  const { leagues } = useLeagues();
-  
-  // Get popular clubs sorted by popularity
-  const popularClubs = clubs
-    .filter(club => club.popularity_score && club.popularity_score > 7)
-    .sort((a, b) => (b.popularity_score || 0) - (a.popularity_score || 0))
-    .slice(0, 8);
-
-  // Get popular leagues (filtered by popularity if available)
-  const popularLeagues = leagues
-    .filter(league => (league as any).popularity && (league as any).popularity > 7)
-    .sort((a, b) => ((b as any).popularity || 0) - ((a as any).popularity || 0))
-    .slice(0, 6);
+  const topClubs = [
+    { name: "Bayern München", logo: "⚽", league: "Bundesliga" },
+    { name: "Barcelona", logo: "🔵", league: "La Liga" },
+    { name: "Hertha BSC", logo: "🔷", league: "2. Bundesliga" },
+    { name: "Dortmund", logo: "🟡", league: "Bundesliga" }
+  ];
 
   const features = [
     {
@@ -46,6 +34,11 @@ const Index = () => {
     }
   ];
 
+  const todaysMatches = [
+    { home: "Bayern", away: "Dortmund", time: "18:30", provider: "Sky" },
+    { home: "Barcelona", away: "Real Madrid", time: "21:00", provider: "DAZN" },
+    { home: "Hertha", away: "Hamburg", time: "13:30", provider: "Sky" }
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-green-50">
@@ -110,86 +103,82 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Deals Section */}
-      <DealsSection />
+      {/* Today's Matches */}
+      <section className="py-16 px-4 bg-gray-50">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-3xl font-bold text-gray-900">
+              <Calendar className="inline mr-3 h-8 w-8 text-green-600" />
+              Heute im TV
+            </h2>
+            <Button asChild variant="outline">
+              <Link to="/news">Alle Spiele anzeigen</Link>
+            </Button>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-6">
+            {todaysMatches.map((match, index) => (
+              <Card key={index} className="hover:shadow-lg transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="text-sm text-gray-500">{match.time}</span>
+                    <Badge className="bg-blue-100 text-blue-800">{match.provider}</Badge>
+                  </div>
+                  <div className="text-center">
+                    <div className="font-semibold text-lg">
+                      {match.home} vs {match.away}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* Popular Clubs */}
       <section className="py-16 px-4 bg-white">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Beliebte Vereine
-            </h2>
-            <p className="text-gray-600">
-              Die beliebtesten Fußballvereine auf MatchKompass
-            </p>
-          </div>
-          
+          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+            Beliebte Vereine
+          </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {popularClubs.map((club) => (
+            {topClubs.map((club, index) => (
               <Link 
-                key={club.club_id} 
-                to={`/club/${club.slug}`}
+                key={index} 
+                to={`/verein/${club.name.toLowerCase().replace(' ', '-')}`}
                 className="group"
               >
-                <Card className="text-center hover:shadow-lg transition-all duration-300 group-hover:scale-105 cursor-pointer border-0 shadow-md">
+                <Card className="text-center hover:shadow-lg transition-all duration-300 group-hover:scale-105 cursor-pointer">
                   <CardContent className="p-6">
-                    <div className="w-16 h-16 bg-gradient-to-br from-green-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      {club.logo_url ? (
-                        <img src={club.logo_url} alt={club.name || ''} className="w-10 h-10 object-contain" />
-                      ) : (
-                        <span className="text-2xl">⚽</span>
-                      )}
-                    </div>
-                    <h3 className="font-semibold text-lg mb-2 group-hover:text-green-600 transition-colors">
-                      {club.name}
-                    </h3>
-                    <Badge variant="secondary" className="mb-2">
-                      {club.country}
-                    </Badge>
-                    {club.popularity_score && (
-                      <div className="text-sm text-green-600 font-semibold">
-                        ★ {club.popularity_score}/10
-                      </div>
-                    )}
+                    <div className="text-4xl mb-3">{club.logo}</div>
+                    <h3 className="font-semibold text-lg mb-2">{club.name}</h3>
+                    <Badge variant="secondary">{club.league}</Badge>
                   </CardContent>
                 </Card>
               </Link>
             ))}
           </div>
-          
-          <div className="text-center mt-8">
-            <Button asChild variant="outline" size="lg">
-              <Link to="/ligen">
-                Alle Vereine nach Liga anzeigen
-              </Link>
-            </Button>
-          </div>
         </div>
       </section>
 
-      {/* Popular Leagues */}
+      {/* Top-Ligen Section */}
       <section className="py-16 px-4 bg-white">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">Top-Ligen</h2>
-          {LEAGUE_CLUSTERS.map(cluster => (
-            <div key={cluster.key} className="mb-8">
-              <h3 className="text-xl font-semibold mb-3 flex items-center gap-2">{cluster.name}</h3>
-              <div className="grid md:grid-cols-3 gap-6">
-                {cluster.leagues.map(league => (
-                  <Link key={league.slug} to={`/competition/${league.slug}`} className="group">
-                    <Card className="flex items-center gap-3 p-4 hover:shadow-lg transition-all duration-300 group-hover:scale-105 cursor-pointer">
-                      <span className="text-2xl">{league.flag}</span>
-                      <div>
-                        <h3 className="font-semibold text-lg group-hover:text-green-600 transition-colors">{league.name}</h3>
-                        <p className="text-xs text-gray-500">{cluster.name}</p>
-                      </div>
-                    </Card>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          ))}
+          <div className="grid md:grid-cols-3 gap-6">
+            {LEAGUE_CLUSTERS.flatMap(cluster =>
+              cluster.leagues.map(league => (
+                <Card key={league.slug} className="flex items-center gap-3 p-4">
+                  <span className="text-2xl">{league.flag}</span>
+                  <div>
+                    <h3 className="font-semibold text-lg">{league.name}</h3>
+                    <p className="text-xs text-gray-500">{cluster.name}</p>
+                  </div>
+                </Card>
+              ))
+            )}
+          </div>
         </div>
       </section>
 
@@ -211,9 +200,6 @@ const Index = () => {
           </Button>
         </div>
       </section>
-
-      {/* FAQ Section */}
-      <FAQSection />
 
       <Footer />
     </div>
