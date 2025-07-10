@@ -10,6 +10,8 @@ import Footer from "@/components/Footer";
 import { useStreaming } from "@/hooks/useStreaming";
 import { useLeagues } from "@/hooks/useLeagues";
 import ComparisonSidebar from "@/components/comparison/ComparisonSidebar";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useNavigate } from "react-router-dom";
 
 interface ComparisonFilters {
   competitions: string[];
@@ -35,6 +37,7 @@ const Vergleich = () => {
     sortBy: 'relevance'
   });
   const [expandedProvider, setExpandedProvider] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const { providers, loading: providersLoading, error: providersError } = useStreaming();
   const { leagues, loading: leaguesLoading, error: leaguesError } = useLeagues();
@@ -205,188 +208,64 @@ const Vergleich = () => {
             />
           )}
 
-          {/* Main content */}
+          {/* Provider Cards */}
           <div className="flex-1 space-y-4">
-            {/* Results header */}
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-sm text-gray-600">
-                {filteredProviders.length} Anbieter gefunden
-              </p>
-              {selectedProviders.length > 0 && (
-                <Button
-                  onClick={() => console.log('Compare selected:', selectedProviders)}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  {selectedProviders.length} Anbieter vergleichen
-                </Button>
-              )}
-            </div>
-
-            {/* Provider cards */}
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredProviders.map((provider) => {
                 const price = parsePrice(provider.monthly_price);
-                const yearlyPrice = parsePrice(provider.yearly_price);
                 const features = parseFeatures(provider);
-                const isSelected = selectedProviders.includes(provider.streamer_id.toString());
-                const isExpanded = expandedProvider === provider.streamer_id.toString();
-                // Define leagues and icons
-                const leaguesList = [
-                  { key: 'bundesliga', label: 'Bundesliga', icon: '🇩🇪' },
-                  { key: '2_bundesliga', label: '2. Bundesliga', icon: '🇩🇪' },
-                  { key: 'champions_league', label: 'Champions League', icon: '🏆' },
-                  { key: 'europa_league', label: 'Europa League', icon: '🥈' },
-                  { key: 'conference_league', label: 'Conference League', icon: '🥉' },
-                  { key: 'premier_league', label: 'Premier League', icon: '🏴' },
-                  { key: 'la_liga', label: 'La Liga', icon: '🇪🇸' },
-                  { key: 'serie_a', label: 'Serie A', icon: '🇮🇹' },
-                  { key: 'ligue_1', label: 'Ligue 1', icon: '🇫🇷' },
-                  { key: 'dfb_pokal', label: 'DFB-Pokal', icon: '🏆' },
-                  { key: 'nationalmannschaft', label: 'Nationalmannschaft', icon: '🇩🇪' },
-                ];
-                // Define features
-                const featuresList = [
-                  { key: 'fourK', label: '4K', value: features.fourK },
-                  { key: 'mobile', label: 'Mobile', value: features.mobile },
-                  { key: 'download', label: 'Download', value: features.download },
-                  { key: 'streams', label: `${features.streams} Streams`, value: features.streams > 0 },
-                ];
-                // Helper for check/cross icons
-                const CheckIcon = (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-check h-4 w-4 text-green-600"><path d="M20 6 9 17l-5-5"></path></svg>
-                );
-                const CrossIcon = (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x h-4 w-4 text-gray-400"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
-                );
-                // Helper for star icon
-                const StarIcon = (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-star h-4 w-4 text-yellow-500 fill-current"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"></path></svg>
-                );
-                // Helper for expand/collapse icon
-                const ChevronIcon = (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-up h-4 w-4"><path d="m18 15-6-6-6 6"></path></svg>
-                );
+                const isSelected = selectedProviders.includes(provider.streamer_id?.toString());
                 return (
-                  <div key={provider.streamer_id} className="rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden">
-                    <div className="flex flex-col space-y-1.5 p-6 pb-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-4">
-                          <span className="text-3xl">
-                            {provider.logo_url ? (
-                              <img src={provider.logo_url} alt={provider.provider_name} className="w-10 h-10 object-contain rounded-full bg-white border" />
-                            ) : (
-                              "🔵"
-                            )}
-                          </span>
-                          <div>
-                            <div className="flex items-center space-x-2">
-                              <h3 className="font-semibold tracking-tight text-xl">{provider.provider_name}</h3>
-                            </div>
-                            <div className="flex items-center space-x-4 mt-1">
-                              <div className="text-lg font-bold text-green-600">€{price.toFixed(2)}/Monat</div>
-                              <div className="flex items-center space-x-1">
-                                {StarIcon}
-                                <span className="text-sm font-medium">4</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 text-primary-foreground h-9 rounded-md px-3 bg-green-600 hover:bg-green-700" onClick={() => handleAffiliateClick(provider)}>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-external-link h-4 w-4 mr-1"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>
-                            Zum Anbieter
-                          </button>
-                          <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3" onClick={() => setExpandedProvider(isExpanded ? null : provider.streamer_id.toString())}>
-                            {ChevronIcon}
-                          </button>
-                        </div>
-                      </div>
-                      {/* Leagues row */}
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4 mt-4">
-                        {leaguesList.map(league => (
-                          <div key={league.key} className="flex items-center space-x-2">
-                            <span className="text-sm">{league.icon}</span>
-                            <span className="text-xs text-gray-600 flex-1">{league.label}</span>
-                            <div className="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs bg-gray-100">
-                              {(provider[league.key] && provider[league.key] > 0) ? CheckIcon : CrossIcon}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      {isExpanded && (
-                        <>
-                          {/* Features and Coverage */}
-                          <div className="border-t pt-4 space-y-4">
-                            <div>
-                              <h4 className="font-medium mb-2">Alle Features:</h4>
-                              <div className="grid grid-cols-2 gap-2">
-                                {featuresList.map(feature => (
-                                  <div key={feature.key} className="flex items-center justify-between text-sm">
-                                    <span>{feature.label}</span>
-                                    {feature.value ? CheckIcon : CrossIcon}
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                            <div>
-                              <h4 className="font-medium mb-2">Vollständige Liga-Abdeckung:</h4>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                {leaguesList.map(league => (
-                                  <div key={league.key} className="flex items-center justify-between text-sm">
-                                    <div className="flex items-center space-x-2">
-                                      <span>{league.icon}</span>
-                                      <span>{league.label}</span>
-                                    </div>
-                                    <div className={`px-2 py-1 rounded text-xs font-medium ${provider[league.key] && provider[league.key] > 0 ? (provider[league.key] >= 100 ? 'text-green-600 bg-green-100' : 'text-orange-600 bg-orange-100') : 'text-gray-400 bg-gray-100'}`}>
-                                      {provider[league.key] ? `${provider[league.key]}%` : '0%'}
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          </div>
-                          {/* Price row */}
-                          <div className="border-t pt-4">
-                            <div className="grid grid-cols-2 gap-4 text-center">
-                              <div>
-                                <div className="text-lg font-bold">€{price.toFixed(2)}</div>
-                                <div className="text-xs text-gray-500">Monatlich</div>
-                              </div>
-                              <div>
-                                <div className="text-lg font-bold text-green-600">€{yearlyPrice ? (yearlyPrice / 12).toFixed(2) : '-'}</div>
-                                <div className="text-xs text-gray-500">Mit Jahresabo</div>
-                              </div>
-                            </div>
-                          </div>
-                        </>
-                      )}
+                  <Card key={provider.streamer_id} className={`relative ${isSelected ? 'ring-2 ring-blue-500' : ''}`}>
+                    <div className="absolute top-2 left-2 z-10">
+                      <Checkbox
+                        checked={isSelected}
+                        onCheckedChange={() => handleProviderToggle(provider.streamer_id?.toString())}
+                      />
                     </div>
-                  </div>
+                    <CardHeader>
+                      <div className="flex items-center gap-3">
+                        {provider.logo_url && (
+                          <img src={provider.logo_url} alt={provider.name} className="w-10 h-10 object-contain rounded bg-white border" />
+                        )}
+                        <CardTitle>{provider.name}</CardTitle>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-col gap-2">
+                        <div className="flex gap-1">
+                          {features.fourK && <Badge>4K</Badge>}
+                          {features.mobile && <Badge>Mobile</Badge>}
+                          {features.download && <Badge>Download</Badge>}
+                          {features.streams > 1 && <Badge>Multi</Badge>}
+                        </div>
+                        <div className="text-sm text-gray-600">{price.toFixed(2)}€ / Monat</div>
+                        <Button
+                          size="sm"
+                          className="w-full bg-green-600 hover:bg-green-700 text-white mt-2"
+                          onClick={() => handleAffiliateClick(provider)}
+                        >
+                          Zum Angebot
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
                 );
               })}
             </div>
-
-            {filteredProviders.length === 0 && (
-              <div className="text-center py-12">
-                <div className="text-gray-400 mb-4">
-                  <Filter className="h-12 w-12 mx-auto" />
-                </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  Keine Anbieter gefunden
-                </h3>
-                <p className="text-gray-600">
-                  Versuche deine Filter anzupassen, um mehr Ergebnisse zu sehen.
-                </p>
+            {/* Sticky Compare Bar */}
+            {selectedProviders.length > 1 && (
+              <div className="sticky bottom-0 left-0 w-full bg-blue-50 border-t z-10 shadow flex px-4 py-3 gap-4 overflow-x-auto mt-4">
+                <div className="w-48 font-semibold text-blue-700 flex items-center">{selectedProviders.length} Anbieter ausgewählt</div>
+                <Button
+                  size="sm"
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  onClick={() => navigate(`/detailvergleich2?providers=${selectedProviders.join(',')}`)}
+                >
+                  Vergleichen
+                </Button>
               </div>
             )}
-
-            {/* Disclaimer */}
-            <div className="mt-8 p-4 bg-gray-100 rounded-lg">
-              <p className="text-sm text-gray-600 text-center">
-                * Affiliate-Links: Wir erhalten eine Provision, wenn Sie über unsere Links ein Abonnement abschließen. 
-                Dies beeinflusst nicht unsere Bewertungen und Vergleiche. Alle Preise sind unverbindlich und können sich ändern.
-              </p>
-            </div>
           </div>
         </div>
       </div>
