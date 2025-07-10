@@ -11,6 +11,7 @@ import { useLeagues } from "@/hooks/useLeagues";
 import ComparisonSidebar from "@/components/comparison/ComparisonSidebar";
 import { Checkbox } from "@/components/ui/checkbox";
 import HighlightBadge from "@/components/ui/highlight-badge";
+import { LEAGUE_CLUSTERS } from "./Wizard";
 
 interface ComparisonFilters {
   competitions: string[];
@@ -103,6 +104,9 @@ const EnhancedVergleich = () => {
     'Ligue 1': 'ligue_1',
     'Nationalmannschaft': 'nationalmannschaft',
   };
+
+  // Helper to get flag for a league_slug
+  const getFlagForLeague = (league_slug: string) => LEAGUE_CLUSTERS.flatMap(c => c.leagues).find(l => l.slug === league_slug)?.flag || "🏆";
 
   const filteredProviders = useMemo(() => {
     let filtered = providers.filter(provider => {
@@ -261,20 +265,13 @@ const EnhancedVergleich = () => {
                     const yearlyPrice = parsePrice(provider.yearly_price);
                     const features = parseFeatures(provider);
                     const isExpanded = expandedProvider === provider.streamer_id;
-                    // Define leagues and icons
-                    const leaguesList = [
-                      { key: 'bundesliga', label: 'Bundesliga', icon: '🇩🇪' },
-                      { key: 'second_bundesliga', label: '2. Bundesliga', icon: '🇩🇪' },
-                      { key: 'dfb_pokal', label: 'DFB-Pokal', icon: '🏆' },
-                      { key: 'champions_league', label: 'Champions League', icon: '🏆' },
-                      { key: 'europa_league', label: 'Europa League', icon: '🥈' },
-                      { key: 'conference_league', label: 'Conference League', icon: '🥉' },
-                      { key: 'premier_league', label: 'Premier League', icon: '🏴' },
-                      { key: 'la_liga', label: 'La Liga', icon: '🇪🇸' },
-                      { key: 'serie_a', label: 'Serie A', icon: '🇮🇹' },
-                      { key: 'ligue_1', label: 'Ligue 1', icon: '🇫🇷' },
-                      { key: 'nationalmannschaft', label: 'Nationalmannschaft', icon: '🇩🇪' },
-                    ];
+                    // Dynamic leagues list from DB
+                    const dynamicLeaguesList = leagues.map(league => ({
+                      key: league.league_slug,
+                      label: league.league,
+                      icon: league.icon || getFlagForLeague(league.league_slug),
+                      covered: provider[league.league_slug] > 0
+                    }));
                     // Define features
                     const featuresList = [
                       { key: 'fourK', label: '4K', value: features.fourK },
@@ -332,14 +329,14 @@ const EnhancedVergleich = () => {
                               </button>
                             </div>
                           </div>
-                          {/* Leagues row */}
+                          {/* Leagues row - dynamic */}
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4 mt-4">
-                            {leaguesList.map(league => (
+                            {dynamicLeaguesList.map(league => (
                               <div key={league.key} className="flex items-center space-x-2">
                                 <span className="text-sm">{league.icon}</span>
                                 <span className="text-xs text-gray-600 flex-1">{league.label}</span>
                                 <div className="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs bg-gray-100">
-                                  {(provider[league.key] && provider[league.key] > 0) ? CheckIcon : CrossIcon}
+                                  {league.covered ? CheckIcon : CrossIcon}
                                 </div>
                               </div>
                             ))}
@@ -362,14 +359,14 @@ const EnhancedVergleich = () => {
                                 <div>
                                   <h4 className="font-medium mb-2">Vollständige Liga-Abdeckung:</h4>
                                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                    {leaguesList.map(league => (
+                                    {dynamicLeaguesList.map(league => (
                                       <div key={league.key} className="flex items-center justify-between text-sm">
                                         <div className="flex items-center space-x-2">
                                           <span>{league.icon}</span>
                                           <span>{league.label}</span>
                                         </div>
-                                        <div className={`px-2 py-1 rounded text-xs font-medium ${provider[league.key] && provider[league.key] > 0 ? (provider[league.key] >= 100 ? 'text-green-600 bg-green-100' : 'text-orange-600 bg-orange-100') : 'text-gray-400 bg-gray-100'}`}>
-                                          {provider[league.key] ? `${provider[league.key]}%` : '0%'}
+                                        <div className={`px-2 py-1 rounded text-xs font-medium ${league.covered ? (provider[league.key] >= 100 ? 'text-green-600 bg-green-100' : 'text-orange-600 bg-orange-100') : 'text-gray-400 bg-gray-100'}`}>
+                                          {league.covered ? `${provider[league.key]}%` : '0%'}
                                         </div>
                                       </div>
                                     ))}
