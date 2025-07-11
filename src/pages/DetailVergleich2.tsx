@@ -1,8 +1,9 @@
 import { useState, useMemo, useEffect } from "react";
-import { Download, Filter } from "lucide-react";
+import { Download, Filter, Pin, X, Check, Star, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useStreamingEnhanced } from "@/hooks/useStreamingEnhanced";
@@ -10,7 +11,7 @@ import { useLeaguesEnhanced } from "@/hooks/useLeaguesEnhanced";
 
 const DetailVergleich2 = () => {
   const [selectedLeagues, setSelectedLeagues] = useState<string[]>([]);
-  const [selectedProviders, setSelectedProviders] = useState<number[]>([]);
+  const [pinnedProviders, setPinnedProviders] = useState<number[]>([]);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 100]);
   const [featureFilters, setFeatureFilters] = useState({
     fourK: false,
@@ -64,11 +65,22 @@ const DetailVergleich2 = () => {
     return { coveredGames, totalGames, percentage };
   };
 
+  const calculateCostPerGame = (provider: any) => {
+    const monthlyPrice = parsePrice(provider.monthly_price);
+    let totalGames = 0;
+    
+    selectedLeagues.forEach(leagueSlug => {
+      const coverage = getProviderCoverage(provider, leagueSlug);
+      totalGames += coverage.coveredGames;
+    });
+    
+    return totalGames > 0 ? monthlyPrice / totalGames : 0;
+  };
+
   const filteredProviders = useMemo(() => {
     let filtered = providers.filter(provider => {
       // Price filter
       const monthly = parsePrice(provider.monthly_price);
-      const yearly = parsePrice(provider.yearly_price);
       if (monthly < priceRange[0] || monthly > priceRange[1]) return false;
       // Feature filters
       const features = parseFeatures(provider);
@@ -76,13 +88,27 @@ const DetailVergleich2 = () => {
       if (featureFilters.mobile && !features.mobile) return false;
       if (featureFilters.download && !features.download) return false;
       if (featureFilters.multiStream && !features.multiStream) return false;
-      // Provider filter
-      if (selectedProviders.length > 0 && !selectedProviders.includes(provider.streamer_id)) return false;
       // League filter
       return selectedLeagues.some(league => (provider[league] || 0) > 0);
     });
     return filtered;
-  }, [providers, selectedLeagues, selectedProviders, priceRange, featureFilters]);
+  }, [providers, selectedLeagues, priceRange, featureFilters]);
+
+  // Find best price-performance ratio
+  const bestValueProvider = useMemo(() => {
+    if (filteredProviders.length === 0) return null;
+    return filteredProviders.reduce((best, current) => {
+      const currentCost = calculateCostPerGame(current);
+      const bestCost = calculateCostPerGame(best);
+      return currentCost < bestCost && currentCost > 0 ? current : best;
+    });
+  }, [filteredProviders, selectedLeagues]);
+
+  const displayProviders = useMemo(() => {
+    const pinned = filteredProviders.filter(p => pinnedProviders.includes(p.streamer_id));
+    const unpinned = filteredProviders.filter(p => !pinnedProviders.includes(p.streamer_id));
+    return [...pinned, ...unpinned];
+  }, [filteredProviders, pinnedProviders]);
 
   const toggleLeague = (leagueSlug: string) => {
     setSelectedLeagues(prev => 
@@ -92,13 +118,29 @@ const DetailVergleich2 = () => {
     );
   };
 
-  const toggleProvider = (providerId: number) => {
-    setSelectedProviders(prev =>
+  const togglePin = (providerId: number) => {
+    setPinnedProviders(prev => 
       prev.includes(providerId)
         ? prev.filter(id => id !== providerId)
         : [...prev, providerId]
     );
   };
+
+  const groupedLeagues = useMemo(() => {
+    const grouped: { [key: string]: typeof leagues } = {};
+    leagues.forEach(league => {
+      const country = league.country || 'International';
+      if (!grouped[country]) grouped[country] = [];
+      grouped[country].push(league);
+    });
+    
+    // Sort by popularity within each group
+    Object.keys(grouped).forEach(country => {
+      grouped[country].sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
+    });
+    
+    return grouped;
+  }, [leagues]);
 
   const getCellBackgroundColor = (percentage: number) => {
     if (percentage >= 90) return 'bg-green-100 text-green-800';
@@ -109,10 +151,10 @@ const DetailVergleich2 = () => {
   };
 
   const exportToCSV = () => {
-    const headers = ['Liga', ...filteredProviders.map(p => p.name)];
+    const headers = ['Liga', ...displayProviders.map(p => p.name)];
     const rows = selectedLeagues.map(leagueSlug => [
       leagues.find(l => l.league_slug === leagueSlug)?.league || leagueSlug,
-      ...filteredProviders.map(provider => {
+      ...displayProviders.map(provider => {
         const coverage = getProviderCoverage(provider, leagueSlug);
         return `${coverage.percentage}% (${coverage.coveredGames}/${coverage.totalGames})`;
       })
@@ -124,7 +166,7 @@ const DetailVergleich2 = () => {
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', 'streaming-vergleich-vertikal.csv');
+    link.setAttribute('download', 'streaming-vergleich-detailiert.csv');
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -152,194 +194,277 @@ const DetailVergleich2 = () => {
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="text-center mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Vertikaler Streaming-Vergleich
+            Detaillierter Streaming-Vergleich
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Vergleichstabelle mit Anbietern oben und Ligen links
+            Vergleichen Sie Streaming-Anbieter Seite an Seite mit detaillierter Analyse
           </p>
         </div>
-        <div className="grid lg:grid-cols-4 gap-6">
-          {/* Sidebar Filter */}
-          <div className="lg:col-span-1">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Filter className="h-5 w-5" />
-                  Filter
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {/* Pricing Section */}
-                <div className="mb-6">
-                  <div className="font-semibold mb-2">Preis (Monatlich)</div>
-                  <input
-                    type="range"
-                    min={0}
-                    max={100}
-                    step={1}
-                    value={priceRange[0]}
-                    onChange={e => setPriceRange([Number(e.target.value), priceRange[1]])}
-                  />
-                  <input
-                    type="range"
-                    min={0}
-                    max={100}
-                    step={1}
-                    value={priceRange[1]}
-                    onChange={e => setPriceRange([priceRange[0], Number(e.target.value)])}
-                  />
-                  <div className="flex justify-between text-xs text-gray-600">
-                    <span>{priceRange[0]}€</span>
-                    <span>{priceRange[1]}€</span>
-                  </div>
-                </div>
-                {/* Features Section */}
-                <div className="mb-6">
-                  <div className="font-semibold mb-2">Features</div>
-                  <div className="space-y-2">
-                    <label className="flex items-center gap-2 text-sm">
-                      <Checkbox checked={featureFilters.fourK} onCheckedChange={() => setFeatureFilters(f => ({ ...f, fourK: !f.fourK }))} />
-                      4K Streaming
-                    </label>
-                    <label className="flex items-center gap-2 text-sm">
-                      <Checkbox checked={featureFilters.mobile} onCheckedChange={() => setFeatureFilters(f => ({ ...f, mobile: !f.mobile }))} />
-                      Mobile App
-                    </label>
-                    <label className="flex items-center gap-2 text-sm">
-                      <Checkbox checked={featureFilters.download} onCheckedChange={() => setFeatureFilters(f => ({ ...f, download: !f.download }))} />
-                      Download/Offline
-                    </label>
-                    <label className="flex items-center gap-2 text-sm">
-                      <Checkbox checked={featureFilters.multiStream} onCheckedChange={() => setFeatureFilters(f => ({ ...f, multiStream: !f.multiStream }))} />
-                      Multi-Stream
-                    </label>
-                  </div>
-                </div>
-                {/* League/Competition Section */}
-                <div className="font-semibold mb-2">Ligen</div>
-                <div className="space-y-3 max-h-40 overflow-y-auto">
-                  {leagues.map((league) => (
-                    <div key={league.league_slug} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={league.league_slug}
-                        checked={selectedLeagues.includes(league.league_slug || '')}
-                        onCheckedChange={() => toggleLeague(league.league_slug || '')}
-                      />
-                      <label 
-                        htmlFor={league.league_slug} 
-                        className="text-sm cursor-pointer flex-1"
-                      >
-                        {league.league}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-4 pt-4 border-t">
-                  <p className="text-xs text-gray-600 mb-2">
-                    {selectedLeagues.length} Ligen ausgewählt
-                  </p>
+
+        {/* Filter Bar */}
+        <div className="mb-6 bg-white rounded-lg border p-4">
+          <div className="flex flex-wrap gap-4 items-center">
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-gray-500" />
+              <span className="text-sm font-medium">Filter:</span>
+            </div>
+            
+            {/* Price Filter */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm">Preis:</span>
+              <input
+                type="range"
+                min={0}
+                max={100}
+                value={priceRange[1]}
+                onChange={e => setPriceRange([0, Number(e.target.value)])}
+                className="w-20"
+              />
+              <span className="text-sm text-gray-600">bis {priceRange[1]}€</span>
+            </div>
+
+            {/* Feature Filters */}
+            <div className="flex gap-2">
+              {Object.entries(featureFilters).map(([key, value]) => (
+                <Badge 
+                  key={key}
+                  variant={value ? "default" : "outline"}
+                  className="cursor-pointer"
+                  onClick={() => setFeatureFilters(f => ({ ...f, [key]: !f[key] }))}
+                >
+                  {key === 'fourK' ? '4K' : key === 'multiStream' ? 'Multi-Stream' : key}
+                </Badge>
+              ))}
+            </div>
+
+            <Button onClick={exportToCSV} variant="outline" size="sm">
+              <Download className="h-4 w-4 mr-2" />
+              Export
+            </Button>
+          </div>
+        </div>
+
+        {/* Comparison Table */}
+        <div className="bg-white rounded-lg border overflow-hidden">
+          {/* Provider Headers */}
+          <div className="flex border-b">
+            <div className="w-64 p-4 bg-gray-50 font-semibold border-r">
+              Kriterien
+            </div>
+            {displayProviders.map((provider, index) => (
+              <div key={provider.streamer_id} className={`flex-1 min-w-72 p-4 text-center border-r last:border-r-0 ${
+                pinnedProviders.includes(provider.streamer_id) ? 'bg-blue-50 border-blue-200' : 'bg-gray-50'
+              } ${index < 3 ? 'border-blue-300' : ''}`}>
+                
+                {/* Ranking Badge */}
+                <div className="flex justify-between items-start mb-2">
+                  <Badge variant={index === 0 ? "default" : "outline"} className="text-xs">
+                    {index + 1}
+                  </Badge>
                   <Button
-                    onClick={exportToCSV}
-                    variant="outline"
+                    variant="ghost"
                     size="sm"
-                    className="w-full"
-                    disabled={filteredProviders.length === 0}
+                    onClick={() => togglePin(provider.streamer_id)}
+                    className={`p-1 h-6 w-6 ${pinnedProviders.includes(provider.streamer_id) ? 'text-blue-600' : 'text-gray-400'}`}
                   >
-                    <Download className="h-4 w-4 mr-2" />
-                    Export als CSV
+                    <Pin className="h-3 w-3" />
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-          {/* Vertical Table */}
-          <div className="lg:col-span-3 overflow-x-auto">
-            <div className="rounded-lg border bg-white shadow-sm overflow-x-auto relative">
-              <table className="min-w-full text-sm">
-                <thead>
-                  <tr>
-                    <th className="px-4 py-2 text-left font-semibold bg-gray-50">Liga / Anbieter</th>
-                    {filteredProviders.map(provider => {
-                      const features = parseFeatures(provider);
-                      return (
-                        <th key={provider.streamer_id} className="px-4 py-2 text-center font-semibold bg-gray-50 min-w-[220px]">
-                          <div className="flex flex-col items-center gap-1">
-                            {provider.logo_url && (
-                              <img src={provider.logo_url} alt={provider.name} className="w-10 h-10 object-contain mb-1 rounded bg-white border" />
-                            )}
-                            <span className="font-medium truncate max-w-[100px]">{provider.name}</span>
-                            <span className="text-xs text-gray-500">{parsePrice(provider.monthly_price).toFixed(2)}€ / Monat</span>
-                            {provider.highlights?.highlight_1 && (
-                              <span className="text-xs text-green-700 bg-green-100 rounded px-2 py-0.5 mt-1">{provider.highlights.highlight_1}</span>
-                            )}
-                          </div>
-                        </th>
-                      );
-                    })}
-                  </tr>
-                </thead>
-                <tbody>
-                  {/* Features Row */}
-                  <tr>
-                    <td className="px-4 py-2 font-medium bg-gray-50">Features</td>
-                    {filteredProviders.map(provider => {
-                      const features = parseFeatures(provider);
-                      return (
-                        <td key={provider.streamer_id} className="px-4 py-2 text-center">
-                          <div className="flex flex-col gap-1 items-center">
-                            <div className="flex gap-1">
-                              <span title="4K Streaming" className={`text-xs px-2 py-0.5 rounded ${features.fourK ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-400'}`}>4K</span>
-                              <span title="Mobile App" className={`text-xs px-2 py-0.5 rounded ${features.mobile ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-400'}`}>Mobile</span>
-                              <span title="Download/Offline" className={`text-xs px-2 py-0.5 rounded ${features.download ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-400'}`}>Download</span>
-                              <span title="Multi-Stream" className={`text-xs px-2 py-0.5 rounded ${features.multiStream ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-400'}`}>Multi</span>
-                            </div>
-                          </div>
-                        </td>
-                      );
-                    })}
-                  </tr>
-                  {/* League Rows */}
-                  {selectedLeagues.map(leagueSlug => {
-                    const league = leagues.find(l => l.league_slug === leagueSlug);
-                    return (
-                      <tr key={leagueSlug}>
-                        <td className="px-4 py-2 font-medium bg-gray-50">
-                          {league?.league || leagueSlug}
-                        </td>
-                        {filteredProviders.map(provider => {
-                          const coverage = getProviderCoverage(provider, leagueSlug);
-                          return (
-                            <td key={provider.streamer_id} className={`px-4 py-2 text-center ${getCellBackgroundColor(coverage.percentage)}`}>
-                              {coverage.percentage}%
-                              <div className="text-xs text-gray-500">{coverage.coveredGames}/{coverage.totalGames}</div>
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-              {/* Sticky Conversion Section */}
-              <div className="sticky bottom-0 left-0 w-full bg-white border-t z-10 shadow flex px-4 py-3 gap-4 overflow-x-auto">
-                <div className="w-48 font-semibold text-gray-700 flex items-center">Jetzt Angebot sichern:</div>
-                {filteredProviders.map(provider => (
-                  <div key={provider.streamer_id} className="min-w-[220px] flex flex-col items-center">
-                    <Button
-                      size="sm"
-                      className="w-full bg-green-600 hover:bg-green-700 text-white"
-                      onClick={() => window.open(provider.affiliate_url, '_blank')}
-                    >
-                      Zum Angebot
-                    </Button>
-                    {provider.highlights?.highlight_1 && (
-                      <span className="text-xs text-green-700 bg-green-100 rounded px-2 py-0.5 mt-1">{provider.highlights.highlight_1}</span>
-                    )}
+
+                {/* Provider Logo and Name */}
+                <div className="flex flex-col items-center mb-3">
+                  {provider.logo_url && (
+                    <img 
+                      src={provider.logo_url} 
+                      alt={provider.name} 
+                      className="w-16 h-16 object-contain mb-2 rounded-lg bg-white border" 
+                    />
+                  )}
+                  <h3 className="font-semibold text-lg mb-1">{provider.name}</h3>
+                  
+                  {/* Price-Performance Winner Badge */}
+                  {bestValueProvider?.streamer_id === provider.streamer_id && (
+                    <Badge className="bg-orange-100 text-orange-800 border-orange-300 mb-2">
+                      <TrendingUp className="h-3 w-3 mr-1" />
+                      Preis-Leistungs-Sieger
+                    </Badge>
+                  )}
+                </div>
+
+                {/* CTA Button */}
+                <Button 
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white mb-2"
+                  onClick={() => window.open(provider.affiliate_url, '_blank')}
+                >
+                  Zum Angebot*
+                </Button>
+                
+                {/* Highlight */}
+                {provider.highlights?.highlight_1 && (
+                  <div className="text-xs text-green-700 bg-green-100 rounded px-2 py-1">
+                    {provider.highlights.highlight_1}
                   </div>
-                ))}
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Anbieter Name Section */}
+          <div className="flex border-b">
+            <div className="w-64 p-4 bg-gray-50 font-medium border-r">Anbieter</div>
+            {displayProviders.map(provider => (
+              <div key={provider.streamer_id} className="flex-1 min-w-72 p-4 text-center border-r last:border-r-0">
+                <span className="font-semibold text-lg">{provider.name}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Monthly Price Section */}
+          <div className="flex border-b">
+            <div className="w-64 p-4 bg-gray-50 font-medium border-r">Monatlicher Preis</div>
+            {displayProviders.map(provider => (
+              <div key={provider.streamer_id} className="flex-1 min-w-72 p-4 text-center border-r last:border-r-0">
+                <span className="text-lg font-semibold text-green-600">
+                  {parsePrice(provider.monthly_price).toFixed(2)}€
+                </span>
+              </div>
+            ))}
+          </div>
+
+          {/* Yearly Price Section */}
+          <div className="flex border-b">
+            <div className="w-64 p-4 bg-gray-50 font-medium border-r">Jährlicher Preis</div>
+            {displayProviders.map(provider => (
+              <div key={provider.streamer_id} className="flex-1 min-w-72 p-4 text-center border-r last:border-r-0">
+                <span className="text-lg font-semibold">
+                  {parsePrice(provider.yearly_price).toFixed(2)}€
+                </span>
+                {provider.yearly_price && provider.monthly_price && (
+                  <div className="text-xs text-gray-500 mt-1">
+                    Ersparnis: {(parsePrice(provider.monthly_price) * 12 - parsePrice(provider.yearly_price)).toFixed(2)}€
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Cost Per Game Section */}
+          <div className="flex border-b">
+            <div className="w-64 p-4 bg-gray-50 font-medium border-r">Kosten pro Spiel</div>
+            {displayProviders.map(provider => (
+              <div key={provider.streamer_id} className="flex-1 min-w-72 p-4 text-center border-r last:border-r-0">
+                <span className="text-lg font-semibold text-blue-600">
+                  {calculateCostPerGame(provider).toFixed(2)}€
+                </span>
+                <div className="text-xs text-gray-500 mt-1">pro Spiel</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Features Section */}
+          <div className="flex border-b">
+            <div className="w-64 p-4 bg-gray-50 font-medium border-r">Features</div>
+            {displayProviders.map(provider => {
+              const features = parseFeatures(provider);
+              return (
+                <div key={provider.streamer_id} className="flex-1 min-w-72 p-4 border-r last:border-r-0">
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div className="flex items-center gap-2">
+                      {features.fourK ? <Check className="h-4 w-4 text-green-600" /> : <X className="h-4 w-4 text-red-500" />}
+                      4K Streaming
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {features.mobile ? <Check className="h-4 w-4 text-green-600" /> : <X className="h-4 w-4 text-red-500" />}
+                      Mobile App
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {features.download ? <Check className="h-4 w-4 text-green-600" /> : <X className="h-4 w-4 text-red-500" />}
+                      Download
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {features.multiStream ? <Check className="h-4 w-4 text-green-600" /> : <X className="h-4 w-4 text-red-500" />}
+                      Multi-Stream ({features.streams})
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Leagues Section */}
+          <div className="border-b">
+            <div className="flex bg-gray-100">
+              <div className="w-64 p-4 font-semibold border-r">Ligen & Wettbewerbe</div>
+              <div className="flex-1 p-4 text-center text-sm text-gray-600">
+                Abdeckung (verfügbare Spiele / gesamt)
               </div>
             </div>
+            
+            {Object.entries(groupedLeagues).map(([country, countryLeagues]) => (
+              <div key={country}>
+                {/* Country Header */}
+                <div className="flex bg-gray-50">
+                  <div className="w-64 p-3 font-medium border-r text-gray-700">
+                    {country}
+                  </div>
+                  {displayProviders.map(() => (
+                    <div key={country} className="flex-1 min-w-72 border-r last:border-r-0"></div>
+                  ))}
+                </div>
+                
+                {/* League Rows */}
+                {countryLeagues
+                  .filter(league => selectedLeagues.includes(league.league_slug || ''))
+                  .map(league => (
+                    <div key={league.league_slug} className="flex">
+                      <div className="w-64 p-3 border-r border-b">
+                        <div className="flex items-center gap-2">
+                          <Checkbox
+                            checked={selectedLeagues.includes(league.league_slug || '')}
+                            onCheckedChange={() => toggleLeague(league.league_slug || '')}
+                          />
+                          <span className="text-sm">{league.league}</span>
+                        </div>
+                      </div>
+                      {displayProviders.map(provider => {
+                        const coverage = getProviderCoverage(provider, league.league_slug || '');
+                        return (
+                          <div key={provider.streamer_id} className="flex-1 min-w-72 p-3 text-center border-r last:border-r-0 border-b">
+                            <div className={`inline-flex items-center gap-1 px-2 py-1 rounded text-sm ${getCellBackgroundColor(coverage.percentage)}`}>
+                              {coverage.percentage}%
+                              <span className="text-xs">({coverage.coveredGames}/{coverage.totalGames})</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ))}
+              </div>
+            ))}
           </div>
+
+          {/* Final CTA Section */}
+          <div className="flex">
+            <div className="w-64 p-4 bg-gray-50 font-semibold border-r">Angebot</div>
+            {displayProviders.map(provider => (
+              <div key={provider.streamer_id} className="flex-1 min-w-72 p-4 text-center border-r last:border-r-0">
+                <Button 
+                  className="w-full bg-green-600 hover:bg-green-700 text-white"
+                  onClick={() => window.open(provider.affiliate_url, '_blank')}
+                >
+                  Zum Angebot*
+                </Button>
+                {provider.highlights?.highlight_2 && (
+                  <div className="text-xs text-blue-600 mt-2">{provider.highlights.highlight_2}</div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Disclaimer */}
+        <div className="mt-4 text-xs text-gray-500 text-center">
+          * Affiliate-Links: Wir erhalten eine Provision bei Abschluss eines Abonnements über unsere Links.
         </div>
       </div>
       <Footer />

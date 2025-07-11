@@ -224,6 +224,7 @@ export type Database = {
           country: string | null
           "country code": string | null
           country_code: string | null
+          icon: string | null
           league: string | null
           league_id: number
           league_slug: string | null
@@ -235,6 +236,7 @@ export type Database = {
           country?: string | null
           "country code"?: string | null
           country_code?: string | null
+          icon?: string | null
           league?: string | null
           league_id: number
           league_slug?: string | null
@@ -246,6 +248,7 @@ export type Database = {
           country?: string | null
           "country code"?: string | null
           country_code?: string | null
+          icon?: string | null
           league?: string | null
           league_id?: number
           league_slug?: string | null
