@@ -12,6 +12,7 @@ import Footer from "@/components/Footer";
 import { useStreamingEnhanced } from "@/hooks/useStreamingEnhanced";
 import { useLeaguesEnhanced } from "@/hooks/useLeaguesEnhanced";
 import { useIsMobile } from "@/hooks/use-mobile";
+import ComparisonSidebar from "@/components/comparison/ComparisonSidebar";
 
 const DetailVergleich2 = () => {
   const [selectedLeagues, setSelectedLeagues] = useState<string[]>([]);
@@ -22,6 +23,34 @@ const DetailVergleich2 = () => {
   const { providers, loading: providersLoading } = useStreamingEnhanced();
   const { leagues, loading: leaguesLoading } = useLeaguesEnhanced();
   const isMobile = useIsMobile();
+
+  // Add filters state for ComparisonSidebar
+  const [filters, setFilters] = useState({
+    competitions: selectedLeagues,
+    priceRange,
+    features: {
+      fourK: selectedFeatures.includes('4K'),
+      mobile: selectedFeatures.includes('Mobile'),
+      download: selectedFeatures.includes('Download'),
+      multiStream: selectedFeatures.includes('Multi-Stream'),
+    },
+    simultaneousStreams: 1,
+    sortBy: 'relevance',
+  });
+  // Sync filters with existing filter states
+  useEffect(() => {
+    setFilters(f => ({
+      ...f,
+      competitions: selectedLeagues,
+      priceRange,
+      features: {
+        fourK: selectedFeatures.includes('4K'),
+        mobile: selectedFeatures.includes('Mobile'),
+        download: selectedFeatures.includes('Download'),
+        multiStream: selectedFeatures.includes('Multi-Stream'),
+      },
+    }));
+  }, [selectedLeagues, priceRange, selectedFeatures]);
 
   // Preselect all providers and leagues after data is loaded
   useEffect(() => {
@@ -256,151 +285,28 @@ const DetailVergleich2 = () => {
           </div>
         ) : (
           <div className="flex gap-6">
-            {/* Left Sidebar - Filters */}
-            <div className="w-64 space-y-4">
-              {/* Price Filter */}
-              <Card className="p-4">
-                <h3 className="font-semibold mb-3 flex items-center gap-2">
-                  <Sliders className="h-4 w-4" />
-                  Preis
-                </h3>
-                <div className="space-y-3">
-                  <div className="px-2">
-                    <Slider
-                      value={[priceRange[1]]}
-                      onValueChange={([value]) => setPriceRange([0, value])}
-                      max={100}
-                      step={5}
-                      className="w-full"
-                    />
-                  </div>
-                  <div className="text-sm text-gray-600 text-center">
-                    Bis {priceRange[1]}€ / Monat
-                  </div>
-                </div>
-              </Card>
-
-              {/* Features Filter */}
-              <Card className="p-4">
-                <h3 className="font-semibold mb-3">Features</h3>
-                <div className="space-y-2">
-                  {['4K', 'Mobile', 'Download', 'Multi-Stream'].map(feature => (
-                    <div key={feature} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={feature}
-                        checked={selectedFeatures.includes(feature)}
-                        onCheckedChange={() => toggleFeature(feature)}
-                      />
-                      <Label htmlFor={feature} className="text-sm">{feature}</Label>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-
-              {/* Providers Filter */}
-              <Card className="p-4">
-                <h3 className="font-semibold mb-3">Anbieter</h3>
-                <div className="space-y-2 max-h-60 overflow-y-auto">
-                  {providers.map(provider => (
-                    <div key={provider.streamer_id} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`provider-${provider.streamer_id}`}
-                        checked={selectedProviders.includes(provider.streamer_id)}
-                        onCheckedChange={() => toggleProvider(provider.streamer_id)}
-                      />
-                      <Label htmlFor={`provider-${provider.streamer_id}`} className="text-sm">
-                        {provider.name}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-
-              {/* Leagues Filter */}
-              <Card className="p-4">
-                <h3 className="font-semibold mb-3">Ligen</h3>
-                <div className="space-y-3 max-h-80 overflow-y-auto">
-                  {Object.entries(groupedLeagues).map(([country, countryLeagues]) => (
-                    <div key={country}>
-                      <h4 className="font-medium text-sm text-gray-700 mb-2">{country}</h4>
-                      <div className="space-y-1 ml-2">
-                        {countryLeagues.map(league => (
-                          <div key={league.league_slug} className="flex items-center space-x-2">
-                            <Checkbox
-                              id={league.league_slug}
-                              checked={selectedLeagues.includes(league.league_slug || '')}
-                              onCheckedChange={() => toggleLeague(league.league_slug || '')}
-                            />
-                            <Label htmlFor={league.league_slug} className="text-xs">
-                              {league.league}
-                            </Label>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </Card>
+            <div className="w-64">
+              <ComparisonSidebar
+                filters={filters}
+                onFiltersChange={setFilters}
+                availableCompetitions={leagues.map(l => l.league_slug)}
+                isOpen={true}
+                onClose={() => {}}
+              />
             </div>
-
-            {/* Main Content - Comparison Table */}
             <div className="flex-1">
               <div className="bg-white rounded-lg border overflow-x-auto">
                 <div className="min-w-[1000px]">
-                  {/* Header Row with Provider Names */}
+                  {/* Remove Anbieter Section, add button row instead */}
                   <div className="flex border-b">
-                    <div className="w-40 p-3 bg-gray-50 font-semibold border-r text-sm">
-                      Kriterien
-                    </div>
-                    {displayProviders.map((provider, index) => (
-                      <div key={provider.streamer_id} className={`w-48 p-3 text-center border-r last:border-r-0 ${
-                        pinnedProviders.includes(provider.streamer_id) ? 'bg-blue-50 border-blue-200' : 'bg-gray-50'
-                      }`}>
-                        
-                        {/* Ranking Badge and Pin */}
-                        <div className="flex justify-between items-start mb-2">
-                          <Badge variant={index === 0 ? "default" : "outline"} className="text-xs">
-                            {index + 1}
-                          </Badge>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => togglePin(provider.streamer_id)}
-                            className={`p-1 h-5 w-5 ${pinnedProviders.includes(provider.streamer_id) ? 'text-blue-600' : 'text-gray-400'}`}
-                          >
-                            <Pin className="h-3 w-3" />
-                          </Button>
-                        </div>
-
-                        {/* Provider Logo and Name */}
-                        <div className="flex flex-col items-center">
-                          {provider.logo_url && (
-                            <img 
-                              src={provider.logo_url} 
-                              alt={provider.name} 
-                              className="w-12 h-12 object-contain mb-1 rounded bg-white border" 
-                            />
-                          )}
-                          <h3 className="font-semibold text-sm">{provider.name}</h3>
-                          
-                          {/* Price-Performance Winner Badge */}
-                          {bestValueProvider?.streamer_id === provider.streamer_id && (
-                            <Badge className="bg-orange-100 text-orange-800 border-orange-300 text-xs mt-1">
-                              <TrendingUp className="h-3 w-3 mr-1" />
-                              Preis-Leistungs-Sieger
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Anbieter Section */}
-                  <div className="flex border-b">
-                    <div className="w-40 p-3 bg-gray-50 font-medium border-r text-sm">Anbieter</div>
+                    <div className="w-40 p-3 bg-gray-50 font-medium border-r text-sm">Jetzt abonnieren</div>
                     {displayProviders.map(provider => (
                       <div key={provider.streamer_id} className="w-48 p-3 text-center border-r last:border-r-0">
-                        <span className="font-semibold text-sm">{provider.name}</span>
+                        {provider.affiliate_url && (
+                          <Button className="w-full bg-green-600 hover:bg-green-700 text-white text-sm py-2" onClick={() => window.open(provider.affiliate_url, '_blank')}>
+                            Jetzt abonnieren
+                          </Button>
+                        )}
                       </div>
                     ))}
                   </div>
