@@ -128,8 +128,11 @@ const DetailVergleich2 = () => {
       if (selectedFeatures.includes('Download') && !features.download) return false;
       if (selectedFeatures.includes('Multi-Stream') && !features.multiStream) return false;
       
-      // League filter (must cover all selected leagues)
-      return selectedLeagues.some(league => (provider[league] || 0) > 0);
+      // League filter: if none selected, show all; if some selected, must cover all
+      if (selectedLeagues.length > 0) {
+        return selectedLeagues.every(league => (provider[league] || 0) > 0);
+      }
+      return true;
     });
     return filtered;
   }, [providers, selectedProviders, selectedLeagues, priceRange, selectedFeatures]);
@@ -235,73 +238,75 @@ const DetailVergleich2 = () => {
         </div>
         {/* Horizontal Filter Bar */}
         <Card className="mb-6">
-          <CardContent className="flex flex-wrap gap-6 items-end justify-between">
-            {/* Price Range */}
-            <div>
-              <Label className="block mb-1">Preisspanne</Label>
-              <Slider
-                value={priceRange}
-                onValueChange={value => setPriceRange([value[0], value[1]] as [number, number])}
-                max={100}
-                min={0}
-                step={5}
-                className="w-48"
-              />
-              <div className="flex justify-between text-xs text-gray-600 mt-1">
-                <span>{priceRange[0]}€</span>
-                <span>{priceRange[1]}€</span>
-              </div>
-            </div>
-            {/* Sort Options */}
-            <div>
-              <Label className="block mb-1">Sortierung</Label>
-              <select
-                className="border rounded px-2 py-1 text-sm"
-                value={filters.sortBy}
-                onChange={e => setFilters(f => ({ ...f, sortBy: e.target.value }))}
-              >
-                <option value="relevance">Nach Relevanz</option>
-                <option value="price-asc">Preis aufsteigend</option>
-                <option value="price-desc">Preis absteigend</option>
-                <option value="coverage">Nach Abdeckung</option>
-                <option value="popularity">Nach Beliebtheit</option>
-              </select>
-            </div>
-            {/* Features */}
-            <div>
-              <Label className="block mb-1">Features</Label>
-              <div className="flex gap-3">
-                <div className="flex items-center gap-1">
-                  <Checkbox checked={selectedFeatures.includes('4K')} onCheckedChange={() => toggleFeature('4K')} />
-                  <span className="text-xs">4K</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Checkbox checked={selectedFeatures.includes('Mobile')} onCheckedChange={() => toggleFeature('Mobile')} />
-                  <span className="text-xs">Mobile</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Checkbox checked={selectedFeatures.includes('Download')} onCheckedChange={() => toggleFeature('Download')} />
-                  <span className="text-xs">Download</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Checkbox checked={selectedFeatures.includes('Multi-Stream')} onCheckedChange={() => toggleFeature('Multi-Stream')} />
-                  <span className="text-xs">Multi-Stream</span>
+          <CardContent>
+            <div className="flex flex-wrap gap-6 items-end justify-between mb-4">
+              {/* Price Range */}
+              <div>
+                <Label className="block mb-1">Preisspanne</Label>
+                <Slider
+                  value={priceRange}
+                  onValueChange={value => setPriceRange([value[0], value[1]] as [number, number])}
+                  max={100}
+                  min={0}
+                  step={5}
+                  className="w-48"
+                />
+                <div className="flex justify-between text-xs text-gray-600 mt-1">
+                  <span>{priceRange[0]}€</span>
+                  <span>{priceRange[1]}€</span>
                 </div>
               </div>
+              {/* Sort Options */}
+              <div>
+                <Label className="block mb-1">Sortierung</Label>
+                <select
+                  className="border rounded px-2 py-1 text-sm"
+                  value={filters.sortBy}
+                  onChange={e => setFilters(f => ({ ...f, sortBy: e.target.value }))}
+                >
+                  <option value="relevance">Nach Relevanz</option>
+                  <option value="price-asc">Preis aufsteigend</option>
+                  <option value="price-desc">Preis absteigend</option>
+                  <option value="coverage">Nach Abdeckung</option>
+                  <option value="popularity">Nach Beliebtheit</option>
+                </select>
+              </div>
+              {/* Features */}
+              <div>
+                <Label className="block mb-1">Features</Label>
+                <div className="flex gap-3">
+                  <div className="flex items-center gap-1">
+                    <Checkbox checked={selectedFeatures.includes('4K')} onCheckedChange={() => toggleFeature('4K')} />
+                    <span className="text-xs">4K</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Checkbox checked={selectedFeatures.includes('Mobile')} onCheckedChange={() => toggleFeature('Mobile')} />
+                    <span className="text-xs">Mobile</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Checkbox checked={selectedFeatures.includes('Download')} onCheckedChange={() => toggleFeature('Download')} />
+                    <span className="text-xs">Download</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Checkbox checked={selectedFeatures.includes('Multi-Stream')} onCheckedChange={() => toggleFeature('Multi-Stream')} />
+                    <span className="text-xs">Multi-Stream</span>
+                  </div>
+                </div>
+              </div>
             </div>
-            {/* League Filter */}
-            <div>
-              <Label className="block mb-1">Wettbewerbe</Label>
-              <div className="flex flex-wrap gap-2 max-w-xs">
-                {leagues.map(league => (
+            {/* Second row: League Filter */}
+            <div className="flex flex-wrap gap-4 items-center">
+              <Label className="block mb-1 mr-2">Wettbewerbe</Label>
+              {leagues.map(league => (
+                <div key={league.league_slug} className="flex items-center gap-1 mr-3">
                   <Checkbox
-                    key={league.league_slug}
                     checked={selectedLeagues.includes(league.league_slug)}
                     onCheckedChange={() => toggleLeague(league.league_slug)}
                     id={league.league_slug}
                   />
-                ))}
-              </div>
+                  <label htmlFor={league.league_slug} className="text-xs cursor-pointer">{league.league}</label>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
