@@ -95,20 +95,21 @@ const EnhancedVergleich = () => {
 
   // Helper to get coverage for a single league
   const getProviderCoverageForLeague = (provider: any, leagueSlug: string) => {
+    const providerKey = competitionKeyMap[leagueSlug] || leagueSlug;
     const league = leagues.find(l => l.league_slug === leagueSlug);
     const totalGames = league?.['number of games'] || 0;
-    const coveredGames = (provider[leagueSlug] as number) || 0;
+    const coveredGames = (provider[providerKey] as number) || 0;
     const percentage = totalGames > 0 ? Math.round((coveredGames / totalGames) * 100) : 0;
     return { coveredGames, totalGames, percentage };
   };
   // Helper to calculate cost per game
   const calculateCostPerGame = (provider: any, selectedLeagues: string[]) => {
-    const monthlyPrice = parsePrice(provider.monthly_price);
     let totalGames = 0;
     selectedLeagues.forEach(leagueSlug => {
       const coverage = getProviderCoverageForLeague(provider, leagueSlug);
       totalGames += coverage.coveredGames;
     });
+    const monthlyPrice = parsePrice(provider.monthly_price);
     return totalGames > 0 ? monthlyPrice / totalGames : 0;
   };
   // Mapping from sidebar competition names to provider keys
@@ -142,7 +143,8 @@ const EnhancedVergleich = () => {
       if (filters.competitions.length > 0) {
         let coversAny = false;
         for (const leagueSlug of filters.competitions) {
-          if ((provider[leagueSlug] || 0) > 0) coversAny = true;
+          const providerKey = competitionKeyMap[leagueSlug] || leagueSlug;
+          if ((provider[providerKey] || 0) > 0) coversAny = true;
         }
         if (!coversAny) return false;
       }
