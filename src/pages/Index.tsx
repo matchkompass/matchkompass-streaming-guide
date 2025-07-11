@@ -194,6 +194,11 @@ const Index = () => {
                                           {item.percentage}%
                                         </Badge>
                                         <span className="text-xs text-gray-700 font-semibold min-w-[60px] text-right">€{item.price.toFixed(2)}</span>
+                                        {item.provider.affiliate_url && (
+                                          <Button size="sm" className="ml-2 bg-green-600 hover:bg-green-700 text-white px-3 py-1 text-xs" onClick={(e) => { e.preventDefault(); window.open(item.provider.affiliate_url, '_blank'); }}>
+                                            Jetzt abonnieren
+                                          </Button>
+                                        )}
                                       </div>
                                     ))
                                   )}
