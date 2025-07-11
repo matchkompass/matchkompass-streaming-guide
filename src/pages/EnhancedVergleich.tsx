@@ -94,21 +94,6 @@ const EnhancedVergleich = () => {
     return totalPossible > 0 ? Math.round((totalCovered / totalPossible) * 100) : 0;
   };
 
-  // Mapping from sidebar competition names to provider keys
-  const competitionKeyMap: Record<string, string> = {
-    'Bundesliga': 'bundesliga',
-    '2. Bundesliga': 'second_bundesliga',
-    'DFB-Pokal': 'dfb_pokal',
-    'Champions League': 'champions_league',
-    'Europa League': 'europa_league',
-    'Conference League': 'conference_league',
-    'Premier League': 'premier_league',
-    'La Liga': 'la_liga',
-    'Serie A': 'serie_a',
-    'Ligue 1': 'ligue_1',
-    'Nationalmannschaft': 'nationalmannschaft',
-  };
-
   // Helper to get flag for a league_slug
   const getFlagForLeague = (league_slug: string) => LEAGUE_CLUSTERS.flatMap(c => c.leagues).find(l => l.slug === league_slug)?.flag || "🏆";
 
@@ -124,11 +109,10 @@ const EnhancedVergleich = () => {
       if (filters.features.download && !features.download) return false;
       if (filters.features.multiStream && !features.multiStream) return false;
       if (features.streams < filters.simultaneousStreams) return false;
-      // Competition filter (map sidebar names to provider keys)
+      // Competition filter (use competition slugs directly)
       if (filters.competitions.length > 0) {
-        for (const compName of filters.competitions) {
-          const key = competitionKeyMap[compName];
-          if (!key || !provider[key] || provider[key] <= 0) {
+        for (const compSlug of filters.competitions) {
+          if (!provider[compSlug] || provider[compSlug] <= 0) {
             return false;
           }
         }
@@ -139,8 +123,8 @@ const EnhancedVergleich = () => {
     filtered.sort((a, b) => {
       const priceA = parsePrice(paymentType === 'yearly' ? a.yearly_price : a.monthly_price);
       const priceB = parsePrice(paymentType === 'yearly' ? b.yearly_price : b.monthly_price);
-      const coverageA = getProviderCoverage(a, filters.competitions.map(c => competitionKeyMap[c] || c));
-      const coverageB = getProviderCoverage(b, filters.competitions.map(c => competitionKeyMap[c] || c));
+      const coverageA = getProviderCoverage(a, filters.competitions);
+      const coverageB = getProviderCoverage(b, filters.competitions);
       
       switch (filters.sortBy) {
         case 'price-asc':
