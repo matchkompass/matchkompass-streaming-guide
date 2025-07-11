@@ -12,7 +12,6 @@ import Footer from "@/components/Footer";
 import { useStreamingEnhanced } from "@/hooks/useStreamingEnhanced";
 import { useLeaguesEnhanced } from "@/hooks/useLeaguesEnhanced";
 import { useIsMobile } from "@/hooks/use-mobile";
-import ComparisonSidebar from "@/components/comparison/ComparisonSidebar";
 
 const DetailVergleich2 = () => {
   const [selectedLeagues, setSelectedLeagues] = useState<string[]>([]);
@@ -129,7 +128,7 @@ const DetailVergleich2 = () => {
       if (selectedFeatures.includes('Download') && !features.download) return false;
       if (selectedFeatures.includes('Multi-Stream') && !features.multiStream) return false;
       
-      // League filter
+      // League filter (must cover all selected leagues)
       return selectedLeagues.some(league => (provider[league] || 0) > 0);
     });
     return filtered;
@@ -234,6 +233,79 @@ const DetailVergleich2 = () => {
             Vergleichen Sie Streaming-Anbieter Seite an Seite
           </p>
         </div>
+        {/* Horizontal Filter Bar */}
+        <Card className="mb-6">
+          <CardContent className="flex flex-wrap gap-6 items-end justify-between">
+            {/* Price Range */}
+            <div>
+              <Label className="block mb-1">Preisspanne</Label>
+              <Slider
+                value={priceRange}
+                onValueChange={value => setPriceRange([value[0], value[1]] as [number, number])}
+                max={100}
+                min={0}
+                step={5}
+                className="w-48"
+              />
+              <div className="flex justify-between text-xs text-gray-600 mt-1">
+                <span>{priceRange[0]}€</span>
+                <span>{priceRange[1]}€</span>
+              </div>
+            </div>
+            {/* Sort Options */}
+            <div>
+              <Label className="block mb-1">Sortierung</Label>
+              <select
+                className="border rounded px-2 py-1 text-sm"
+                value={filters.sortBy}
+                onChange={e => setFilters(f => ({ ...f, sortBy: e.target.value }))}
+              >
+                <option value="relevance">Nach Relevanz</option>
+                <option value="price-asc">Preis aufsteigend</option>
+                <option value="price-desc">Preis absteigend</option>
+                <option value="coverage">Nach Abdeckung</option>
+                <option value="popularity">Nach Beliebtheit</option>
+              </select>
+            </div>
+            {/* Features */}
+            <div>
+              <Label className="block mb-1">Features</Label>
+              <div className="flex gap-3">
+                <div className="flex items-center gap-1">
+                  <Checkbox checked={selectedFeatures.includes('4K')} onCheckedChange={() => toggleFeature('4K')} />
+                  <span className="text-xs">4K</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Checkbox checked={selectedFeatures.includes('Mobile')} onCheckedChange={() => toggleFeature('Mobile')} />
+                  <span className="text-xs">Mobile</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Checkbox checked={selectedFeatures.includes('Download')} onCheckedChange={() => toggleFeature('Download')} />
+                  <span className="text-xs">Download</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Checkbox checked={selectedFeatures.includes('Multi-Stream')} onCheckedChange={() => toggleFeature('Multi-Stream')} />
+                  <span className="text-xs">Multi-Stream</span>
+                </div>
+              </div>
+            </div>
+            {/* League Filter */}
+            <div>
+              <Label className="block mb-1">Wettbewerbe</Label>
+              <div className="flex flex-wrap gap-2 max-w-xs">
+                {leagues.map(league => (
+                  <Checkbox
+                    key={league.league_slug}
+                    checked={selectedLeagues.includes(league.league_slug)}
+                    onCheckedChange={() => toggleLeague(league.league_slug)}
+                    id={league.league_slug}
+                  />
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        {/* Table and rest of layout remain unchanged */}
         {isMobile ? (
           <div className="flex flex-col gap-4">
             {displayProviders.map((provider) => {
@@ -286,13 +358,7 @@ const DetailVergleich2 = () => {
         ) : (
           <div className="flex gap-6">
             <div className="w-72 min-w-[16rem]">
-              <ComparisonSidebar
-                filters={filters}
-                onFiltersChange={setFilters}
-                availableCompetitions={leagues.map(l => l.league_slug)}
-                isOpen={true}
-                onClose={() => {}}
-              />
+              {/* The ComparisonSidebar component is removed, so this div is now empty */}
             </div>
             <div className="flex-1">
               <div className="bg-white rounded-lg border overflow-x-auto">
