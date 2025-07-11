@@ -285,7 +285,7 @@ const DetailVergleich2 = () => {
           </div>
         ) : (
           <div className="flex gap-6">
-            <div className="w-64">
+            <div className="w-72 min-w-[16rem]">
               <ComparisonSidebar
                 filters={filters}
                 onFiltersChange={setFilters}
@@ -296,8 +296,22 @@ const DetailVergleich2 = () => {
             </div>
             <div className="flex-1">
               <div className="bg-white rounded-lg border overflow-x-auto">
-                <div className="min-w-[1000px]">
-                  {/* Remove Anbieter Section, add button row instead */}
+                <div className="min-w-[1200px]">
+                  {/* Provider Logo/Name Row */}
+                  <div className="flex border-b">
+                    <div className="w-40 p-3 bg-gray-50 font-medium border-r text-sm"></div>
+                    {displayProviders.map(provider => (
+                      <div key={provider.streamer_id} className="w-48 p-3 text-center border-r last:border-r-0 flex flex-col items-center justify-center">
+                        {provider.logo_url ? (
+                          <img src={provider.logo_url} alt={provider.name} className="w-10 h-10 object-contain rounded-full bg-white border mb-1" />
+                        ) : (
+                          <span className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-200 mb-1">📺</span>
+                        )}
+                        <span className="text-sm font-semibold text-gray-900">{provider.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {/* Jetzt abonnieren Button Row */}
                   <div className="flex border-b">
                     <div className="w-40 p-3 bg-gray-50 font-medium border-r text-sm">Jetzt abonnieren</div>
                     {displayProviders.map(provider => (
