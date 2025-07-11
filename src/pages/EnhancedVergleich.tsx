@@ -39,6 +39,7 @@ const EnhancedVergleich = () => {
   });
   const [paymentType, setPaymentType] = useState<'monthly' | 'yearly'>('monthly');
   const [expandedProvider, setExpandedProvider] = useState<number | null>(null);
+  const [expandedMobileCard, setExpandedMobileCard] = useState<number | null>(null);
 
   const { providers, loading: providersLoading, error: providersError } = useStreaming();
   const { leagues, loading: leaguesLoading, error: leaguesError } = useLeagues();
@@ -274,39 +275,60 @@ const EnhancedVergleich = () => {
                       icon: league.icon || getFlagForLeague(league.league_slug),
                       covered: provider[league.league_slug] > 0
                     }));
+                    const isExpanded = expandedMobileCard === provider.streamer_id;
                     return (
                       <Card key={provider.streamer_id} className="shadow-md">
-                        <CardHeader>
-                          <div className="flex items-center gap-3 mb-2">
-                            <span className="text-2xl">{provider.logo_url ? <img src={provider.logo_url} alt={provider.provider_name} className="w-8 h-8 object-contain rounded-full bg-white border" /> : "🔵"}</span>
-                            <div>
-                              <h3 className="font-bold text-lg mb-0.5">{provider.name}</h3>
-                              <div className="text-xs text-gray-500">€{price.toFixed(2)}/Monat</div>
-                            </div>
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="grid grid-cols-2 gap-2 mb-2">
-                            {dynamicLeaguesList.slice(0, 8).map(league => (
-                              <div key={league.key} className="flex items-center gap-1">
-                                <span className="text-sm">{league.icon}</span>
-                                <span className="text-xs text-gray-600 flex-1">{league.label}</span>
-                                <div className="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs bg-gray-100">
-                                  {league.covered ? "✔️" : "✖️"}
-                                </div>
+                        <button
+                          className="w-full text-left focus:outline-none"
+                          onClick={() => setExpandedMobileCard(isExpanded ? null : provider.streamer_id)}
+                        >
+                          <CardHeader>
+                            <div className="flex items-center gap-3 mb-2">
+                              <span className="text-2xl">{provider.logo_url ? <img src={provider.logo_url} alt={provider.provider_name} className="w-8 h-8 object-contain rounded-full bg-white border" /> : "🔵"}</span>
+                              <div>
+                                <h3 className="font-bold text-lg mb-0.5">{provider.name}</h3>
+                                <div className="text-xs text-gray-500">€{price.toFixed(2)}/Monat</div>
                               </div>
-                            ))}
-                          </div>
-                          <div className="flex flex-wrap gap-2 mt-2">
-                            {features.fourK && <Badge className="bg-green-100 text-green-800">4K</Badge>}
-                            {features.mobile && <Badge className="bg-blue-100 text-blue-800">Mobile</Badge>}
-                            {features.download && <Badge className="bg-purple-100 text-purple-800">Download</Badge>}
-                            {features.streams > 1 && <Badge className="bg-orange-100 text-orange-800">{features.streams} Streams</Badge>}
-                          </div>
-                          <Button className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white text-sm py-2" onClick={() => handleAffiliateClick(provider)}>
-                            Zum Anbieter
-                          </Button>
-                        </CardContent>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2 mb-2">
+                              {dynamicLeaguesList.slice(0, 8).map(league => (
+                                <div key={league.key} className="flex items-center gap-1">
+                                  <span className="text-sm">{league.icon}</span>
+                                  <span className="text-xs text-gray-600 flex-1">{league.label}</span>
+                                  <div className="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs bg-gray-100">
+                                    {league.covered ? "✔️" : "✖️"}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </CardHeader>
+                        </button>
+                        {isExpanded && (
+                          <CardContent>
+                            <div className="flex flex-wrap gap-2 mb-2">
+                              {features.fourK && <Badge className="bg-green-100 text-green-800">4K</Badge>}
+                              {features.mobile && <Badge className="bg-blue-100 text-blue-800">Mobile</Badge>}
+                              {features.download && <Badge className="bg-purple-100 text-purple-800">Download</Badge>}
+                              {features.streams > 1 && <Badge className="bg-orange-100 text-orange-800">{features.streams} Streams</Badge>}
+                            </div>
+                            <div className="grid grid-cols-1 gap-2 mb-2">
+                              {dynamicLeaguesList.map(league => (
+                                <div key={league.key} className="flex items-center justify-between text-sm">
+                                  <div className="flex items-center gap-2">
+                                    <span>{league.icon}</span>
+                                    <span>{league.label}</span>
+                                  </div>
+                                  <div className={`px-2 py-1 rounded text-xs font-medium ${league.covered ? (provider[league.key] >= 100 ? 'text-green-600 bg-green-100' : 'text-orange-600 bg-orange-100') : 'text-gray-400 bg-gray-100'}`}>
+                                    {league.covered ? `${provider[league.key]}%` : '0%'}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                            <Button className="w-full mt-2 bg-green-600 hover:bg-green-700 text-white text-sm py-2" onClick={() => handleAffiliateClick(provider)}>
+                              Zum Anbieter
+                            </Button>
+                          </CardContent>
+                        )}
                       </Card>
                     );
                   })}

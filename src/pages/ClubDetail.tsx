@@ -103,96 +103,81 @@ const ClubDetail = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
       <div className="max-w-6xl mx-auto px-4 py-6">
-        {/* Providers Coverage Section */}
-        {providerCoverages.length > 0 && (
-          <div className="mb-6">
-            <Card className="shadow-md">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <span className="text-2xl">📺</span>
-                  Top Streaming-Anbieter für {club.name}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="border border-dashed rounded-lg p-2 bg-white mb-2">
-                  <div className="text-xs text-gray-700 font-semibold mb-1">Verfügbar bei:</div>
-                  {providerCoverages.map((item) => (
-                    <div key={item.provider.streamer_id} className="flex items-center justify-between border-b last:border-b-0 border-dotted border-gray-200 px-2 py-1 text-sm">
-                      <div className="flex items-center gap-2">
-                        {item.provider.logo_url ? (
-                          <img src={item.provider.logo_url} alt={item.provider.provider_name} className="w-4 h-4 object-contain rounded-full" />
-                        ) : (
-                          <span className="w-4 h-4 bg-gray-200 rounded-full flex items-center justify-center">📺</span>
-                        )}
-                        <span className="font-medium">{item.provider.provider_name}</span>
-                      </div>
-                      <Badge
-                        className={
-                          `${item.percentage >= 90 ? 'bg-green-500' : item.percentage >= 50 ? 'bg-orange-500' : 'bg-red-500'} ${isMobile ? 'mx-auto flex justify-center' : ''}`
-                        }
-                      >
-                        {item.percentage}%
-                      </Badge>
-                      <span className="text-xs text-gray-700 font-semibold min-w-[60px] text-right">€{item.price.toFixed(2)}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-        {/* Hero Section */}
-        <div className="bg-white rounded-lg shadow-sm mb-6 overflow-hidden">
-          <div 
-            className="h-32 bg-gradient-to-r"
-            style={{
-              background: `linear-gradient(135deg, ${club.primary_color || '#2E7D32'}, ${club.secondary_color || '#1565C0'})`
-            }}
-          />
-          <div className="px-6 pb-6 -mt-16 relative">
-            <div className="flex flex-col md:flex-row md:items-end gap-4">
-              <div className="bg-white rounded-lg p-4 shadow-lg">
-                {club.logo_url ? (
-                  <img src={club.logo_url} alt={club.name} className="w-20 h-20 object-contain" />
-                ) : (
-                  <div className="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center text-3xl">
-                    ⚽
-                  </div>
-                )}
-              </div>
-              <div className="text-white md:text-gray-900 flex-1">
-                <h1 className="text-3xl font-bold mb-2">{club.name}</h1>
-                <div className="flex flex-wrap gap-4 text-sm">
-                  {club.founded_year && (
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4" />
-                      Gegründet {club.founded_year}
-                    </div>
-                  )}
-                  {club.stadium_name && (
-                    <div className="flex items-center gap-1">
-                      <MapPin className="h-4 w-4" />
-                      {club.stadium_name}
-                      {club.stadium_capacity && ` (${club.stadium_capacity?.toLocaleString()} Plätze)`}
-                    </div>
-                  )}
-                  {club.members_count && (
-                    <div className="flex items-center gap-1">
-                      <Users className="h-4 w-4" />
-                      {club.members_count.toLocaleString()} Mitglieder
-                    </div>
-                  )}
-                </div>
+        {/* Club Info Card (top, styled with club colors) */}
+        <div className="rounded-lg shadow-sm mb-6 overflow-hidden" style={{ background: `linear-gradient(135deg, ${club.primary_color || '#2E7D32'}, ${club.secondary_color || '#1565C0'})` }}>
+          <div className="flex flex-col md:flex-row md:items-center gap-6 p-6">
+            <div className="bg-white rounded-lg p-4 shadow-lg flex items-center justify-center" style={{ minWidth: 80, minHeight: 80 }}>
+              {club.logo_url ? (
+                <img src={club.logo_url} alt={club.name} className="w-20 h-20 object-contain" />
+              ) : (
+                <div className="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center text-3xl">⚽</div>
+              )}
+            </div>
+            <div className="flex-1 text-white md:text-gray-900">
+              <h1 className="text-3xl font-bold mb-2">{club.name}</h1>
+              <div className="flex flex-wrap gap-4 text-sm">
+                {club.country && <span className="bg-white/30 rounded px-2 py-1">{club.country}</span>}
+                {club.founded_year && <span className="bg-white/30 rounded px-2 py-1">Gegründet {club.founded_year}</span>}
+                {club.stadium_name && <span className="bg-white/30 rounded px-2 py-1">{club.stadium_name}{club.stadium_capacity && ` (${club.stadium_capacity?.toLocaleString()} Plätze)`}</span>}
+                {club.members_count && <span className="bg-white/30 rounded px-2 py-1">{club.members_count.toLocaleString()} Mitglieder</span>}
               </div>
             </div>
           </div>
         </div>
-
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
-            {/* Current Competitions */}
+            {/* Top Streaming-Anbieter Section (table layout for desktop) */}
+            {providerCoverages.length > 0 && (
+              <Card className="shadow-md">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <span className="text-2xl">📺</span>
+                    Top Streaming-Anbieter für {club.name}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full text-sm">
+                      <thead>
+                        <tr className="text-left text-gray-700">
+                          <th className="py-2 px-2">Anbieter</th>
+                          <th className="py-2 px-2 text-center">Abdeckung</th>
+                          <th className="py-2 px-2 text-right">Preis</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {providerCoverages.map((item) => (
+                          <tr key={item.provider.streamer_id} className="border-b last:border-b-0 border-dotted border-gray-200">
+                            <td className="py-2 px-2">
+                              <div className="flex items-center gap-2">
+                                {item.provider.logo_url ? (
+                                  <img src={item.provider.logo_url} alt={item.provider.provider_name} className="w-5 h-5 object-contain rounded-full" />
+                                ) : (
+                                  <span className="w-5 h-5 bg-gray-200 rounded-full flex items-center justify-center">📺</span>
+                                )}
+                                <span className="font-medium">{item.provider.provider_name}</span>
+                              </div>
+                            </td>
+                            <td className="py-2 px-2 text-center">
+                              <Badge className={
+                                `${item.percentage >= 90 ? 'bg-green-500' : item.percentage >= 50 ? 'bg-orange-500' : 'bg-red-500'} mx-auto flex justify-center`
+                              }>
+                                {item.percentage}%
+                              </Badge>
+                            </td>
+                            <td className="py-2 px-2 text-right">
+                              <span className="text-xs text-gray-700 font-semibold min-w-[60px]">€{item.price.toFixed(2)}</span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+            {/* Aktuelle Wettbewerbe Section */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -214,8 +199,7 @@ const ClubDetail = () => {
                 </div>
               </CardContent>
             </Card>
-
-            {/* Best Streaming Combo */}
+            {/* Best Streaming Combo Section (unchanged) */}
             <Card>
               <CardHeader>
                 <CardTitle>Beste Streaming-Kombination</CardTitle>
@@ -236,8 +220,7 @@ const ClubDetail = () => {
               </CardContent>
             </Card>
           </div>
-
-          {/* Sidebar */}
+          {/* Sidebar: Quick Facts (unchanged) */}
           <div>
             <Card>
               <CardHeader>
@@ -257,7 +240,6 @@ const ClubDetail = () => {
                     </a>
                   </div>
                 )}
-                
                 {club.fanshop_url && (
                   <div>
                     <label className="text-sm font-medium text-gray-600 block mb-1">Fanshop</label>
@@ -271,21 +253,18 @@ const ClubDetail = () => {
                     </a>
                   </div>
                 )}
-
                 {club.stadium_location && (
                   <div>
                     <label className="text-sm font-medium text-gray-600 block mb-1">Stadion-Standort</label>
                     <p className="text-sm">{club.stadium_location}</p>
                   </div>
                 )}
-
                 {club.country && (
                   <div>
                     <label className="text-sm font-medium text-gray-600 block mb-1">Land</label>
                     <p className="text-sm">{club.country}</p>
                   </div>
                 )}
-
                 {/* Social Media Links */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-600 block">Social Media</label>
@@ -327,7 +306,6 @@ const ClubDetail = () => {
           </div>
         </div>
       </div>
-
       <Footer />
     </div>
   );
