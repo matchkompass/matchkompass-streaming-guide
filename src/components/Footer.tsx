@@ -12,28 +12,23 @@ const Footer = () => {
       { name: "Spielplan & News", href: "/news" }
     ],
     vereine: [
-      { name: "Bayern München", href: "/verein/bayern-muenchen" },
-      { name: "Borussia Dortmund", href: "/verein/borussia-dortmund" },
-      { name: "FC Barcelona", href: "/verein/fc-barcelona" },
-      { name: "Real Madrid", href: "/verein/real-madrid" }
+      { name: "Bayern München", href: "/clubs/bayern-muenchen" },
+      { name: "Borussia Dortmund", href: "/clubs/borussia-dortmund" },
+      { name: "FC Barcelona", href: "/clubs/fc-barcelona" },
+      { name: "Real Madrid", href: "/clubs/real-madrid" }
     ],
     ligen: [
-      { name: "Bundesliga", href: "/liga/bundesliga" },
-      { name: "2. Bundesliga", href: "/liga/2-bundesliga" },
-      { name: "Champions League", href: "/liga/champions-league" },
-      { name: "DFB-Pokal", href: "/liga/dfb-pokal" }
-    ],
-    anbieter: [
-      { name: "Sky Deutschland", href: "/anbieter/sky" },
-      { name: "DAZN", href: "/anbieter/dazn" },
-      { name: "Amazon Prime", href: "/anbieter/amazon-prime" },
-      { name: "MagentaTV", href: "/anbieter/magenta-tv" }
+      { name: "Bundesliga", href: "/leagues/bundesliga" },
+      { name: "2. Bundesliga", href: "/leagues/2-bundesliga" },
+      { name: "Champions League", href: "/leagues/champions-league" },
+      { name: "DFB-Pokal", href: "/leagues/dfb-pokal" }
     ],
     rechtliches: [
       { name: "Impressum", href: "/impressum" },
       { name: "Datenschutz", href: "/datenschutz" },
       { name: "AGB", href: "/agb" },
-      { name: "Cookie-Richtlinie", href: "/cookies" }
+      { name: "Cookie-Richtlinie", href: "/cookies" },
+      { name: "Widerrufsrecht", href: "/widerrufsrecht" }
     ]
   };
 
@@ -124,10 +119,13 @@ const Footer = () => {
               Rechtliches
             </h3>
             <ul className="space-y-2">
-              <li><Link to="/impressum" className="text-gray-400 hover:text-green-400 transition-colors">Impressum</Link></li>
-              <li><Link to="/datenschutz" className="text-gray-400 hover:text-green-400 transition-colors">Datenschutz</Link></li>
-              <li><Link to="/agb" className="text-gray-400 hover:text-green-400 transition-colors">AGB</Link></li>
-              <li><Link to="/widerrufsrecht" className="text-gray-400 hover:text-green-400 transition-colors">Widerrufsrecht</Link></li>
+              {footerLinks.rechtliches.map((link) => (
+                <li key={link.name}>
+                  <Link to={link.href} className="text-gray-400 hover:text-green-400 transition-colors">
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
             <div className="mt-4 space-y-1 text-gray-400 text-sm">
               <div>📧 info@matchkompass.de</div>

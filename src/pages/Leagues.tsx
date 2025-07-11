@@ -161,7 +161,7 @@ const Leagues = () => {
                   {clusterLeagues.length} Ligen
                 </Badge>
               </h2>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid md:grid-cols-2 gap-6">
                 {clusterLeagues.map((league) => {
                   // Get top 4 cheapest providers with coverage > 0
                   const providerCoverages = providers

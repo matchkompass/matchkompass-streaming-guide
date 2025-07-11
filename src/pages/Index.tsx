@@ -148,7 +148,7 @@ const Index = () => {
                 return (
                   <div key={cluster.key} className="mb-10">
                     <h3 className={`text-xl font-bold mb-4 ${cluster.headerColor}`}>{cluster.name}</h3>
-                    <div className="grid md:grid-cols-3 gap-6">
+                    <div className="grid md:grid-cols-2 gap-6">
                       {clusterLeagues.map((league) => {
                         // Get top 4 cheapest providers with coverage > 0
                         const providerCoverages = providers
