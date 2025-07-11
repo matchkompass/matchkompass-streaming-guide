@@ -129,8 +129,8 @@ const DetailVergleich2 = () => {
       if (selectedFeatures.includes('Download') && !features.download) return false;
       if (selectedFeatures.includes('Multi-Stream') && !features.multiStream) return false;
       
-      // League filter (must cover all selected leagues)
-      return selectedLeagues.every(league => (provider[league] || 0) > 0);
+      // League filter
+      return selectedLeagues.some(league => (provider[league] || 0) > 0);
     });
     return filtered;
   }, [providers, selectedProviders, selectedLeagues, priceRange, selectedFeatures]);
