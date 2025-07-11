@@ -9,6 +9,7 @@ import Footer from "@/components/Footer";
 import { LEAGUE_CLUSTERS } from "./Wizard";
 import { useLeagues } from "@/hooks/useLeagues";
 import { useStreaming } from "@/hooks/useStreaming";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Helper: slug to flag
 const LEAGUE_SLUG_TO_FLAG = Object.fromEntries(
@@ -49,6 +50,7 @@ const Index = () => {
 
   const { leagues, loading: leaguesLoading } = useLeagues();
   const { providers, loading: providersLoading } = useStreaming();
+  const isMobile = useIsMobile();
 
   // Helper to compute provider coverage for a league
   const getProviderCoverage = (provider, league) => {
@@ -186,9 +188,7 @@ const Index = () => {
                                         </div>
                                         <Badge
                                           className={
-                                            item.percentage >= 90 ? 'bg-green-500' :
-                                            item.percentage >= 50 ? 'bg-orange-500' :
-                                            'bg-red-500'
+                                            `${item.percentage >= 90 ? 'bg-green-500' : item.percentage >= 50 ? 'bg-orange-500' : 'bg-red-500'} ${isMobile ? 'mx-auto flex justify-center' : ''}`
                                           }
                                         >
                                           {item.percentage}%

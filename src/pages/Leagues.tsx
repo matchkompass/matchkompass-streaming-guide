@@ -11,6 +11,7 @@ import FAQSection from "@/components/FAQSection";
 import { useLeagues } from "@/hooks/useLeagues";
 import { useStreaming } from "@/hooks/useStreaming";
 import { LEAGUE_CLUSTERS } from "./Wizard";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Helper: slug to flag
 const LEAGUE_SLUG_TO_FLAG = Object.fromEntries(
@@ -21,6 +22,7 @@ const Leagues = () => {
   const { leagues, loading } = useLeagues();
   const [searchTerm, setSearchTerm] = useState("");
   const { providers, loading: providersLoading } = useStreaming();
+  const isMobile = useIsMobile();
 
   const filteredLeagues = leagues.filter(league =>
     league.league?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -216,9 +218,7 @@ const Leagues = () => {
                                   </div>
                                   <Badge
                                     className={
-                                      item.percentage >= 90 ? 'bg-green-500' :
-                                      item.percentage >= 50 ? 'bg-orange-500' :
-                                      'bg-red-500'
+                                      `${item.percentage >= 90 ? 'bg-green-500' : item.percentage >= 50 ? 'bg-orange-500' : 'bg-red-500'} ${isMobile ? 'mx-auto flex justify-center' : ''}`
                                     }
                                   >
                                     {item.percentage}%

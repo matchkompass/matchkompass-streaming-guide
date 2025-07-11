@@ -10,12 +10,16 @@ import Footer from "@/components/Footer";
 import { useClubs, Club } from "@/hooks/useClubs";
 import { useLeagues } from "@/hooks/useLeagues";
 import { getClubCompetitions } from "@/utils/enhancedCoverageCalculator";
+import { useStreaming } from "@/hooks/useStreaming";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const ClubDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const { clubs, loading: clubsLoading } = useClubs();
   const { leagues } = useLeagues();
   const [club, setClub] = useState<Club | null>(null);
+  const { providers } = useStreaming();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (clubs.length > 0 && slug) {
@@ -68,11 +72,77 @@ const ClubDetail = () => {
 
   const competitions = getCompetitionDetails(club);
 
+  // Helper: get all leagues for this club
+  const clubLeagues = Object.keys(club)
+    .filter(key => club[key] === true && key !== 'slug' && key !== 'name')
+    .filter(key => leagues.some(l => l.league_slug === key));
+  // Compute provider coverage for this club (sum covered games for all club leagues)
+  const providerCoverages = providers.map(provider => {
+    let coveredGames = 0;
+    let totalGames = 0;
+    clubLeagues.forEach(leagueSlug => {
+      const league = leagues.find(l => l.league_slug === leagueSlug);
+      if (!league) return;
+      const games = league['number of games'] || 0;
+      totalGames += games;
+      coveredGames += (provider[leagueSlug] || 0);
+    });
+    const percentage = totalGames > 0 ? Math.round((coveredGames / totalGames) * 100) : 0;
+    return {
+      provider,
+      coveredGames,
+      totalGames,
+      percentage,
+      price: parseFloat(provider.monthly_price) || 0,
+    };
+  })
+    .filter(item => item.coveredGames > 0)
+    .sort((a, b) => b.percentage - a.percentage || a.price - b.price)
+    .slice(0, 4);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
       
       <div className="max-w-6xl mx-auto px-4 py-6">
+        {/* Providers Coverage Section */}
+        {providerCoverages.length > 0 && (
+          <div className="mb-6">
+            <Card className="shadow-md">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <span className="text-2xl">📺</span>
+                  Top Streaming-Anbieter für {club.name}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="border border-dashed rounded-lg p-2 bg-white mb-2">
+                  <div className="text-xs text-gray-700 font-semibold mb-1">Verfügbar bei:</div>
+                  {providerCoverages.map((item) => (
+                    <div key={item.provider.streamer_id} className="flex items-center justify-between border-b last:border-b-0 border-dotted border-gray-200 px-2 py-1 text-sm">
+                      <div className="flex items-center gap-2">
+                        {item.provider.logo_url ? (
+                          <img src={item.provider.logo_url} alt={item.provider.provider_name} className="w-4 h-4 object-contain rounded-full" />
+                        ) : (
+                          <span className="w-4 h-4 bg-gray-200 rounded-full flex items-center justify-center">📺</span>
+                        )}
+                        <span className="font-medium">{item.provider.provider_name}</span>
+                      </div>
+                      <Badge
+                        className={
+                          `${item.percentage >= 90 ? 'bg-green-500' : item.percentage >= 50 ? 'bg-orange-500' : 'bg-red-500'} ${isMobile ? 'mx-auto flex justify-center' : ''}`
+                        }
+                      >
+                        {item.percentage}%
+                      </Badge>
+                      <span className="text-xs text-gray-700 font-semibold min-w-[60px] text-right">€{item.price.toFixed(2)}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
         {/* Hero Section */}
         <div className="bg-white rounded-lg shadow-sm mb-6 overflow-hidden">
           <div 
@@ -141,19 +211,6 @@ const ClubDetail = () => {
                       <Badge variant="outline">{comp.slug.replace('_', ' ')}</Badge>
                     </div>
                   ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Season Schedule Placeholder */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Saison-Spielplan</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8 text-gray-500">
-                  <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                  <p>Spielplan wird bald verfügbar sein</p>
                 </div>
               </CardContent>
             </Card>

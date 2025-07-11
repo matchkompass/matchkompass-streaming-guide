@@ -12,6 +12,7 @@ import ComparisonSidebar from "@/components/comparison/ComparisonSidebar";
 import { Checkbox } from "@/components/ui/checkbox";
 import HighlightBadge from "@/components/ui/highlight-badge";
 import { LEAGUE_CLUSTERS } from "./Wizard";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ComparisonFilters {
   competitions: string[];
@@ -41,6 +42,7 @@ const EnhancedVergleich = () => {
 
   const { providers, loading: providersLoading, error: providersError } = useStreaming();
   const { leagues, loading: leaguesLoading, error: leaguesError } = useLeagues();
+  const isMobile = useIsMobile();
 
   const parsePrice = (priceString?: string): number => {
     if (!priceString) return 0;
@@ -258,7 +260,58 @@ const EnhancedVergleich = () => {
             </div>
 
             <div className="space-y-4">
-              <div className="flex-1">
+              {/* Main provider/league display */}
+              {isMobile ? (
+                <div className="flex flex-col gap-4">
+                  {filteredProviders.map((provider) => {
+                    const price = parsePrice(provider.monthly_price);
+                    const yearlyPrice = parsePrice(provider.yearly_price);
+                    const features = parseFeatures(provider);
+                    const sortedLeagues = [...leagues].sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
+                    const dynamicLeaguesList = sortedLeagues.map(league => ({
+                      key: league.league_slug,
+                      label: league.league,
+                      icon: league.icon || getFlagForLeague(league.league_slug),
+                      covered: provider[league.league_slug] > 0
+                    }));
+                    return (
+                      <Card key={provider.streamer_id} className="shadow-md">
+                        <CardHeader>
+                          <div className="flex items-center gap-3 mb-2">
+                            <span className="text-2xl">{provider.logo_url ? <img src={provider.logo_url} alt={provider.provider_name} className="w-8 h-8 object-contain rounded-full bg-white border" /> : "🔵"}</span>
+                            <div>
+                              <h3 className="font-bold text-lg mb-0.5">{provider.name}</h3>
+                              <div className="text-xs text-gray-500">€{price.toFixed(2)}/Monat</div>
+                            </div>
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="grid grid-cols-2 gap-2 mb-2">
+                            {dynamicLeaguesList.slice(0, 8).map(league => (
+                              <div key={league.key} className="flex items-center gap-1">
+                                <span className="text-sm">{league.icon}</span>
+                                <span className="text-xs text-gray-600 flex-1">{league.label}</span>
+                                <div className="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs bg-gray-100">
+                                  {league.covered ? "✔️" : "✖️"}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {features.fourK && <Badge className="bg-green-100 text-green-800">4K</Badge>}
+                            {features.mobile && <Badge className="bg-blue-100 text-blue-800">Mobile</Badge>}
+                            {features.download && <Badge className="bg-purple-100 text-purple-800">Download</Badge>}
+                            {features.streams > 1 && <Badge className="bg-orange-100 text-orange-800">{features.streams} Streams</Badge>}
+                          </div>
+                          <Button className="w-full mt-4 bg-green-600 hover:bg-green-700 text-white text-sm py-2" onClick={() => handleAffiliateClick(provider)}>
+                            Zum Anbieter
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              ) : (
                 <div className="flex flex-col gap-6">
                   {filteredProviders.map((provider) => {
                     const price = parsePrice(provider.monthly_price);
@@ -394,7 +447,7 @@ const EnhancedVergleich = () => {
                     );
                   })}
                 </div>
-              </div>
+              )}
             </div>
 
             {filteredProviders.length === 0 && (
