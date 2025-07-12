@@ -277,11 +277,11 @@ const OptimizedStep4Results = ({
                   </div>
                   <div className="bg-gray-50 rounded-lg p-4 space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Monatlich:</span>
+                      <span className="text-sm text-gray-600">Monatliches Abo:</span>
                       <span className="font-semibold text-green-600">€{rec.totalCost.toFixed(2)}</span>
                     </div>
                      <div className="flex justify-between">
-                       <span className="text-sm text-gray-600">Jährlich:</span>
+                       <span className="text-sm text-gray-600">Jährliches Abo:</span>
                        <span className="font-semibold">€{rec.yearlyCost.toFixed(2)}</span>
                      </div>
                     <div className="flex justify-between border-t pt-2">
@@ -343,19 +343,52 @@ const OptimizedStep4Results = ({
                           {provider.logo_url && (
                             <img src={provider.logo_url} alt={provider.provider_name} className="w-6 h-6 object-contain" />
                           )}
-                          <span className="text-sm font-medium">{provider.provider_name}</span>
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium">{provider.provider_name}</span>
+                            <span className="text-xs text-gray-500">
+                              Monatlich: €{parsePrice(provider.monthly_price).toFixed(2)}
+                            </span>
+                          </div>
                         </div>
-                        <span className="text-sm text-gray-600">
-                          €{parsePrice(provider.monthly_price).toFixed(2)}
-                        </span>
+                        {provider.affiliate_url && (
+                          <Button 
+                            size="sm" 
+                            className="bg-green-600 hover:bg-green-700 text-white text-xs px-2 py-1"
+                            onClick={() => window.open(provider.affiliate_url, '_blank')}
+                          >
+                            Jetzt buchen
+                          </Button>
+                        )}
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <Button className="w-full bg-green-600 hover:bg-green-700" size="lg">
-                  Jetzt abschließen
-                </Button>
+                <div className="space-y-2">
+                  {rec.providers.length === 1 && rec.providers[0].affiliate_url ? (
+                    <Button 
+                      className="w-full bg-green-600 hover:bg-green-700" 
+                      size="lg"
+                      onClick={() => window.open(rec.providers[0].affiliate_url, '_blank')}
+                    >
+                      Jetzt zum Angebot
+                    </Button>
+                  ) : (
+                    <Button 
+                      className="w-full bg-green-600 hover:bg-green-700" 
+                      size="lg"
+                      onClick={() => {
+                        rec.providers.forEach(provider => {
+                          if (provider.affiliate_url) {
+                            window.open(provider.affiliate_url, '_blank');
+                          }
+                        });
+                      }}
+                    >
+                      Alle Angebote öffnen
+                    </Button>
+                  )}
+                </div>
               </CardContent>
             </Card>
           ))}
@@ -390,12 +423,12 @@ const OptimizedStep4Results = ({
                       </div>
                       <div className="bg-gray-50 rounded p-3 space-y-1">
                         <div className="flex justify-between text-sm">
-                          <span>Monatlich:</span>
+                          <span>Monatliches Abo:</span>
                           <span className="font-semibold">€{parsePrice(provider.monthly_price).toFixed(2)}</span>
                         </div>
                         {provider.yearly_price && (
                           <div className="flex justify-between text-sm">
-                            <span>Jährlich:</span>
+                            <span>Jährliches Abo:</span>
                             <span>€{parsePrice(provider.yearly_price).toFixed(2)}</span>
                           </div>
                         )}
@@ -453,9 +486,18 @@ const OptimizedStep4Results = ({
 
                   {/* Actions */}
                   <div className="flex flex-col gap-2">
-                    <Button className="bg-green-600 hover:bg-green-700">
-                      Zum Angebot
-                    </Button>
+                    {provider.affiliate_url ? (
+                      <Button 
+                        className="bg-green-600 hover:bg-green-700"
+                        onClick={() => window.open(provider.affiliate_url, '_blank')}
+                      >
+                        Jetzt buchen
+                      </Button>
+                    ) : (
+                      <Button className="bg-gray-400 cursor-not-allowed" disabled>
+                        Kein Angebot verfügbar
+                      </Button>
+                    )}
                     <Button variant="outline" size="sm">
                       Details anzeigen
                     </Button>

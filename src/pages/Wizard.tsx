@@ -8,7 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import EnhancedCompetitionSelector from "@/components/wizard/EnhancedCompetitionSelector";
-import EnhancedStep3Providers from "@/components/wizard/EnhancedStep3Providers";
+
 import EnhancedStep4Results from "@/components/wizard/EnhancedStep4Results";
 import OptimizedStep4Results from "@/components/wizard/OptimizedStep4Results";
 import { useClubs, Club } from "@/hooks/useClubs";
@@ -111,7 +111,7 @@ const Wizard = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedClubIds, setSelectedClubIds] = useState<number[]>([]);
   const [selectedCompetitions, setSelectedCompetitions] = useState<string[]>([]);
-  const [existingProviders, setExistingProviders] = useState<number[]>([]);
+  const [existingProviders] = useState<number[]>([]); // Always empty - no step 3
   const [searchTerm, setSearchTerm] = useState("");
   const [expandedLeagues, setExpandedLeagues] = useState<string[]>(getDefaultExpandedLeagues());
   const [showAllClubs, setShowAllClubs] = useState<Record<string, boolean>>({});
@@ -197,13 +197,6 @@ const Wizard = () => {
     );
   };
 
-  const handleProviderToggle = (providerId: number) => {
-    setExistingProviders(prev =>
-      prev.includes(providerId)
-        ? prev.filter(id => id !== providerId)
-        : [...prev, providerId]
-    );
-  };
 
   const toggleLeague = (leagueName: string) => {
     setExpandedLeagues(prev => 
@@ -333,40 +326,45 @@ const Wizard = () => {
                               </button>
                               {isExpanded && (
                                 <div className="px-6 pb-6">
-                                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                                   <div className="grid grid-cols-3 gap-3">
                                     {displayedClubs.map((club) => (
-                                      <Card
-                                        key={club.club_id}
-                                        className={`cursor-pointer transition-all duration-200 hover:shadow-md w-full max-w-xs mx-auto ${
-                                          selectedClubIds.includes(club.club_id)
-                                            ? 'ring-2 ring-green-500 bg-green-50'
-                                            : 'hover:bg-gray-50'
-                                        }`}
-                                        onClick={() => handleClubToggle(club.club_id)}
-                                      >
-                                        <CardContent className="p-2 flex flex-col items-center">
-                                          <div className="text-2xl mb-1">
-                                            {club.logo_url ? (
-                                              <img src={club.logo_url} alt={club.name} className="w-8 h-8 object-contain" />
-                                            ) : (
-                                              "⚽"
-                                            )}
-                                          </div>
-                                          <h3 className="font-medium text-xs mb-1 text-center line-clamp-2">{club.name}</h3>
-                                          <div className="flex flex-wrap gap-1 justify-center mb-1">
-                                            {getClubCompetitions(club).map((slug, idx) => (
-                                              <Badge key={idx} variant="secondary" className="text-xxs flex items-center gap-1">
-                                                <span>{LEAGUE_SLUG_TO_FLAG[slug] || "🏆"}</span>
-                                                <span>{LEAGUE_SLUG_TO_NAME[slug] || slug.replace('_', ' ')}</span>
-                                              </Badge>
-                                            ))}
-                                          </div>
-                                          {selectedClubIds.includes(club.club_id) && (
-                                            <div className="mt-1">
-                                              <Check className="h-4 w-4 text-green-600 mx-auto" />
-                                            </div>
-                                          )}
-                                        </CardContent>
+                                       <Card
+                                         key={club.club_id}
+                                         className={`cursor-pointer transition-all duration-200 hover:shadow-md w-full ${
+                                           selectedClubIds.includes(club.club_id)
+                                             ? 'ring-2 ring-green-500 bg-green-50'
+                                             : 'hover:bg-gray-50'
+                                         }`}
+                                         onClick={() => handleClubToggle(club.club_id)}
+                                       >
+                                         <CardContent className="p-3 flex flex-col items-center min-h-[120px]">
+                                           <div className="text-2xl mb-2">
+                                             {club.logo_url ? (
+                                               <img src={club.logo_url} alt={club.name} className="w-8 h-8 object-contain" />
+                                             ) : (
+                                               "⚽"
+                                             )}
+                                           </div>
+                                           <h3 className="font-medium text-sm mb-2 text-center line-clamp-2">{club.name}</h3>
+                                           <div className="flex flex-wrap gap-1 justify-center mb-2">
+                                             {getClubCompetitions(club).slice(0, 2).map((slug, idx) => {
+                                               // Get icon from database
+                                               const league = leagues.find(l => l.league_slug === slug);
+                                               const leagueIcon = league?.icon || LEAGUE_SLUG_TO_FLAG[slug] || "🏆";
+                                               return (
+                                                 <Badge key={idx} variant="secondary" className="text-xs flex items-center gap-1">
+                                                   <span>{leagueIcon}</span>
+                                                   <span>{LEAGUE_SLUG_TO_NAME[slug] || slug.replace('_', ' ')}</span>
+                                                 </Badge>
+                                               );
+                                             })}
+                                           </div>
+                                           {selectedClubIds.includes(club.club_id) && (
+                                             <div className="mt-auto">
+                                               <Check className="h-4 w-4 text-green-600 mx-auto" />
+                                             </div>
+                                           )}
+                                         </CardContent>
                                       </Card>
                                     ))}
                                   </div>
@@ -431,40 +429,45 @@ const Wizard = () => {
                               </button>
                               {isExpanded && (
                                 <div className="px-6 pb-6">
-                                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                                  <div className="grid grid-cols-3 gap-3">
                                     {displayedClubs.map((club) => (
-                                      <Card
-                                        key={club.club_id}
-                                        className={`cursor-pointer transition-all duration-200 hover:shadow-md w-full max-w-xs mx-auto ${
-                                          selectedClubIds.includes(club.club_id)
-                                            ? 'ring-2 ring-green-500 bg-green-50'
-                                            : 'hover:bg-gray-50'
-                                        }`}
-                                        onClick={() => handleClubToggle(club.club_id)}
-                                      >
-                                        <CardContent className="p-2 flex flex-col items-center">
-                                          <div className="text-2xl mb-1">
-                                            {club.logo_url ? (
-                                              <img src={club.logo_url} alt={club.name} className="w-8 h-8 object-contain" />
-                                            ) : (
-                                              "⚽"
-                                            )}
-                                          </div>
-                                          <h3 className="font-medium text-xs mb-1 text-center line-clamp-2">{club.name}</h3>
-                                          <div className="flex flex-wrap gap-1 justify-center mb-1">
-                                            {getClubCompetitions(club).map((slug, idx) => (
-                                              <Badge key={idx} variant="secondary" className="text-xxs flex items-center gap-1">
-                                                <span>{LEAGUE_SLUG_TO_FLAG[slug] || "🏆"}</span>
-                                                <span>{LEAGUE_SLUG_TO_NAME[slug] || slug.replace('_', ' ')}</span>
-                                              </Badge>
-                                            ))}
-                                          </div>
-                                          {selectedClubIds.includes(club.club_id) && (
-                                            <div className="mt-1">
-                                              <Check className="h-4 w-4 text-green-600 mx-auto" />
-                                            </div>
-                                          )}
-                                        </CardContent>
+                                       <Card
+                                         key={club.club_id}
+                                         className={`cursor-pointer transition-all duration-200 hover:shadow-md w-full ${
+                                           selectedClubIds.includes(club.club_id)
+                                             ? 'ring-2 ring-green-500 bg-green-50'
+                                             : 'hover:bg-gray-50'
+                                         }`}
+                                         onClick={() => handleClubToggle(club.club_id)}
+                                       >
+                                         <CardContent className="p-3 flex flex-col items-center min-h-[120px]">
+                                           <div className="text-2xl mb-2">
+                                             {club.logo_url ? (
+                                               <img src={club.logo_url} alt={club.name} className="w-8 h-8 object-contain" />
+                                             ) : (
+                                               "⚽"
+                                             )}
+                                           </div>
+                                           <h3 className="font-medium text-sm mb-2 text-center line-clamp-2">{club.name}</h3>
+                                           <div className="flex flex-wrap gap-1 justify-center mb-2">
+                                             {getClubCompetitions(club).slice(0, 2).map((slug, idx) => {
+                                               // Get icon from database
+                                               const league = leagues.find(l => l.league_slug === slug);
+                                               const leagueIcon = league?.icon || LEAGUE_SLUG_TO_FLAG[slug] || "🏆";
+                                               return (
+                                                 <Badge key={idx} variant="secondary" className="text-xs flex items-center gap-1">
+                                                   <span>{leagueIcon}</span>
+                                                   <span>{LEAGUE_SLUG_TO_NAME[slug] || slug.replace('_', ' ')}</span>
+                                                 </Badge>
+                                               );
+                                             })}
+                                           </div>
+                                           {selectedClubIds.includes(club.club_id) && (
+                                             <div className="mt-auto">
+                                               <Check className="h-4 w-4 text-green-600 mx-auto" />
+                                             </div>
+                                           )}
+                                         </CardContent>
                                       </Card>
                                     ))}
                                   </div>
@@ -516,15 +519,6 @@ const Wizard = () => {
 
       case 3:
         return (
-          <EnhancedStep3Providers
-            providers={providers}
-            existingProviders={existingProviders}
-            onToggleProvider={handleProviderToggle}
-          />
-        );
-
-      case 4:
-        return (
           <OptimizedStep4Results
             selectedClubs={selectedClubs}
             selectedCompetitions={selectedCompetitions}
@@ -542,7 +536,6 @@ const Wizard = () => {
   const canProceed = () => {
     if (currentStep === 1) return selectedClubIds.length > 0;
     if (currentStep === 2) return selectedCompetitions.length > 0;
-    if (currentStep === 3) return true;
     return true;
   };
 
@@ -553,7 +546,7 @@ const Wizard = () => {
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="mb-6">
           <div className="flex items-center justify-center space-x-4 mb-3">
-            {[1, 2, 3, 4].map((step) => (
+            {[1, 2, 3].map((step) => (
               <div key={step} className="flex items-center">
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
@@ -564,7 +557,7 @@ const Wizard = () => {
                 >
                   {currentStep > step ? <Check className="h-4 w-4" /> : step}
                 </div>
-                {step < 4 && (
+                {step < 3 && (
                   <div className={`w-12 h-1 mx-2 ${currentStep > step ? 'bg-green-600' : 'bg-gray-200'}`} />
                 )}
               </div>
@@ -572,13 +565,13 @@ const Wizard = () => {
           </div>
           <div className="text-center">
             <p className="text-sm text-gray-600">
-              Schritt {currentStep} von 4
+              Schritt {currentStep} von 3
             </p>
           </div>
         </div>
 
         {/* Always visible next button at top */}
-        {currentStep < 4 && (
+        {currentStep < 3 && (
           <div className="mb-4 flex justify-end">
             <Button
               onClick={() => setCurrentStep(prev => prev + 1)}
@@ -605,7 +598,7 @@ const Wizard = () => {
             Zurück
           </Button>
 
-          {currentStep < 4 ? (
+          {currentStep < 3 ? (
             <Button
               onClick={() => setCurrentStep(prev => prev + 1)}
               disabled={!canProceed()}
@@ -620,7 +613,7 @@ const Wizard = () => {
                 setCurrentStep(1);
                 setSelectedClubIds([]);
                 setSelectedCompetitions([]);
-                setExistingProviders([]);
+                
               }}
               className="bg-green-600 hover:bg-green-700"
             >

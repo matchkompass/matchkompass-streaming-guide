@@ -279,19 +279,19 @@ const EnhancedCompetitionSelector: React.FC<EnhancedCompetitionSelectorProps> = 
             <h3 className="text-lg font-semibold mb-3 text-blue-800 flex items-center gap-2">
               {cluster.name}
             </h3>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               {comps.map(competition => (
                 <Card
                   key={competition.id}
-                  className={`rounded-lg border text-card-foreground shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md ${
+                  className={`rounded-lg border text-card-foreground shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md min-h-[80px] ${
                     selectedCompetitions.includes(competition.id)
                       ? 'ring-2 ring-green-500 bg-green-50'
                       : ''
                   }`}
                   onClick={() => onCompetitionToggle(competition.id)}
                 >
-                  <CardContent className="p-3">
-                    <div className="flex items-center justify-between">
+                  <CardContent className="p-3 flex flex-col justify-between min-h-[80px]">
+                    <div className="flex items-start justify-between">
                       <div className="flex items-center space-x-2">
                         <span className="text-xl">{LEAGUE_SLUG_TO_FLAG[competition.id] || competition.logo}</span>
                         <div>
@@ -323,7 +323,7 @@ const EnhancedCompetitionSelector: React.FC<EnhancedCompetitionSelectorProps> = 
             <h3 className="text-lg font-semibold mb-3 text-gray-700">
               📋 Weitere Wettbewerbe
             </h3>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               {weitereComps.map(competition => (
                 <CompetitionCard
                   key={competition.id}
