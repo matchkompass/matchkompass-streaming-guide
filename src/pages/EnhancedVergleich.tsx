@@ -326,13 +326,14 @@ const EnhancedVergleich = () => {
                     const features = parseFeatures(provider);
                     const isExpanded = expandedProvider === provider.streamer_id;
                     // Dynamic leagues list from DB
-                    const sortedLeagues = [...leagues].sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
-                    const dynamicLeaguesList = sortedLeagues.map(league => ({
-                      key: league.league_slug,
-                      label: league.league,
-                      icon: league.icon || getFlagForLeague(league.league_slug),
-                      covered: provider[league.league_slug] > 0
-                    }));
+                    const dynamicLeaguesList = [...leagues]
+                      .sort((a, b) => (a.popularity || 0) - (b.popularity || 0))
+                      .map(league => ({
+                        key: league.league_slug,
+                        label: league.league,
+                        icon: league.icon || getFlagForLeague(league.league_slug),
+                        covered: provider[league.league_slug] > 0
+                      }));
                     // Define features
                     const featuresList = [
                       { key: 'fourK', label: '4K', value: features.fourK },
