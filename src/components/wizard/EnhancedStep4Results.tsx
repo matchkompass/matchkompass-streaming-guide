@@ -204,11 +204,33 @@ const EnhancedStep4Results = ({
                     <CardContent className="pt-0">
                       <div className="space-y-3">
                         <div>
-                          <p className="font-semibold text-green-600">{provider.monthly_price}/Monat</p>
-                          {provider.yearly_price && (
-                            <p className="text-sm text-gray-500">{provider.yearly_price}/Jahr</p>
-                          )}
-                        </div>
+                           <p className="font-semibold text-green-600">{provider.monthly_price}/Monat</p>
+                           {provider.yearly_price && (
+                             <p className="text-sm text-gray-500">{provider.yearly_price}/Jahr</p>
+                           )}
+                         </div>
+                         
+                         {/* League Coverage Details like in /vergleich */}
+                         <div className="space-y-2 mt-3">
+                           <h4 className="text-sm font-semibold text-gray-700">Liga-Abdeckung:</h4>
+                           {selectedCompetitions.slice(0, 4).map(leagueSlug => {
+                             const league = leagues.find(l => l.league_slug === leagueSlug);
+                             const coverage = getProviderCoverage(provider, leagueSlug);
+                             const isNotFullCoverage = coverage.percentage < 100;
+                             
+                             return (
+                               <div key={leagueSlug} className="flex items-center justify-between text-xs">
+                                 <div className="flex items-center gap-1">
+                                   <span>{league?.league || leagueSlug}</span>
+                                   {isNotFullCoverage && <span className="text-orange-500">⚠️</span>}
+                                 </div>
+                                 <span className={`font-medium ${coverage.percentage >= 90 ? 'text-green-600' : coverage.percentage >= 50 ? 'text-orange-600' : 'text-red-600'}`}>
+                                   {coverage.percentage}% ({coverage.coveredGames}/{coverage.totalGames})
+                                 </span>
+                               </div>
+                             );
+                           })}
+                         </div>
                         
                          <div className="space-y-1">
                            {provider.highlights.highlight_1 && (

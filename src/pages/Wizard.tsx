@@ -326,7 +326,7 @@ const Wizard = () => {
                               </button>
                               {isExpanded && (
                                 <div className="px-6 pb-6">
-                                   <div className="grid grid-cols-3 gap-3">
+                                   <div className="grid grid-cols-4 gap-3">
                                     {displayedClubs.map((club) => (
                                        <Card
                                          key={club.club_id}

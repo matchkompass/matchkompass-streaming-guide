@@ -471,8 +471,8 @@ const EnhancedVergleich = () => {
                                     <div className="text-xs text-gray-500">Monatlich</div>
                                   </div>
                                   <div>
-                                    <div className="text-lg font-bold text-green-600">€{yearlyPrice ? (yearlyPrice / 12).toFixed(2) : '-'}</div>
-                                    <div className="text-xs text-gray-500">Mit Jahresabo</div>
+                                    <div className="text-lg font-bold text-green-600">€{yearlyPrice ? yearlyPrice.toFixed(2) : (price * 12).toFixed(2)}</div>
+                                    <div className="text-xs text-gray-500">Jahrespreis</div>
                                   </div>
                                 </div>
                               </div>

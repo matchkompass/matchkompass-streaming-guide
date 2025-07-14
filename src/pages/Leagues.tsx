@@ -146,7 +146,7 @@ const Leagues = () => {
         </div>
 
         {/* Leagues by Category */}
-        {/* Render clusters and leagues as in the wizard step 1 */}
+        {/* Table layout for better alignment */}
         {LEAGUE_CLUSTERS.map((cluster) => {
           // Get leagues in this cluster that exist in the fetched leagues data
           const clusterLeagues = cluster.leagues
@@ -161,91 +161,157 @@ const Leagues = () => {
                   {clusterLeagues.length} Ligen
                 </Badge>
               </h2>
-              <div className="grid md:grid-cols-2 gap-6">
-                {clusterLeagues.map((league) => {
-                  // Get top 4 cheapest providers with coverage > 0
-                  const providerCoverages = providers
-                    .map((provider) => getProviderCoverage(provider, league))
-                    .filter((item) => item.coveredGames > 0)
-                    .sort((a, b) => a.price - b.price)
-                    .slice(0, 4);
-                  // Use icon from league data, else flag, else trophy
-                  const flag = league.icon || LEAGUE_CLUSTERS.flatMap(c => c.leagues).find(l => l.slug === league.league_slug)?.flag || "🏆";
-                  return (
-                    <Link 
-                      key={league.league_id}
-                      to={`/competition/${league.league_slug}`}
-                      className="group"
-                    >
-                      <Card className="hover:shadow-lg transition-all duration-300 group-hover:scale-105 cursor-pointer h-full">
-                        <CardHeader className="pb-4">
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="w-12 h-12 bg-gradient-to-br from-green-100 to-blue-100 rounded-full flex items-center justify-center text-2xl">
-                              {flag}
+              
+              {/* Mobile: Cards */}
+              {isMobile ? (
+                <div className="grid grid-cols-1 gap-4">
+                  {clusterLeagues.map((league) => {
+                    // Get top 3 cheapest providers with coverage > 0
+                    const providerCoverages = providers
+                      .map((provider) => getProviderCoverage(provider, league))
+                      .filter((item) => item.coveredGames > 0)
+                      .sort((a, b) => a.price - b.price)
+                      .slice(0, 3);
+                    // Use icon from league data, else flag, else trophy
+                    const flag = league.icon || LEAGUE_CLUSTERS.flatMap(c => c.leagues).find(l => l.slug === league.league_slug)?.flag || "🏆";
+                    return (
+                      <Link 
+                        key={league.league_id}
+                        to={`/competition/${league.league_slug}`}
+                        className="group"
+                      >
+                        <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer">
+                          <CardHeader className="pb-2">
+                            <div className="flex items-center gap-3">
+                              <span className="text-2xl">{flag}</span>
+                              <div>
+                                <CardTitle className="text-lg group-hover:text-green-600 transition-colors">{league.league}</CardTitle>
+                                <div className="flex items-center text-gray-600 text-xs">
+                                  <Users className="h-4 w-4 mr-1" />
+                                  <span>{league['number of games']} Spiele</span>
+                                </div>
+                              </div>
                             </div>
-                            {(league as any).popularity && (league as any).popularity > 7 && (
-                              <Badge className="bg-yellow-100 text-yellow-800">
-                                Beliebt
-                              </Badge>
-                            )}
-                          </div>
-                          <CardTitle className="text-lg group-hover:text-green-600 transition-colors font-bold">
-                            {league.league}
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-3">
-                          <div className="flex items-center text-sm text-gray-600">
-                            {/* Remove country code, only show flag above */}
-                          </div>
-                          <div className="flex items-center text-gray-600 text-xs mb-2">
-                            <Users className="h-4 w-4 mr-1" />
-                            <span>{league['number of games']} Spiele</span>
-                          </div>
-                          {/* Streaming Providers Coverage */}
-                          <div className="space-y-1">
-                            {providersLoading ? (
-                              <div className="text-xs text-gray-400">Lade Anbieter...</div>
-                            ) : (
-                              providerCoverages.map((item) => (
-                                <div key={item.provider.streamer_id} className="flex items-center justify-between border-b last:border-b-0 border-dotted border-gray-200 px-2 py-1 text-xs">
-                                  <div className="flex items-center gap-2">
-                                    {item.provider.logo_url ? (
-                                      <img src={item.provider.logo_url} alt={item.provider.provider_name} className="w-4 h-4 object-contain rounded-full" />
-                                    ) : (
-                                      <span className="w-4 h-4 bg-gray-200 rounded-full flex items-center justify-center">📺</span>
-                                    )}
-                                    <span className="font-medium" style={{ color: item.provider.highlight_color || undefined }}>{item.provider.provider_name}</span>
+                          </CardHeader>
+                          <CardContent className="pt-0">
+                            <div className="space-y-1">
+                              {providersLoading ? (
+                                <div className="text-xs text-gray-400">Lade Anbieter...</div>
+                              ) : (
+                                providerCoverages.map((item) => (
+                                  <div key={item.provider.streamer_id} className="flex items-center justify-between text-xs py-1">
+                                    <div className="flex items-center gap-2">
+                                      {item.provider.logo_url ? (
+                                        <img src={item.provider.logo_url} alt={item.provider.provider_name} className="w-4 h-4 object-contain rounded-full" />
+                                      ) : (
+                                        <span className="w-4 h-4 bg-gray-200 rounded-full flex items-center justify-center">📺</span>
+                                      )}
+                                      <span className="font-medium">{item.provider.provider_name}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <Badge
+                                        className={
+                                          `${item.percentage >= 90 ? 'bg-green-500' : item.percentage >= 50 ? 'bg-orange-500' : 'bg-red-500'} text-xs`
+                                        }
+                                      >
+                                        {item.percentage}%
+                                      </Badge>
+                                      <span className="text-gray-700 font-semibold">€{item.price.toFixed(2)}</span>
+                                    </div>
                                   </div>
-                                  <Badge
-                                    className={
-                                      `${item.percentage >= 90 ? 'bg-green-500' : item.percentage >= 50 ? 'bg-orange-500' : 'bg-red-500'} ${isMobile ? 'mx-auto flex justify-center' : ''}`
-                                    }
-                                  >
-                                    {item.percentage}%
-                                  </Badge>
-                                  <span className="text-xs text-gray-700 font-semibold min-w-[60px] text-right">€{item.price.toFixed(2)}</span>
-                                  {item.provider.affiliate_url && (
-                                    <Button size="sm" className="ml-2 bg-green-600 hover:bg-green-700 text-white px-3 py-1 text-xs" onClick={(e) => { e.preventDefault(); window.open(item.provider.affiliate_url, '_blank'); }}>
-                                      Jetzt abonnieren
-                                    </Button>
+                                ))
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </Link>
+                    );
+                  })}
+                </div>
+              ) : (
+                /* Desktop: Table */
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse border border-gray-200 rounded-lg">
+                    <thead>
+                      <tr className="bg-gray-50">
+                        <th className="border border-gray-200 px-4 py-3 text-left font-semibold">Liga</th>
+                        <th className="border border-gray-200 px-4 py-3 text-center font-semibold">Spiele</th>
+                        <th className="border border-gray-200 px-4 py-3 text-left font-semibold">Beste Anbieter</th>
+                        <th className="border border-gray-200 px-4 py-3 text-center font-semibold">Aktion</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {clusterLeagues.map((league) => {
+                        // Get top 3 cheapest providers with coverage > 0
+                        const providerCoverages = providers
+                          .map((provider) => getProviderCoverage(provider, league))
+                          .filter((item) => item.coveredGames > 0)
+                          .sort((a, b) => a.price - b.price)
+                          .slice(0, 3);
+                        // Use icon from league data, else flag, else trophy
+                        const flag = league.icon || LEAGUE_CLUSTERS.flatMap(c => c.leagues).find(l => l.slug === league.league_slug)?.flag || "🏆";
+                        return (
+                          <tr key={league.league_id} className="hover:bg-gray-50 transition-colors">
+                            <td className="border border-gray-200 px-4 py-3">
+                              <div className="flex items-center gap-3">
+                                <span className="text-xl">{flag}</span>
+                                <div>
+                                  <h3 className="font-bold text-sm">{league.league}</h3>
+                                  {(league as any).popularity && (league as any).popularity > 7 && (
+                                    <Badge className="bg-yellow-100 text-yellow-800 text-xs mt-1">
+                                      Beliebt
+                                    </Badge>
                                   )}
                                 </div>
-                              ))
-                            )}
-                          </div>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="w-full group-hover:bg-green-50 group-hover:border-green-500 group-hover:text-green-700"
-                          >
-                            Alle Vereine anzeigen
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    </Link>
-                  );
-                })}
-              </div>
+                              </div>
+                            </td>
+                            <td className="border border-gray-200 px-4 py-3 text-center text-sm">
+                              {league['number of games']}
+                            </td>
+                            <td className="border border-gray-200 px-4 py-3">
+                              {providerCoverages.length === 0 ? (
+                                <div className="text-xs text-gray-400 italic">Kein Anbieter verfügbar</div>
+                              ) : (
+                                <div className="space-y-1">
+                                  {providerCoverages.map((item) => (
+                                    <div key={item.provider.streamer_id} className="flex items-center justify-between text-xs">
+                                      <div className="flex items-center gap-2">
+                                        {item.provider.logo_url ? (
+                                          <img src={item.provider.logo_url} alt={item.provider.provider_name} className="w-4 h-4 object-contain rounded-full" />
+                                        ) : (
+                                          <span className="w-4 h-4 bg-gray-200 rounded-full flex items-center justify-center">📺</span>
+                                        )}
+                                        <span className="font-medium">{item.provider.provider_name}</span>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        <Badge
+                                          className={
+                                            `${item.percentage >= 90 ? 'bg-green-500' : item.percentage >= 50 ? 'bg-orange-500' : 'bg-red-500'} text-xs`
+                                          }
+                                        >
+                                          {item.percentage}%
+                                        </Badge>
+                                        <span className="text-gray-700 font-semibold">€{item.price.toFixed(2)}</span>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </td>
+                            <td className="border border-gray-200 px-4 py-3 text-center">
+                              <Link to={`/competition/${league.league_slug}`}>
+                                <Button variant="outline" size="sm" className="hover:bg-green-50 hover:border-green-500 hover:text-green-700">
+                                  Details
+                                </Button>
+                              </Link>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           );
         })}
