@@ -279,7 +279,7 @@ const EnhancedCompetitionSelector: React.FC<EnhancedCompetitionSelectorProps> = 
             <h3 className="text-lg font-semibold mb-3 text-blue-800 flex items-center gap-2">
               {cluster.name}
             </h3>
-            <div className="grid grid-cols-4 gap-3">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
               {comps.map(competition => (
                 <Card
                   key={competition.id}
@@ -323,7 +323,7 @@ const EnhancedCompetitionSelector: React.FC<EnhancedCompetitionSelectorProps> = 
             <h3 className="text-lg font-semibold mb-3 text-gray-700">
               📋 Weitere Wettbewerbe
             </h3>
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
               {weitereComps.map(competition => (
                 <CompetitionCard
                   key={competition.id}

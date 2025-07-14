@@ -294,11 +294,11 @@ const Wizard = () => {
                   const clusterLeagues = cluster.leagues.filter(league => clubsByLeague[league.name] && clubsByLeague[league.name].clubs.length > 0);
                   if (clusterLeagues.length === 0) return null;
                   return (
-                    <div key={cluster.name} className={`border-2 rounded-lg ${cluster.color}`}>
-                      <div className={`px-6 py-3 ${cluster.headerColor} font-semibold text-lg`}>
-                        {cluster.name}
-                      </div>
-                      <div className="p-6 space-y-4">
+                     <div key={cluster.name} className={`border-2 rounded-lg ${cluster.color}`}>
+                       <div className={`px-3 md:px-6 py-2 md:py-3 ${cluster.headerColor} font-semibold text-base md:text-lg`}>
+                         {cluster.name}
+                       </div>
+                       <div className="p-3 md:p-6 space-y-3 md:space-y-4">
                         {clusterLeagues.map(league => {
                           const leagueData = clubsByLeague[league.name];
                           if (!leagueData || leagueData.clubs.length === 0) return null;
@@ -307,67 +307,67 @@ const Wizard = () => {
                           const displayedClubs = showAll ? leagueData.clubs : leagueData.clubs.slice(0, 8);
                           return (
                             <div key={league.name} className="border rounded-lg bg-white shadow-sm">
-                              <button
-                                onClick={() => toggleLeague(league.name)}
-                                className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
-                              >
-                                <div className="flex items-center gap-3">
-                                  <h3 className="text-lg font-semibold text-gray-800">
-                                    🏆 {league.name}
-                                  </h3>
-                                  <Badge variant="secondary" className="text-xs">
-                                    {leagueData.clubs.length} Vereine
-                                  </Badge>
-                                </div>
-                                {isExpanded ? 
-                                  <ChevronUp className="h-5 w-5 text-gray-500" /> : 
-                                  <ChevronDown className="h-5 w-5 text-gray-500" />
-                                }
-                              </button>
+                               <button
+                                 onClick={() => toggleLeague(league.name)}
+                                 className="w-full px-3 md:px-6 py-3 md:py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                               >
+                                 <div className="flex items-center gap-2 md:gap-3">
+                                   <h3 className="text-base md:text-lg font-semibold text-gray-800">
+                                     🏆 {league.name}
+                                   </h3>
+                                   <Badge variant="secondary" className="text-xs">
+                                     {leagueData.clubs.length} Vereine
+                                   </Badge>
+                                 </div>
+                                 {isExpanded ? 
+                                   <ChevronUp className="h-4 w-4 md:h-5 md:w-5 text-gray-500" /> : 
+                                   <ChevronDown className="h-4 w-4 md:h-5 md:w-5 text-gray-500" />
+                                 }
+                               </button>
                               {isExpanded && (
-                                <div className="px-6 pb-6">
-                                   <div className="grid grid-cols-4 gap-3">
-                                    {displayedClubs.map((club) => (
-                                       <Card
-                                         key={club.club_id}
-                                         className={`cursor-pointer transition-all duration-200 hover:shadow-md w-full ${
-                                           selectedClubIds.includes(club.club_id)
-                                             ? 'ring-2 ring-green-500 bg-green-50'
-                                             : 'hover:bg-gray-50'
-                                         }`}
-                                         onClick={() => handleClubToggle(club.club_id)}
-                                       >
-                                         <CardContent className="p-3 flex flex-col items-center min-h-[120px]">
-                                           <div className="text-2xl mb-2">
-                                             {club.logo_url ? (
-                                               <img src={club.logo_url} alt={club.name} className="w-8 h-8 object-contain" />
-                                             ) : (
-                                               "⚽"
-                                             )}
-                                           </div>
-                                           <h3 className="font-medium text-sm mb-2 text-center line-clamp-2">{club.name}</h3>
-                                           <div className="flex flex-wrap gap-1 justify-center mb-2">
-                                             {getClubCompetitions(club).slice(0, 2).map((slug, idx) => {
-                                               // Get icon from database
-                                               const league = leagues.find(l => l.league_slug === slug);
-                                               const leagueIcon = league?.icon || LEAGUE_SLUG_TO_FLAG[slug] || "🏆";
-                                               return (
-                                                 <Badge key={idx} variant="secondary" className="text-xs flex items-center gap-1">
-                                                   <span>{leagueIcon}</span>
-                                                   <span>{LEAGUE_SLUG_TO_NAME[slug] || slug.replace('_', ' ')}</span>
-                                                 </Badge>
-                                               );
-                                             })}
-                                           </div>
-                                           {selectedClubIds.includes(club.club_id) && (
-                                             <div className="mt-auto">
-                                               <Check className="h-4 w-4 text-green-600 mx-auto" />
-                                             </div>
-                                           )}
-                                         </CardContent>
-                                      </Card>
-                                    ))}
-                                  </div>
+                                 <div className="px-3 md:px-6 pb-6">
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
+                                     {displayedClubs.map((club) => (
+                                        <Card
+                                          key={club.club_id}
+                                          className={`cursor-pointer transition-all duration-200 hover:shadow-md w-full ${
+                                            selectedClubIds.includes(club.club_id)
+                                              ? 'ring-2 ring-green-500 bg-green-50'
+                                              : 'hover:bg-gray-50'
+                                          }`}
+                                          onClick={() => handleClubToggle(club.club_id)}
+                                        >
+                                          <CardContent className="p-2 md:p-3 flex flex-col items-center min-h-[100px] md:min-h-[120px]">
+                                            <div className="text-xl md:text-2xl mb-1 md:mb-2">
+                                              {club.logo_url ? (
+                                                <img src={club.logo_url} alt={club.name} className="w-6 h-6 md:w-8 md:h-8 object-contain" />
+                                              ) : (
+                                                "⚽"
+                                              )}
+                                            </div>
+                                            <h3 className="font-medium text-xs md:text-sm mb-1 md:mb-2 text-center line-clamp-2">{club.name}</h3>
+                                            <div className="hidden md:flex flex-wrap gap-1 justify-center mb-2">
+                                              {getClubCompetitions(club).slice(0, 2).map((slug, idx) => {
+                                                // Get icon from database
+                                                const league = leagues.find(l => l.league_slug === slug);
+                                                const leagueIcon = league?.icon || LEAGUE_SLUG_TO_FLAG[slug] || "🏆";
+                                                return (
+                                                  <Badge key={idx} variant="secondary" className="text-xs flex items-center gap-1">
+                                                    <span>{leagueIcon}</span>
+                                                    <span>{LEAGUE_SLUG_TO_NAME[slug] || slug.replace('_', ' ')}</span>
+                                                  </Badge>
+                                                );
+                                              })}
+                                            </div>
+                                            {selectedClubIds.includes(club.club_id) && (
+                                              <div className="mt-auto">
+                                                <Check className="h-3 w-3 md:h-4 md:w-4 text-green-600 mx-auto" />
+                                              </div>
+                                            )}
+                                          </CardContent>
+                                       </Card>
+                                     ))}
+                                   </div>
                                   {leagueData.clubs.length > 8 && (
                                     <div className="mt-4 text-center">
                                       <Button

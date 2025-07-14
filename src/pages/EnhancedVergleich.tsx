@@ -1,6 +1,6 @@
 // Minor change: Triggering a commit for push
 import React, { useState, useMemo } from "react";
-import { Filter, Star, Check, X, Menu, Euro, Calendar, Tv } from "lucide-react";
+import { Filter, Star, Check, X, Menu, Euro, Calendar, Tv, ChevronUp, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -248,7 +248,7 @@ const EnhancedVergleich = () => {
             <div className="space-y-4">
               {/* Main provider/league display */}
               {isMobile ? (
-                <div className="flex flex-col gap-4">
+                <div className="space-y-4">
                   {filteredProviders.map((provider) => {
                     const price = parsePrice(provider.monthly_price);
                     const yearlyPrice = parsePrice(provider.yearly_price);
@@ -263,69 +263,94 @@ const EnhancedVergleich = () => {
                     const isExpanded = expandedMobileCard === provider.streamer_id;
                     return (
                       <Card key={provider.streamer_id} className="shadow-md">
-                        <button
-                          className="w-full text-left focus:outline-none"
-                          onClick={() => setExpandedMobileCard(isExpanded ? null : provider.streamer_id)}
-                        >
-                          <CardHeader>
-                            <div className="flex items-center gap-3 mb-2">
-                              <span className="text-2xl">{provider.logo_url ? <img src={provider.logo_url} alt={provider.provider_name} className="w-8 h-8 object-contain rounded-full bg-white border" /> : "🔵"}</span>
-                              <div>
-                                <h3 className="font-bold text-lg mb-0.5">{provider.name}</h3>
-                                <div className="text-xs text-gray-500">€{price.toFixed(2)}/Monat</div>
+                        <CardHeader className="pb-4">
+                          <div className="flex items-center gap-3 mb-3">
+                            {provider.logo_url ? (
+                              <img src={provider.logo_url} alt={provider.provider_name} className="w-10 h-10 object-contain rounded-full bg-white border" />
+                            ) : (
+                              <span className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-200">📺</span>
+                            )}
+                            <div>
+                              <h3 className="font-bold text-lg">{provider.name}</h3>
+                              <div className="text-sm text-gray-600">
+                                €{price.toFixed(2)}/Monat
+                                {yearlyPrice > 0 && (
+                                  <span className="ml-2 text-green-600">
+                                    • €{yearlyPrice.toFixed(2)}/Jahr
+                                  </span>
+                                )}
                               </div>
                             </div>
-                            <div className="grid grid-cols-2 gap-2 mb-2">
-                             {dynamicLeaguesList.slice(0, 8).map(league => {
-                                const leagueData = leagues.find(l => l.league_slug === league.key);
-                                const totalGames = leagueData ? leagueData['number of games'] : 0;
-                                const providerGames = provider[league.key] || 0;
-                                const isFullCoverage = providerGames >= totalGames && totalGames > 0;
-                                
-                                return (
-                                  <div key={league.key} className="flex items-center gap-1">
-                                    <span className="text-sm">{league.icon}</span>
-                                    <span className="text-xs text-gray-600 flex-1">{league.label}</span>
-                                    <div className="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs bg-gray-100">
-                                      {league.covered ? (isFullCoverage ? "✔️" : "❗") : "✖️"}
-                                    </div>
+                          </div>
+                          
+                          <div className="flex flex-wrap gap-2 mb-3">
+                            {features.fourK && <Badge className="bg-green-100 text-green-800 text-xs">4K</Badge>}
+                            {features.mobile && <Badge className="bg-blue-100 text-blue-800 text-xs">Mobile</Badge>}
+                            {features.download && <Badge className="bg-purple-100 text-purple-800 text-xs">Download</Badge>}
+                            {features.streams > 1 && <Badge className="bg-orange-100 text-orange-800 text-xs">{features.streams} Streams</Badge>}
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2 mb-3">
+                            {dynamicLeaguesList.slice(0, 8).map(league => {
+                              const leagueData = leagues.find(l => l.league_slug === league.key);
+                              const totalGames = leagueData ? leagueData['number of games'] : 0;
+                              const providerGames = provider[league.key] || 0;
+                              const isFullCoverage = providerGames >= totalGames && totalGames > 0;
+                              
+                              return (
+                                <div key={league.key} className="flex items-center gap-2">
+                                  <span className="text-sm">{league.icon}</span>
+                                  <span className="text-xs text-gray-600 flex-1 truncate">{league.label}</span>
+                                  <div className="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs bg-gray-100 flex-shrink-0">
+                                    {league.covered ? (isFullCoverage ? "✔️" : "❗") : "✖️"}
                                   </div>
-                                );
-                              })}
-                            </div>
-                          </CardHeader>
-                        </button>
+                                </div>
+                              );
+                            })}
+                          </div>
+
+                          <Button 
+                            className="w-full mb-3 bg-green-600 hover:bg-green-700 text-white"
+                            onClick={() => handleAffiliateClick(provider)}
+                          >
+                            Zum Anbieter
+                          </Button>
+
+                          <Button
+                            variant="outline"
+                            className="w-full"
+                            onClick={() => setExpandedMobileCard(isExpanded ? null : provider.streamer_id)}
+                          >
+                            {isExpanded ? 'Details ausblenden' : 'Details anzeigen'}
+                            {isExpanded ? <ChevronUp className="ml-2 h-4 w-4" /> : <ChevronDown className="ml-2 h-4 w-4" />}
+                          </Button>
+                        </CardHeader>
+                        
                         {isExpanded && (
-                          <CardContent>
-                            <div className="flex flex-wrap gap-2 mb-2">
-                              {features.fourK && <Badge className="bg-green-100 text-green-800">4K</Badge>}
-                              {features.mobile && <Badge className="bg-blue-100 text-blue-800">Mobile</Badge>}
-                              {features.download && <Badge className="bg-purple-100 text-purple-800">Download</Badge>}
-                              {features.streams > 1 && <Badge className="bg-orange-100 text-orange-800">{features.streams} Streams</Badge>}
+                          <CardContent className="pt-0">
+                            <div>
+                              <h4 className="font-medium mb-2">Vollständige Liga-Abdeckung:</h4>
+                              <div className="grid grid-cols-1 gap-2">
+                                {dynamicLeaguesList.map(league => {
+                                  const leagueData = leagues.find(l => l.league_slug === league.key);
+                                  const totalGames = leagueData ? leagueData['number of games'] : 0;
+                                  const providerGames = provider[league.key] || 0;
+                                  const percentage = totalGames > 0 ? Math.round((Math.min(providerGames, totalGames) / totalGames) * 100) : 0;
+                                  
+                                  return (
+                                    <div key={league.key} className="flex items-center justify-between text-sm">
+                                      <div className="flex items-center space-x-2">
+                                        <span>{league.icon}</span>
+                                        <span>{league.label}</span>
+                                      </div>
+                                      <div className={`px-2 py-1 rounded text-xs font-medium ${league.covered ? (percentage >= 100 ? 'text-green-600 bg-green-100' : 'text-orange-600 bg-orange-100') : 'text-gray-400 bg-gray-100'}`}>
+                                        {league.covered ? `${percentage}% (${Math.min(providerGames, totalGames)}/${totalGames})` : '0%'}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
                             </div>
-                             <div className="grid grid-cols-1 gap-2 mb-2">
-                               {dynamicLeaguesList.map(league => {
-                                 const leagueData = leagues.find(l => l.league_slug === league.key);
-                                 const totalGames = leagueData ? leagueData['number of games'] : 0;
-                                 const providerGames = provider[league.key] || 0;
-                                 const percentage = totalGames > 0 ? Math.round((Math.min(providerGames, totalGames) / totalGames) * 100) : 0;
-                                 
-                                 return (
-                                   <div key={league.key} className="flex items-center justify-between text-sm">
-                                     <div className="flex items-center gap-2">
-                                       <span>{league.icon}</span>
-                                       <span>{league.label}</span>
-                                     </div>
-                                     <div className={`px-2 py-1 rounded text-xs font-medium ${league.covered ? (percentage >= 100 ? 'text-green-600 bg-green-100' : 'text-orange-600 bg-orange-100') : 'text-gray-400 bg-gray-100'}`}>
-                                       {league.covered ? `${percentage}% (${Math.min(providerGames, totalGames)}/${totalGames})` : '0%'}
-                                     </div>
-                                   </div>
-                                 );
-                               })}
-                             </div>
-                            <Button className="w-full mt-2 bg-green-600 hover:bg-green-700 text-white text-sm py-2" onClick={() => handleAffiliateClick(provider)}>
-                              Zum Anbieter
-                            </Button>
                           </CardContent>
                         )}
                       </Card>

@@ -184,7 +184,7 @@ const CompetitionDetail = () => {
                             <TableHead>Anbieter</TableHead>
                             <TableHead>Spiele</TableHead>
                             <TableHead>Abdeckung</TableHead>
-                            <TableHead>Preis</TableHead>
+                            <TableHead>Preis & Abonnement</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -221,7 +221,18 @@ const CompetitionDetail = () => {
                                 </Badge>
                               </TableCell>
                               <TableCell>
-                                ab {parsePrice(item.provider.monthly_price).toFixed(2)}€/Monat
+                                <div className="flex flex-col gap-2">
+                                  <span>ab {parsePrice(item.provider.monthly_price).toFixed(2)}€/Monat</span>
+                                  {item.provider.affiliate_url && (
+                                    <Button 
+                                      size="sm"
+                                      className="bg-green-600 hover:bg-green-700 text-white"
+                                      onClick={() => window.open(item.provider.affiliate_url, '_blank')}
+                                    >
+                                      Jetzt abonnieren
+                                    </Button>
+                                  )}
+                                </div>
                               </TableCell>
                             </TableRow>
                           ))}
@@ -258,7 +269,7 @@ const CompetitionDetail = () => {
                               {item.percentage}%
                             </Badge>
                           </div>
-                          <div className="grid grid-cols-2 gap-3 text-sm">
+                          <div className="grid grid-cols-2 gap-3 text-sm mb-3">
                             <div>
                               <span className="text-gray-600">Spiele:</span>
                               <span className="ml-1 font-medium">{item.coveredGames}/{item.totalGames}</span>
@@ -268,6 +279,14 @@ const CompetitionDetail = () => {
                               <span className="ml-1 font-medium">ab {parsePrice(item.provider.monthly_price).toFixed(2)}€/Mon.</span>
                             </div>
                           </div>
+                          {item.provider.affiliate_url && (
+                            <Button 
+                              className="w-full bg-green-600 hover:bg-green-700 text-white text-sm"
+                              onClick={() => window.open(item.provider.affiliate_url, '_blank')}
+                            >
+                              Jetzt abonnieren
+                            </Button>
+                          )}
                         </div>
                       ))}
                     </div>
