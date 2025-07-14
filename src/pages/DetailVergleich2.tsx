@@ -12,55 +12,44 @@ import Footer from "@/components/Footer";
 import { useStreamingEnhanced } from "@/hooks/useStreamingEnhanced";
 import { useLeaguesEnhanced } from "@/hooks/useLeaguesEnhanced";
 import { useIsMobile } from "@/hooks/use-mobile";
+import DetailComparisonSidebar from "@/components/comparison/DetailComparisonSidebar";
 
 const DetailVergleich2 = () => {
-  const [selectedLeagues, setSelectedLeagues] = useState<string[]>([]);
-  const [selectedProviders, setSelectedProviders] = useState<number[]>([]);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [pinnedProviders, setPinnedProviders] = useState<number[]>([]);
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 100]);
-  const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
+  const [filters, setFilters] = useState({
+    leagues: [] as string[],
+    providers: [] as number[],
+    priceRange: [0, 100] as [number, number],
+    features: {
+      fourK: false,
+      mobile: false,
+      download: false,
+      multiStream: false,
+    },
+  });
   const { providers, loading: providersLoading } = useStreamingEnhanced();
   const { leagues, loading: leaguesLoading } = useLeaguesEnhanced();
   const isMobile = useIsMobile();
 
-  // Add filters state for ComparisonSidebar
-  const [filters, setFilters] = useState({
-    competitions: selectedLeagues,
-    priceRange,
-    features: {
-      fourK: selectedFeatures.includes('4K'),
-      mobile: selectedFeatures.includes('Mobile'),
-      download: selectedFeatures.includes('Download'),
-      multiStream: selectedFeatures.includes('Multi-Stream'),
-    },
-    simultaneousStreams: 1,
-    sortBy: 'relevance',
-  });
-  // Sync filters with existing filter states
-  useEffect(() => {
-    setFilters(f => ({
-      ...f,
-      competitions: selectedLeagues,
-      priceRange,
-      features: {
-        fourK: selectedFeatures.includes('4K'),
-        mobile: selectedFeatures.includes('Mobile'),
-        download: selectedFeatures.includes('Download'),
-        multiStream: selectedFeatures.includes('Multi-Stream'),
-      },
-    }));
-  }, [selectedLeagues, priceRange, selectedFeatures]);
-
   // Preselect all providers and leagues after data is loaded
   useEffect(() => {
-    if (providers.length > 0 && selectedProviders.length === 0) {
-      setSelectedProviders(providers.map(p => p.streamer_id));
+    if (providers.length > 0 && filters.providers.length === 0) {
+      setFilters(prev => ({
+        ...prev,
+        providers: providers.map(p => p.streamer_id)
+      }));
     }
   }, [providers]);
 
+  // By default all leagues should be selected (but not ticked) - this means empty array shows all
   useEffect(() => {
-    if (leagues.length > 0 && selectedLeagues.length === 0) {
-      setSelectedLeagues(leagues.map(l => l.league_slug));
+    if (leagues.length > 0 && filters.leagues.length === 0) {
+      // Don't preselect leagues - empty array means show all
+      setFilters(prev => ({
+        ...prev,
+        leagues: []
+      }));
     }
   }, [leagues]);
 
@@ -104,7 +93,8 @@ const DetailVergleich2 = () => {
     const monthlyPrice = parsePrice(provider.monthly_price);
     let totalGames = 0;
     
-    selectedLeagues.forEach(leagueSlug => {
+    const leaguesToCheck = filters.leagues.length > 0 ? filters.leagues : leagues.map(l => l.league_slug);
+    leaguesToCheck.forEach(leagueSlug => {
       const coverage = getProviderCoverage(provider, leagueSlug);
       totalGames += coverage.coveredGames;
     });
@@ -115,24 +105,29 @@ const DetailVergleich2 = () => {
   const filteredProviders = useMemo(() => {
     let filtered = providers.filter(provider => {
       // Provider filter
-      if (!selectedProviders.includes(provider.streamer_id)) return false;
+      if (!filters.providers.includes(provider.streamer_id)) return false;
       
       // Price filter
       const monthly = parsePrice(provider.monthly_price);
-      if (monthly < priceRange[0] || monthly > priceRange[1]) return false;
+      if (monthly < filters.priceRange[0] || monthly > filters.priceRange[1]) return false;
       
       // Feature filters
       const features = parseFeatures(provider);
-      if (selectedFeatures.includes('4K') && !features.fourK) return false;
-      if (selectedFeatures.includes('Mobile') && !features.mobile) return false;
-      if (selectedFeatures.includes('Download') && !features.download) return false;
-      if (selectedFeatures.includes('Multi-Stream') && !features.multiStream) return false;
+      if (filters.features.fourK && !features.fourK) return false;
+      if (filters.features.mobile && !features.mobile) return false;
+      if (filters.features.download && !features.download) return false;
+      if (filters.features.multiStream && !features.multiStream) return false;
       
-      // League filter (must cover all selected leagues)
-      return selectedLeagues.some(league => (provider[league] || 0) > 0);
+      // League filter - if no leagues selected, show all providers
+      // if leagues are selected, provider must cover at least one selected league
+      if (filters.leagues.length > 0) {
+        return filters.leagues.some(league => (provider[league] || 0) > 0);
+      }
+      
+      return true;
     });
     return filtered;
-  }, [providers, selectedProviders, selectedLeagues, priceRange, selectedFeatures]);
+  }, [providers, filters]);
 
   // Find best price-performance ratio
   const bestValueProvider = useMemo(() => {
@@ -142,7 +137,7 @@ const DetailVergleich2 = () => {
       const bestCost = calculateCostPerGame(best);
       return currentCost < bestCost && currentCost > 0 ? current : best;
     });
-  }, [filteredProviders, selectedLeagues]);
+  }, [filteredProviders, filters.leagues]);
 
   const displayProviders = useMemo(() => {
     const pinned = filteredProviders.filter(p => pinnedProviders.includes(p.streamer_id));
@@ -150,20 +145,8 @@ const DetailVergleich2 = () => {
     return [...pinned, ...unpinned];
   }, [filteredProviders, pinnedProviders]);
 
-  const toggleLeague = (leagueSlug: string) => {
-    setSelectedLeagues(prev => 
-      prev.includes(leagueSlug)
-        ? prev.filter(l => l !== leagueSlug)
-        : [...prev, leagueSlug]
-    );
-  };
-
-  const toggleProvider = (providerId: number) => {
-    setSelectedProviders(prev => 
-      prev.includes(providerId)
-        ? prev.filter(id => id !== providerId)
-        : [...prev, providerId]
-    );
+  const handleFiltersChange = (newFilters: typeof filters) => {
+    setFilters(newFilters);
   };
 
   const togglePin = (providerId: number) => {
@@ -174,13 +157,6 @@ const DetailVergleich2 = () => {
     );
   };
 
-  const toggleFeature = (feature: string) => {
-    setSelectedFeatures(prev => 
-      prev.includes(feature)
-        ? prev.filter(f => f !== feature)
-        : [...prev, feature]
-    );
-  };
 
   const groupedLeagues = useMemo(() => {
     const grouped: { [key: string]: typeof leagues } = {};
@@ -236,6 +212,28 @@ const DetailVergleich2 = () => {
         {/* Table and rest of layout remain unchanged */}
         {isMobile ? (
           <div className="flex flex-col gap-4">
+            {/* Mobile filter button */}
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold">Filter Ergebnisse</h2>
+              <Button 
+                variant="outline"
+                onClick={() => setSidebarOpen(true)}
+              >
+                <Filter className="w-4 h-4 mr-2" />
+                Filter
+              </Button>
+            </div>
+
+            {/* Mobile sidebar */}
+            {sidebarOpen && (
+              <DetailComparisonSidebar
+                filters={filters}
+                onFiltersChange={handleFiltersChange}
+                isOpen={sidebarOpen}
+                onClose={() => setSidebarOpen(false)}
+              />
+            )}
+
             {displayProviders.map((provider) => {
               const price = parsePrice(provider.monthly_price);
               const features = parseFeatures(provider);
@@ -286,7 +284,12 @@ const DetailVergleich2 = () => {
         ) : (
           <div className="flex gap-6">
             <div className="w-72 min-w-[16rem]">
-              {/* The ComparisonSidebar component is removed, so this div is now empty */}
+              <DetailComparisonSidebar
+                filters={filters}
+                onFiltersChange={handleFiltersChange}
+                isOpen={true}
+                onClose={() => {}}
+              />
             </div>
             <div className="flex-1">
               <div className="bg-white rounded-lg border overflow-x-auto">
@@ -440,7 +443,7 @@ const DetailVergleich2 = () => {
                         
                         {/* League Rows */}
                         {countryLeagues
-                          .filter(league => selectedLeagues.includes(league.league_slug || ''))
+                          .filter(league => filters.leagues.length === 0 || filters.leagues.includes(league.league_slug || ''))
                           .map(league => (
                             <div key={league.league_slug} className="flex">
                               <div className="w-40 p-2 border-r border-b">
