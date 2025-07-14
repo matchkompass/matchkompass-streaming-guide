@@ -104,16 +104,16 @@ const CompetitionDetail = () => {
     <div className="min-h-screen bg-gray-50">
       <Header />
       
-      <div className="max-w-6xl mx-auto px-4 py-6">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
         {/* Hero Section */}
-        <div className="bg-white rounded-lg shadow-sm mb-6 p-6">
-          <div className="flex items-center gap-6">
-            <div className="bg-gray-100 rounded-lg p-4">
-              <Trophy className="h-16 w-16 text-gray-600" />
+        <div className="bg-white rounded-lg shadow-sm mb-6 p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
+            <div className="bg-gray-100 rounded-lg p-3 sm:p-4 self-center sm:self-auto">
+              <Trophy className="h-12 w-12 sm:h-16 sm:w-16 text-gray-600" />
             </div>
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">{league.league}</h1>
-              <div className="flex items-center gap-4 text-gray-600">
+            <div className="flex-1 text-center sm:text-left">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{league.league}</h1>
+              <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-gray-600 text-sm sm:text-base">
                 <div className="flex items-center gap-1">
                   <Play className="h-4 w-4" />
                   {league['number of games']} Spiele pro Saison
@@ -139,30 +139,30 @@ const CompetitionDetail = () => {
               </CardHeader>
               <CardContent>
                 {participatingClubs.length > 0 ? (
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-3 sm:gap-4">
                     {participatingClubs.map((club) => (
                       <div 
                         key={club.club_id}
-                        className="flex flex-col items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
+                        className="flex flex-col items-center p-2 sm:p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
                         onClick={() => window.location.href = `/club/${club.slug}`}
                       >
                         <div className="mb-2">
                           {club.logo_url ? (
-                            <img src={club.logo_url} alt={club.name} className="w-8 h-8 object-contain" />
+                            <img src={club.logo_url} alt={club.name} className="w-6 h-6 sm:w-8 sm:h-8 object-contain" />
                           ) : (
-                            <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-sm">
+                            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gray-300 rounded-full flex items-center justify-center text-xs sm:text-sm">
                               ⚽
                             </div>
                           )}
                         </div>
-                        <span className="text-xs text-center font-medium">{club.name}</span>
+                        <span className="text-xs text-center font-medium leading-tight">{club.name}</span>
                       </div>
                     ))}
                   </div>
                 ) : (
                   <div className="text-center py-8 text-gray-500">
                     <Users className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                    <p>Keine teilnehmenden Vereine in der Datenbank gefunden</p>
+                    <p className="text-sm sm:text-base">Keine teilnehmenden Vereine in der Datenbank gefunden</p>
                   </div>
                 )}
               </CardContent>
@@ -175,19 +175,65 @@ const CompetitionDetail = () => {
               </CardHeader>
               <CardContent>
                 {streamingCoverage.length > 0 ? (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Anbieter</TableHead>
-                        <TableHead>Spiele</TableHead>
-                        <TableHead>Abdeckung</TableHead>
-                        <TableHead>Preis</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
+                  <>
+                    {/* Desktop Table View */}
+                    <div className="hidden md:block overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Anbieter</TableHead>
+                            <TableHead>Spiele</TableHead>
+                            <TableHead>Abdeckung</TableHead>
+                            <TableHead>Preis</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {streamingCoverage.map((item, index) => (
+                            <TableRow key={index}>
+                              <TableCell>
+                                <div className="flex items-center gap-3">
+                                  {item.provider.logo_url ? (
+                                    <img 
+                                      src={item.provider.logo_url} 
+                                      alt={item.provider.provider_name} 
+                                      className="w-8 h-8 object-contain" 
+                                    />
+                                  ) : (
+                                    <div className="w-8 h-8 bg-gray-200 rounded flex items-center justify-center">
+                                      📺
+                                    </div>
+                                  )}
+                                  <span className="font-medium">{item.provider.provider_name}</span>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                {item.coveredGames}/{item.totalGames}
+                              </TableCell>
+                              <TableCell>
+                                <Badge 
+                                  className={
+                                    item.percentage >= 90 ? 'bg-green-500' : 
+                                    item.percentage >= 50 ? 'bg-orange-500' : 
+                                    'bg-red-500'
+                                  }
+                                >
+                                  {item.percentage}%
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                ab {parsePrice(item.provider.monthly_price).toFixed(2)}€/Monat
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+
+                    {/* Mobile Card View */}
+                    <div className="md:hidden space-y-3">
                       {streamingCoverage.map((item, index) => (
-                        <TableRow key={index}>
-                          <TableCell>
+                        <div key={index} className="bg-gray-50 rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-3">
                               {item.provider.logo_url ? (
                                 <img 
@@ -200,13 +246,8 @@ const CompetitionDetail = () => {
                                   📺
                                 </div>
                               )}
-                              <span className="font-medium">{item.provider.provider_name}</span>
+                              <span className="font-medium text-sm">{item.provider.provider_name}</span>
                             </div>
-                          </TableCell>
-                          <TableCell>
-                            {item.coveredGames}/{item.totalGames}
-                          </TableCell>
-                          <TableCell>
                             <Badge 
                               className={
                                 item.percentage >= 90 ? 'bg-green-500' : 
@@ -216,18 +257,25 @@ const CompetitionDetail = () => {
                             >
                               {item.percentage}%
                             </Badge>
-                          </TableCell>
-                          <TableCell>
-                            ab {parsePrice(item.provider.monthly_price).toFixed(2)}€/Monat
-                          </TableCell>
-                        </TableRow>
+                          </div>
+                          <div className="grid grid-cols-2 gap-3 text-sm">
+                            <div>
+                              <span className="text-gray-600">Spiele:</span>
+                              <span className="ml-1 font-medium">{item.coveredGames}/{item.totalGames}</span>
+                            </div>
+                            <div>
+                              <span className="text-gray-600">Preis:</span>
+                              <span className="ml-1 font-medium">ab {parsePrice(item.provider.monthly_price).toFixed(2)}€/Mon.</span>
+                            </div>
+                          </div>
+                        </div>
                       ))}
-                    </TableBody>
-                  </Table>
+                    </div>
+                  </>
                 ) : (
                   <div className="text-center py-8 text-gray-500">
                     <Play className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                    <p>Keine Streaming-Anbieter für diese Liga verfügbar</p>
+                    <p className="text-sm sm:text-base">Keine Streaming-Anbieter für diese Liga verfügbar</p>
                   </div>
                 )}
               </CardContent>

@@ -103,20 +103,20 @@ const ClubDetail = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <div className="max-w-6xl mx-auto px-4 py-6">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
         {/* Club Info Card (top, styled with club colors) */}
         <div className="rounded-lg shadow-sm mb-6 overflow-hidden" style={{ background: `linear-gradient(135deg, ${club.primary_color || '#2E7D32'}, ${club.secondary_color || '#1565C0'})` }}>
-          <div className="flex flex-col md:flex-row md:items-center gap-6 p-6">
-            <div className="bg-white rounded-lg p-4 shadow-lg flex items-center justify-center" style={{ minWidth: 80, minHeight: 80 }}>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 p-4 sm:p-6">
+            <div className="bg-white rounded-lg p-3 sm:p-4 shadow-lg flex items-center justify-center self-center sm:self-auto" style={{ minWidth: 64, minHeight: 64 }}>
               {club.logo_url ? (
-                <img src={club.logo_url} alt={club.name} className="w-20 h-20 object-contain" />
+                <img src={club.logo_url} alt={club.name} className="w-16 h-16 sm:w-20 sm:h-20 object-contain" />
               ) : (
-                <div className="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center text-3xl">⚽</div>
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-200 rounded-lg flex items-center justify-center text-2xl sm:text-3xl">⚽</div>
               )}
             </div>
-            <div className="flex-1 text-white md:text-gray-900">
-              <h1 className="text-3xl font-bold mb-2">{club.name}</h1>
-              <div className="flex flex-wrap gap-4 text-sm">
+            <div className="flex-1 text-white text-center sm:text-left">
+              <h1 className="text-2xl sm:text-3xl font-bold mb-2">{club.name}</h1>
+              <div className="flex flex-wrap justify-center sm:justify-start gap-2 sm:gap-4 text-xs sm:text-sm">
                 {club.country && <span className="bg-white/30 rounded px-2 py-1">{club.country}</span>}
                 {club.founded_year && <span className="bg-white/30 rounded px-2 py-1">Gegründet {club.founded_year}</span>}
                 {club.stadium_name && <span className="bg-white/30 rounded px-2 py-1">{club.stadium_name}{club.stadium_capacity && ` (${club.stadium_capacity?.toLocaleString()} Plätze)`}</span>}
@@ -137,7 +137,8 @@ const ClubDetail = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="overflow-x-auto">
+                  {/* Desktop Table View */}
+                  <div className="hidden md:block overflow-x-auto">
                     <table className="min-w-full text-sm">
                       <thead>
                         <tr className="text-left text-gray-700">
@@ -167,17 +168,50 @@ const ClubDetail = () => {
                               </Badge>
                             </td>
                             <td className="py-2 px-2 text-right">
-                              <span className="text-xs text-gray-700 font-semibold min-w-[60px]">€{item.price.toFixed(2)}</span>
-                              {item.provider.affiliate_url && (
-                                <Button size="sm" className="ml-2 bg-green-600 hover:bg-green-700 text-white px-3 py-1 text-xs" onClick={() => window.open(item.provider.affiliate_url, '_blank')}>
-                                  Jetzt abonnieren
-                                </Button>
-                              )}
+                              <div className="flex items-center justify-end gap-2">
+                                <span className="text-xs text-gray-700 font-semibold">€{item.price.toFixed(2)}</span>
+                                {item.provider.affiliate_url && (
+                                  <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 text-xs" onClick={() => window.open(item.provider.affiliate_url, '_blank')}>
+                                    Abonnieren
+                                  </Button>
+                                )}
+                              </div>
                             </td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
+                  </div>
+
+                  {/* Mobile Card View */}
+                  <div className="md:hidden space-y-3">
+                    {providerCoverages.map((item) => (
+                      <div key={item.provider.streamer_id} className="bg-gray-50 rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            {item.provider.logo_url ? (
+                              <img src={item.provider.logo_url} alt={item.provider.provider_name} className="w-8 h-8 object-contain" />
+                            ) : (
+                              <span className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">📺</span>
+                            )}
+                            <span className="font-medium text-sm">{item.provider.provider_name}</span>
+                          </div>
+                          <Badge className={
+                            item.percentage >= 90 ? 'bg-green-500' : item.percentage >= 50 ? 'bg-orange-500' : 'bg-red-500'
+                          }>
+                            {item.percentage}%
+                          </Badge>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-600">Preis: <span className="font-semibold text-gray-900">€{item.price.toFixed(2)}/Monat</span></span>
+                          {item.provider.affiliate_url && (
+                            <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 text-xs" onClick={() => window.open(item.provider.affiliate_url, '_blank')}>
+                              Abonnieren
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </CardContent>
               </Card>
@@ -191,14 +225,14 @@ const ClubDetail = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   {competitions.map((comp, index) => (
                     <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div>
-                        <h4 className="font-medium">{comp.name}</h4>
-                        <p className="text-sm text-gray-600">{comp.games} Spiele</p>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-sm sm:text-base truncate">{comp.name}</h4>
+                        <p className="text-xs sm:text-sm text-gray-600">{comp.games} Spiele</p>
                       </div>
-                      <Badge variant="outline">{comp.slug.replace('_', ' ')}</Badge>
+                      <Badge variant="outline" className="ml-2 text-xs whitespace-nowrap">{comp.slug.replace('_', ' ')}</Badge>
                     </div>
                   ))}
                 </div>
