@@ -276,15 +276,22 @@ const EnhancedVergleich = () => {
                               </div>
                             </div>
                             <div className="grid grid-cols-2 gap-2 mb-2">
-                              {dynamicLeaguesList.slice(0, 8).map(league => (
-                                <div key={league.key} className="flex items-center gap-1">
-                                  <span className="text-sm">{league.icon}</span>
-                                  <span className="text-xs text-gray-600 flex-1">{league.label}</span>
-                                  <div className="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs bg-gray-100">
-                                    {league.covered ? "✔️" : "✖️"}
+                             {dynamicLeaguesList.slice(0, 8).map(league => {
+                                const leagueData = leagues.find(l => l.league_slug === league.key);
+                                const totalGames = leagueData ? leagueData['number of games'] : 0;
+                                const providerGames = provider[league.key] || 0;
+                                const isFullCoverage = providerGames >= totalGames && totalGames > 0;
+                                
+                                return (
+                                  <div key={league.key} className="flex items-center gap-1">
+                                    <span className="text-sm">{league.icon}</span>
+                                    <span className="text-xs text-gray-600 flex-1">{league.label}</span>
+                                    <div className="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs bg-gray-100">
+                                      {league.covered ? (isFullCoverage ? "✔️" : "❗") : "✖️"}
+                                    </div>
                                   </div>
-                                </div>
-                              ))}
+                                );
+                              })}
                             </div>
                           </CardHeader>
                         </button>
@@ -296,19 +303,26 @@ const EnhancedVergleich = () => {
                               {features.download && <Badge className="bg-purple-100 text-purple-800">Download</Badge>}
                               {features.streams > 1 && <Badge className="bg-orange-100 text-orange-800">{features.streams} Streams</Badge>}
                             </div>
-                            <div className="grid grid-cols-1 gap-2 mb-2">
-                              {dynamicLeaguesList.map(league => (
-                                <div key={league.key} className="flex items-center justify-between text-sm">
-                                  <div className="flex items-center gap-2">
-                                    <span>{league.icon}</span>
-                                    <span>{league.label}</span>
-                                  </div>
-                                  <div className={`px-2 py-1 rounded text-xs font-medium ${league.covered ? (provider[league.key] >= 100 ? 'text-green-600 bg-green-100' : 'text-orange-600 bg-orange-100') : 'text-gray-400 bg-gray-100'}`}>
-                                    {league.covered ? `${provider[league.key]}%` : '0%'}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
+                             <div className="grid grid-cols-1 gap-2 mb-2">
+                               {dynamicLeaguesList.map(league => {
+                                 const leagueData = leagues.find(l => l.league_slug === league.key);
+                                 const totalGames = leagueData ? leagueData['number of games'] : 0;
+                                 const providerGames = provider[league.key] || 0;
+                                 const percentage = totalGames > 0 ? Math.round((Math.min(providerGames, totalGames) / totalGames) * 100) : 0;
+                                 
+                                 return (
+                                   <div key={league.key} className="flex items-center justify-between text-sm">
+                                     <div className="flex items-center gap-2">
+                                       <span>{league.icon}</span>
+                                       <span>{league.label}</span>
+                                     </div>
+                                     <div className={`px-2 py-1 rounded text-xs font-medium ${league.covered ? (percentage >= 100 ? 'text-green-600 bg-green-100' : 'text-orange-600 bg-orange-100') : 'text-gray-400 bg-gray-100'}`}>
+                                       {league.covered ? `${percentage}% (${Math.min(providerGames, totalGames)}/${totalGames})` : '0%'}
+                                     </div>
+                                   </div>
+                                 );
+                               })}
+                             </div>
                             <Button className="w-full mt-2 bg-green-600 hover:bg-green-700 text-white text-sm py-2" onClick={() => handleAffiliateClick(provider)}>
                               Zum Anbieter
                             </Button>
@@ -391,18 +405,25 @@ const EnhancedVergleich = () => {
                               </button>
                             </div>
                           </div>
-                          {/* Leagues row - dynamic */}
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4 mt-4">
-                            {dynamicLeaguesList.slice(0, 8).map(league => (
-                              <div key={league.key} className="flex items-center space-x-2">
-                                <span className="text-sm">{league.icon}</span>
-                                <span className="text-xs text-gray-600 flex-1">{league.label}</span>
-                                <div className="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs bg-gray-100">
-                                  {league.covered ? CheckIcon : CrossIcon}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
+                           {/* Leagues row - dynamic */}
+                           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4 mt-4">
+                             {dynamicLeaguesList.slice(0, 8).map(league => {
+                               const leagueData = leagues.find(l => l.league_slug === league.key);
+                               const totalGames = leagueData ? leagueData['number of games'] : 0;
+                               const providerGames = provider[league.key] || 0;
+                               const isFullCoverage = providerGames >= totalGames && totalGames > 0;
+                               
+                               return (
+                                 <div key={league.key} className="flex items-center space-x-2">
+                                   <span className="text-sm">{league.icon}</span>
+                                   <span className="text-xs text-gray-600 flex-1">{league.label}</span>
+                                   <div className="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs bg-gray-100">
+                                     {league.covered ? (isFullCoverage ? CheckIcon : <span className="text-orange-500">❗</span>) : CrossIcon}
+                                   </div>
+                                 </div>
+                               );
+                             })}
+                           </div>
                           {isExpanded && (
                             <>
                               {/* Features and Coverage */}
@@ -420,19 +441,26 @@ const EnhancedVergleich = () => {
                                 </div>
                                 <div>
                                   <h4 className="font-medium mb-2">Vollständige Liga-Abdeckung:</h4>
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                    {dynamicLeaguesList.map(league => (
-                                      <div key={league.key} className="flex items-center justify-between text-sm">
-                                        <div className="flex items-center space-x-2">
-                                          <span>{league.icon}</span>
-                                          <span>{league.label}</span>
-                                        </div>
-                                        <div className={`px-2 py-1 rounded text-xs font-medium ${league.covered ? (provider[league.key] >= 100 ? 'text-green-600 bg-green-100' : 'text-orange-600 bg-orange-100') : 'text-gray-400 bg-gray-100'}`}>
-                                          {league.covered ? `${provider[league.key]}%` : '0%'}
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
+                                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                     {dynamicLeaguesList.map(league => {
+                                       const leagueData = leagues.find(l => l.league_slug === league.key);
+                                       const totalGames = leagueData ? leagueData['number of games'] : 0;
+                                       const providerGames = provider[league.key] || 0;
+                                       const percentage = totalGames > 0 ? Math.round((Math.min(providerGames, totalGames) / totalGames) * 100) : 0;
+                                       
+                                       return (
+                                         <div key={league.key} className="flex items-center justify-between text-sm">
+                                           <div className="flex items-center space-x-2">
+                                             <span>{league.icon}</span>
+                                             <span>{league.label}</span>
+                                           </div>
+                                           <div className={`px-2 py-1 rounded text-xs font-medium ${league.covered ? (percentage >= 100 ? 'text-green-600 bg-green-100' : 'text-orange-600 bg-orange-100') : 'text-gray-400 bg-gray-100'}`}>
+                                             {league.covered ? `${percentage}% (${Math.min(providerGames, totalGames)}/${totalGames})` : '0%'}
+                                           </div>
+                                         </div>
+                                       );
+                                     })}
+                                   </div>
                                 </div>
                               </div>
                               {/* Price row */}
