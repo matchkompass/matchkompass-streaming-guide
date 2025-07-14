@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,7 @@ import { Club } from "@/hooks/useClubs";
 import { StreamingProviderEnhanced } from "@/hooks/useStreamingEnhanced";
 import { LeagueEnhanced } from "@/hooks/useLeaguesEnhanced";
 import HighlightBadge from "@/components/ui/highlight-badge";
-import { Trophy, Award, Star, Euro, Calendar, Tv } from "lucide-react";
+import { Trophy, Award, Star, Euro, Calendar, Tv, ChevronDown, ChevronUp } from "lucide-react";
 
 interface OptimizedRecommendation {
   scenario: string;
@@ -37,6 +37,8 @@ const OptimizedStep4Results = ({
   providers,
   leagues
 }: OptimizedStep4ResultsProps) => {
+  const [expandedProvider, setExpandedProvider] = useState<number | null>(null);
+
   const parsePrice = (priceString?: string): number => {
     if (!priceString) return 0;
     return parseFloat(priceString.replace(/[^\d.,]/g, '').replace(',', '.')) || 0;
@@ -187,6 +189,42 @@ const OptimizedStep4Results = ({
       };
     }).filter(rec => rec.providers.length > 0);
   }, [selectedClubs, selectedCompetitions, providers, leagues, existingProviders]);
+
+  // Dynamic leagues mapping
+  const dynamicLeaguesList = useMemo(() => {
+    const allLeagues = [
+      { key: 'bundesliga', label: 'Bundesliga', icon: '🇩🇪' },
+      { key: 'champions_league', label: 'Champions League', icon: '⭐' },
+      { key: 'second_bundesliga', label: '2. Bundesliga', icon: '2️⃣' },
+      { key: 'premier_league', label: 'Premier League', icon: '🇬🇧' },
+      { key: 'la_liga', label: 'La Liga', icon: '🇪🇸' },
+      { key: 'serie_a', label: 'Serie A', icon: '🇮🇹' },
+      { key: 'ligue_1', label: 'Ligue 1', icon: '🇫🇷' },
+      { key: 'europa_league', label: 'Europa League', icon: '🥈' },
+      { key: 'conference_league', label: 'Conference League', icon: '🥉' },
+      { key: 'third_bundesliga', label: '3. Bundesliga', icon: '3️⃣' },
+      { key: 'club_world_cup', label: 'Klub Weltmeisterschaft', icon: '🌐' },
+      { key: 'sueper_lig', label: 'Süper Lig', icon: '🇹🇷' },
+      { key: 'mls', label: 'Major Soccer League', icon: '🇺🇸' },
+      { key: 'saudi_pro_league', label: 'Saudi Pro League', icon: '🇸🇦' },
+      { key: 'liga_portugal', label: 'Liga Portugal', icon: '🇵🇹' },
+      { key: 'dfb_pokal', label: 'DFB Pokal ', icon: '🏆' },
+      { key: 'eredevise', label: 'Eredevise', icon: '🇳🇱' },
+      { key: 'copa_del_rey', label: 'Copa del rey', icon: '🇪🇸' },
+      { key: 'fa_cup', label: 'FA Cup', icon: '🇬🇧' },
+      { key: 'efl_cup', label: 'EFL Cup', icon: '🇬🇧' },
+      { key: 'coupe_de_france', label: 'Coupe de France', icon: '🇫🇷' },
+      { key: 'coppa_italia', label: 'Coppa Italia', icon: '🇮🇹' }
+    ];
+
+    return allLeagues.map(league => {
+      const isInSelectedClubs = selectedClubs.some(club => club[league.key as keyof Club] === true);
+      return {
+        ...league,
+        covered: isInSelectedClubs
+      };
+    });
+  }, [selectedClubs]);
 
   const allProviders = useMemo(() => {
     return providers
@@ -498,11 +536,56 @@ const OptimizedStep4Results = ({
                         Kein Angebot verfügbar
                       </Button>
                     )}
-                    <Button variant="outline" size="sm">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setExpandedProvider(
+                        expandedProvider === provider.streamer_id ? null : provider.streamer_id
+                      )}
+                      className="flex items-center gap-2"
+                    >
                       Details anzeigen
+                      {expandedProvider === provider.streamer_id ? (
+                        <ChevronUp className="h-4 w-4" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4" />
+                      )}
                     </Button>
                   </div>
                 </div>
+
+                {/* Expanded Details Section */}
+                {expandedProvider === provider.streamer_id && (
+                  <div className="border-t pt-4 mt-4">
+                    <div className="space-y-4">
+                      <h4 className="font-medium mb-2">Vollständige Liga-Abdeckung:</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        {dynamicLeaguesList.map(league => {
+                          const leagueData = leagues.find(l => l.league_slug === league.key);
+                          const totalGames = leagueData ? leagueData['number of games'] : 0;
+                          const providerGames = provider[league.key as keyof typeof provider] || 0;
+                          const percentage = totalGames > 0 ? Math.round((Math.min(Number(providerGames), totalGames) / totalGames) * 100) : 0;
+                          
+                          return (
+                            <div key={league.key} className="flex items-center justify-between text-sm">
+                              <div className="flex items-center space-x-2">
+                                <span>{league.icon}</span>
+                                <span>{league.label}</span>
+                              </div>
+                              <div className={`px-2 py-1 rounded text-xs font-medium ${
+                                league.covered ? 
+                                  (percentage >= 100 ? 'text-green-600 bg-green-100' : 'text-orange-600 bg-orange-100') : 
+                                  'text-gray-400 bg-gray-100'
+                              }`}>
+                                {league.covered ? `${percentage}% (${Math.min(Number(providerGames), totalGames)}/${totalGames})` : '0%'}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))}
