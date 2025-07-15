@@ -186,26 +186,80 @@ const OptimizedStep4Results = ({
       { target: 66, name: "Budget-Option (66%)", icon: <Star className="h-5 w-5 text-amber-600" /> }
     ];
 
-    return scenarios.map((scenario, index) => {
-      const providers = findOptimalCombinations(scenario.target);
-      const totalCost = providers.reduce((sum, p) => sum + parsePrice(p.monthly_price), 0);
-      const yearlyCost = providers.reduce((sum, p) => {
-        const yearly = parsePrice(p.yearly_price);
-        return sum + (yearly || parsePrice(p.monthly_price) * 12);
-      }, 0);
-      const savings = Math.max(0, (totalCost * 12) - yearlyCost);
-
-      // Calculate actual coverage
+    // --- NEU: Einzelanbieter und Kombi für 100% immer berechnen ---
+    // Einzelanbieter mit 100%
+    const availableProviders = providers.filter(p => !existingProviders.includes(p.streamer_id));
+    const totalGames = selectedCompetitions.reduce((sum, comp) => {
+      const league = leagues.find(l => l.league_slug === comp);
+      return sum + (league?.['number of games'] || 0);
+    }, 0);
+    const targetGames = Math.ceil((totalGames * 1));
+    const fullCoverageProviders = availableProviders.filter(provider => {
+      return selectedCompetitions.every(comp => {
+        const league = leagues.find(l => l.league_slug === comp);
+        const total = league?.['number of games'] || 0;
+        const covered = (provider[comp as keyof StreamingProviderEnhanced] as number) || 0;
+        return total > 0 && Math.min(covered, total) === total;
+      });
+    });
+    let cheapestSingle: StreamingProviderEnhanced | null = null;
+    let cheapestSinglePrice = Infinity;
+    for (const provider of fullCoverageProviders) {
+      const price = parsePrice(provider.monthly_price);
+      if (price < cheapestSinglePrice) {
+        cheapestSingle = provider;
+        cheapestSinglePrice = price;
+      }
+    }
+    // Günstigste Kombi (wie im Algorithmus)
+    function getCoverageForCombo(combo: StreamingProviderEnhanced[]): number {
+      let coveredGames = 0;
+      selectedCompetitions.forEach(comp => {
+        const league = leagues.find(l => l.league_slug === comp);
+        const total = league?.['number of games'] || 0;
+        let maxCovered = 0;
+        combo.forEach(provider => {
+          const covered = (provider[comp as keyof StreamingProviderEnhanced] as number) || 0;
+          maxCovered = Math.max(maxCovered, Math.min(covered, total));
+        });
+        coveredGames += maxCovered;
+      });
+      return coveredGames;
+    }
+    function getPriceForCombo(combo: StreamingProviderEnhanced[]): number {
+      return combo.reduce((sum, p) => sum + parsePrice(p.monthly_price), 0);
+    }
+    const combos: StreamingProviderEnhanced[][] = [];
+    for (let i = 0; i < availableProviders.length; i++) {
+      for (let j = i + 1; j < availableProviders.length; j++) {
+        combos.push([availableProviders[i], availableProviders[j]]);
+        for (let k = j + 1; k < availableProviders.length; k++) {
+          combos.push([availableProviders[i], availableProviders[j], availableProviders[k]]);
+        }
+      }
+    }
+    const exactCombos = combos.filter(combo => getCoverageForCombo(combo) === totalGames);
+    let cheapestCombo: StreamingProviderEnhanced[] | null = null;
+    let cheapestComboPrice = Infinity;
+    for (const combo of exactCombos) {
+      const price = getPriceForCombo(combo);
+      if (price < cheapestComboPrice) {
+        cheapestCombo = combo;
+        cheapestComboPrice = price;
+      }
+    }
+    // --- Empfehlungen bauen ---
+    const recs: any[] = [];
+    if (cheapestSingle) {
+      // Coverage/Stats berechnen wie unten
+      const providers = [cheapestSingle];
+      const totalCost = parsePrice(cheapestSingle.monthly_price);
+      const yearlyCost = parsePrice(cheapestSingle.yearly_price) || totalCost * 12;
       const competitionStats = selectedCompetitions.map(comp => {
         const league = leagues.find(l => l.league_slug === comp);
         const totalGames = league?.['number of games'] || 0;
-        let maxCovered = 0;
-        
-        providers.forEach(provider => {
-          const providerGames = (provider[comp as keyof StreamingProviderEnhanced] as number) || 0;
-          maxCovered = Math.max(maxCovered, Math.min(providerGames, totalGames));
-        });
-
+        const providerGames = (cheapestSingle[comp as keyof StreamingProviderEnhanced] as number) || 0;
+        const maxCovered = Math.min(providerGames, totalGames);
         const coverage = totalGames > 0 ? Math.round((maxCovered / totalGames) * 100) : 0;
         return {
           name: league?.league || comp,
@@ -213,36 +267,101 @@ const OptimizedStep4Results = ({
           games: `${maxCovered}/${totalGames}`
         };
       });
-
-      const totalGames = competitionStats.reduce((sum, c) => sum + parseInt(c.games.split('/')[1]), 0);
-      const coveredGames = competitionStats.reduce((sum, c) => sum + parseInt(c.games.split('/')[0]), 0);
-      const actualCoverage = totalGames > 0 ? Math.round((coveredGames / totalGames) * 100) : 0;
-      const costPerGame = coveredGames > 0 ? totalCost / coveredGames : 0;
-
-      // Filter out results that don't meet the exact target for 100% scenarios
-      if (scenario.target === 100 && actualCoverage < 100) {
-        return null;
-      }
-
-      // Mock other sports data
-      const otherSports = providers.length > 0 ? 
-        ["Tennis", "Basketball", "Golf", "Formel 1", "Champions League", "Europa League"].slice(0, 3 + providers.length) : 
-        [];
-
-      return {
-        scenario: scenario.name,
+      const totalGamesSum = competitionStats.reduce((sum, c) => sum + parseInt(c.games.split('/')[1]), 0);
+      const coveredGamesSum = competitionStats.reduce((sum, c) => sum + parseInt(c.games.split('/')[0]), 0);
+      const actualCoverage = totalGamesSum > 0 ? Math.round((coveredGamesSum / totalGamesSum) * 100) : 0;
+      recs.push({
+        scenario: "Einzelanbieter (100%)",
         providers,
         totalCost,
         yearlyCost,
-        savings,
         coveragePercentage: actualCoverage,
-        costPerGame,
         competitions: competitionStats,
-        otherSports,
-        icon: scenario.icon,
-        rank: index + 1
-      };
-    }).filter(rec => rec !== null && rec.providers.length > 0);
+        icon: <Trophy className="h-5 w-5 text-yellow-500" />,
+        rank: 1
+      });
+    }
+    if (cheapestCombo) {
+      const providers = cheapestCombo;
+      const totalCost = getPriceForCombo(cheapestCombo);
+      const yearlyCost = providers.reduce((sum, p) => {
+        const yearly = parsePrice(p.yearly_price);
+        return sum + (yearly || parsePrice(p.monthly_price) * 12);
+      }, 0);
+      const competitionStats = selectedCompetitions.map(comp => {
+        const league = leagues.find(l => l.league_slug === comp);
+        const totalGames = league?.['number of games'] || 0;
+        let maxCovered = 0;
+        providers.forEach(provider => {
+          const providerGames = (provider[comp as keyof StreamingProviderEnhanced] as number) || 0;
+          maxCovered = Math.max(maxCovered, Math.min(providerGames, totalGames));
+        });
+        const coverage = totalGames > 0 ? Math.round((maxCovered / totalGames) * 100) : 0;
+        return {
+          name: league?.league || comp,
+          coverage,
+          games: `${maxCovered}/${totalGames}`
+        };
+      });
+      const totalGamesSum = competitionStats.reduce((sum, c) => sum + parseInt(c.games.split('/')[1]), 0);
+      const coveredGamesSum = competitionStats.reduce((sum, c) => sum + parseInt(c.games.split('/')[0]), 0);
+      const actualCoverage = totalGamesSum > 0 ? Math.round((coveredGamesSum / totalGamesSum) * 100) : 0;
+      recs.push({
+        scenario: "Kombi (100%)",
+        providers,
+        totalCost,
+        yearlyCost,
+        coveragePercentage: actualCoverage,
+        competitions: competitionStats,
+        icon: <Award className="h-5 w-5 text-gray-400" />,
+        rank: 2
+      });
+    }
+    // --- Restliche Szenarien wie gehabt ---
+    return [
+      ...recs,
+      ...scenarios.slice(1).map((scenario, index) => {
+        if (scenario.target === 100) return null; // 100% schon oben behandelt
+        const providers = findOptimalCombinations(scenario.target);
+        const totalCost = providers.reduce((sum, p) => sum + parsePrice(p.monthly_price), 0);
+        const yearlyCost = providers.reduce((sum, p) => {
+          const yearly = parsePrice(p.yearly_price);
+          return sum + (yearly || parsePrice(p.monthly_price) * 12);
+        }, 0);
+        // Calculate actual coverage
+        const competitionStats = selectedCompetitions.map(comp => {
+          const league = leagues.find(l => l.league_slug === comp);
+          const totalGames = league?.['number of games'] || 0;
+          let maxCovered = 0;
+          providers.forEach(provider => {
+            const providerGames = (provider[comp as keyof StreamingProviderEnhanced] as number) || 0;
+            maxCovered = Math.max(maxCovered, Math.min(providerGames, totalGames));
+          });
+          const coverage = totalGames > 0 ? Math.round((maxCovered / totalGames) * 100) : 0;
+          return {
+            name: league?.league || comp,
+            coverage,
+            games: `${maxCovered}/${totalGames}`
+          };
+        });
+        const totalGamesSum = competitionStats.reduce((sum, c) => sum + parseInt(c.games.split('/')[1]), 0);
+        const coveredGamesSum = competitionStats.reduce((sum, c) => sum + parseInt(c.games.split('/')[0]), 0);
+        const actualCoverage = totalGamesSum > 0 ? Math.round((coveredGamesSum / totalGamesSum) * 100) : 0;
+        if (providers.length === 0 || (scenario.target === 100 && actualCoverage < 100)) {
+          return null;
+        }
+        return {
+          scenario: scenario.name,
+          providers,
+          totalCost,
+          yearlyCost,
+          coveragePercentage: actualCoverage,
+          competitions: competitionStats,
+          icon: scenario.icon,
+          rank: 3 + index
+        };
+      }).filter(Boolean)
+    ];
   }, [selectedClubs, selectedCompetitions, providers, leagues, existingProviders]);
 
   // Dynamic leagues mapping
