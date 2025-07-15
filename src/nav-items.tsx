@@ -7,6 +7,8 @@ import Deals from "./pages/Deals";
 import Impressum from "./pages/Impressum";
 import Datenschutz from "./pages/Datenschutz";
 import AGB from "./pages/AGB";
+import CookieRichtlinie from "./pages/CookieRichtlinie";
+import Barrierefreiheit from "./pages/Barrierefreiheit";
 
 export const navItems = [
   {
@@ -49,5 +51,15 @@ export const navItems = [
     title: "AGB",
     to: "/agb",
     page: <AGB />,
+  },
+  {
+    title: "Cookie-Richtlinie",
+    to: "/cookies",
+    page: <CookieRichtlinie />,
+  },
+  {
+    title: "Barrierefreiheit",
+    to: "/barrierefreiheit",
+    page: <Barrierefreiheit />,
   },
 ];

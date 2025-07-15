@@ -28,7 +28,7 @@ const Footer = () => {
       { name: "Datenschutz", href: "/datenschutz" },
       { name: "AGB", href: "/agb" },
       { name: "Cookie-Richtlinie", href: "/cookies" },
-      { name: "Widerrufsrecht", href: "/widerrufsrecht" }
+      { name: "Barrierefreiheit", href: "/barrierefreiheit" },
     ]
   };
 
