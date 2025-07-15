@@ -241,7 +241,7 @@ const EnhancedCompetitionSelector: React.FC<EnhancedCompetitionSelectorProps> = 
 
       {/* Top row: selected leagues as cards */}
       {selectedCompetitions.length > 0 && (
-        <div className="mb-4 flex flex-wrap gap-2">
+        <div className="mb-4 grid grid-cols-1 md:grid-cols-4 gap-2">
           {selectedCompetitions.map(slug => {
             const comp = allCompetitions.find(c => c.id === slug);
             if (!comp) return null;
@@ -279,7 +279,7 @@ const EnhancedCompetitionSelector: React.FC<EnhancedCompetitionSelectorProps> = 
             <h3 className="text-lg font-semibold mb-3 text-blue-800 flex items-center gap-2">
               {cluster.name}
             </h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
               {comps.map(competition => (
                 <Card
                   key={competition.id}
