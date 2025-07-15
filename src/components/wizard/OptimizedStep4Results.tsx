@@ -474,165 +474,6 @@ const OptimizedStep4Results = ({
         </p>
       </div>
 
-      {/* Top 3 Recommendations */}
-      <div className="space-y-6">
-        <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-          <Trophy className="h-5 w-5 text-yellow-500" />
-          Top Empfehlungen
-        </h3>
-        
-        <div className="grid lg:grid-cols-3 gap-6">
-          {recommendations.map((rec, index) => (
-            <Card key={index} className={`${index === 0 ? 'ring-2 ring-green-500 relative' : ''}`}>
-              {index === 0 && (
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <Badge className="bg-green-500 text-white px-4 py-1">
-                    Beste Wahl
-                  </Badge>
-                </div>
-              )}
-              
-              <CardHeader className="pb-4">
-                <CardTitle className="flex items-center justify-between text-lg">
-                  <div className="flex items-center gap-2">
-                    {rec.icon}
-                    <span className="text-sm">{rec.scenario}</span>
-                  </div>
-                  <Badge className="bg-blue-100 text-blue-800">
-                    {rec.coveragePercentage}%
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-
-              <CardContent className="space-y-6">
-                {/* Price Section */}
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Euro className="h-4 w-4 text-green-600" />
-                    <h4 className="font-semibold text-gray-900">Preise</h4>
-                  </div>
-                   <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-                     <div className="flex justify-between">
-                       <span className="text-sm text-gray-600">Preis im Monatsabo:</span>
-                       <span className="font-semibold text-green-600">€{rec.totalCost.toFixed(2)}</span>
-                     </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Preis im Jahresabo:</span>
-                        <span className="font-semibold">€{rec.yearlyCost.toFixed(2)}</span>
-                      </div>
-                   </div>
-                </div>
-
-                {/* Competitions Section */}
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Calendar className="h-4 w-4 text-blue-600" />
-                    <h4 className="font-semibold text-gray-900">Wettbewerbe</h4>
-                  </div>
-                  <div className="space-y-2">
-                    {rec.competitions.slice(0, 3).map((comp, idx) => (
-                      <div key={idx} className="flex justify-between items-center">
-                        <span className="text-sm text-gray-700">{comp.name}</span>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-gray-500">{comp.games}</span>
-                          <Badge variant={comp.coverage >= 90 ? "default" : comp.coverage >= 70 ? "secondary" : "outline"} 
-                                 className="text-xs">
-                            {comp.coverage}%
-                          </Badge>
-                        </div>
-                      </div>
-                    ))}
-                    {rec.competitions.length > 3 && (
-                      <div className="text-xs text-gray-500 text-center pt-1">
-                        +{rec.competitions.length - 3} weitere
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Features Section */}
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Tv className="h-4 w-4 text-purple-600" />
-                    <h4 className="font-semibold text-gray-900">Features</h4>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {rec.providers.map((provider, idx) => {
-                      const features = parseFeatures(provider);
-                      return (
-                        <div key={idx} className="flex flex-wrap gap-2">
-                          {features.fourK && <Badge className="bg-green-100 text-green-800">4K</Badge>}
-                          {features.mobile && <Badge className="bg-blue-100 text-blue-800">Mobile</Badge>}
-                          {features.download && <Badge className="bg-purple-100 text-purple-800">Download</Badge>}
-                          {features.streams > 1 && <Badge className="bg-orange-100 text-orange-800">{features.streams} Streams</Badge>}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Providers */}
-                <div className="space-y-3">
-                  <h4 className="font-semibold text-gray-900">Anbieter ({rec.providers.length})</h4>
-                  <div className="space-y-2">
-                    {rec.providers.map((provider, pIdx) => (
-                      <div key={pIdx} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                        <div className="flex items-center gap-2">
-                          {provider.logo_url && (
-                            <img src={provider.logo_url} alt={provider.name} className="w-6 h-6 object-contain" />
-                          )}
-                          <div className="flex flex-col">
-                            <span className="text-sm font-medium">{provider.name}</span>
-                            <span className="text-xs text-gray-500">
-                              Monatlich: €{parsePrice(provider.monthly_price).toFixed(2)}
-                            </span>
-                          </div>
-                        </div>
-                        {provider.affiliate_url && (
-                          <Button 
-                            size="sm" 
-                            className="bg-green-600 hover:bg-green-700 text-white text-xs px-2 py-1"
-                            onClick={() => window.open(provider.affiliate_url, '_blank')}
-                          >
-                            Jetzt buchen
-                          </Button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  {rec.providers.length === 1 && rec.providers[0].affiliate_url ? (
-                    <Button 
-                      className="w-full bg-green-600 hover:bg-green-700" 
-                      size="lg"
-                      onClick={() => window.open(rec.providers[0].affiliate_url, '_blank')}
-                    >
-                      Jetzt zum Angebot
-                    </Button>
-                  ) : (
-                    <Button 
-                      className="w-full bg-green-600 hover:bg-green-700" 
-                      size="lg"
-                      onClick={() => {
-                        rec.providers.forEach(provider => {
-                          if (provider.affiliate_url) {
-                            window.open(provider.affiliate_url, '_blank');
-                          }
-                        });
-                      }}
-                    >
-                      Alle Angebote öffnen
-                    </Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-
       {/* All Providers List */}
       <div className="space-y-6">
         <h3 className="text-xl font-semibold text-gray-900">Alle Streaming-Anbieter</h3>
@@ -786,6 +627,165 @@ const OptimizedStep4Results = ({
                     </div>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      {/* Top 3 Recommendations */}
+      <div className="space-y-6">
+        <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+          <Trophy className="h-5 w-5 text-yellow-500" />
+          Top Empfehlungen
+        </h3>
+        
+        <div className="grid lg:grid-cols-3 gap-6">
+          {recommendations.map((rec, index) => (
+            <Card key={index} className={`${index === 0 ? 'ring-2 ring-green-500 relative' : ''}`}>
+              {index === 0 && (
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <Badge className="bg-green-500 text-white px-4 py-1">
+                    Beste Wahl
+                  </Badge>
+                </div>
+              )}
+              
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center justify-between text-lg">
+                  <div className="flex items-center gap-2">
+                    {rec.icon}
+                    <span className="text-sm">{rec.scenario}</span>
+                  </div>
+                  <Badge className="bg-blue-100 text-blue-800">
+                    {rec.coveragePercentage}%
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+
+              <CardContent className="space-y-6">
+                {/* Price Section */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Euro className="h-4 w-4 text-green-600" />
+                    <h4 className="font-semibold text-gray-900">Preise</h4>
+                  </div>
+                   <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                     <div className="flex justify-between">
+                       <span className="text-sm text-gray-600">Preis im Monatsabo:</span>
+                       <span className="font-semibold text-green-600">€{rec.totalCost.toFixed(2)}</span>
+                     </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Preis im Jahresabo:</span>
+                        <span className="font-semibold">€{rec.yearlyCost.toFixed(2)}</span>
+                      </div>
+                   </div>
+                </div>
+
+                {/* Competitions Section */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Calendar className="h-4 w-4 text-blue-600" />
+                    <h4 className="font-semibold text-gray-900">Wettbewerbe</h4>
+                  </div>
+                  <div className="space-y-2">
+                    {rec.competitions.slice(0, 3).map((comp, idx) => (
+                      <div key={idx} className="flex justify-between items-center">
+                        <span className="text-sm text-gray-700">{comp.name}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-gray-500">{comp.games}</span>
+                          <Badge variant={comp.coverage >= 90 ? "default" : comp.coverage >= 70 ? "secondary" : "outline"} 
+                                 className="text-xs">
+                            {comp.coverage}%
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                    {rec.competitions.length > 3 && (
+                      <div className="text-xs text-gray-500 text-center pt-1">
+                        +{rec.competitions.length - 3} weitere
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Features Section */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Tv className="h-4 w-4 text-purple-600" />
+                    <h4 className="font-semibold text-gray-900">Features</h4>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {rec.providers.map((provider, idx) => {
+                      const features = parseFeatures(provider);
+                      return (
+                        <div key={idx} className="flex flex-wrap gap-2">
+                          {features.fourK && <Badge className="bg-green-100 text-green-800">4K</Badge>}
+                          {features.mobile && <Badge className="bg-blue-100 text-blue-800">Mobile</Badge>}
+                          {features.download && <Badge className="bg-purple-100 text-purple-800">Download</Badge>}
+                          {features.streams > 1 && <Badge className="bg-orange-100 text-orange-800">{features.streams} Streams</Badge>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Providers */}
+                <div className="space-y-3">
+                  <h4 className="font-semibold text-gray-900">Anbieter ({rec.providers.length})</h4>
+                  <div className="space-y-2">
+                    {rec.providers.map((provider, pIdx) => (
+                      <div key={pIdx} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                        <div className="flex items-center gap-2">
+                          {provider.logo_url && (
+                            <img src={provider.logo_url} alt={provider.name} className="w-6 h-6 object-contain" />
+                          )}
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium">{provider.name}</span>
+                            <span className="text-xs text-gray-500">
+                              Monatlich: €{parsePrice(provider.monthly_price).toFixed(2)}
+                            </span>
+                          </div>
+                        </div>
+                        {provider.affiliate_url && (
+                          <Button 
+                            size="sm" 
+                            className="bg-green-600 hover:bg-green-700 text-white text-xs px-2 py-1"
+                            onClick={() => window.open(provider.affiliate_url, '_blank')}
+                          >
+                            Jetzt buchen
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  {rec.providers.length === 1 && rec.providers[0].affiliate_url ? (
+                    <Button 
+                      className="w-full bg-green-600 hover:bg-green-700" 
+                      size="lg"
+                      onClick={() => window.open(rec.providers[0].affiliate_url, '_blank')}
+                    >
+                      Jetzt zum Angebot
+                    </Button>
+                  ) : (
+                    <Button 
+                      className="w-full bg-green-600 hover:bg-green-700" 
+                      size="lg"
+                      onClick={() => {
+                        rec.providers.forEach(provider => {
+                          if (provider.affiliate_url) {
+                            window.open(provider.affiliate_url, '_blank');
+                          }
+                        });
+                      }}
+                    >
+                      Alle Angebote öffnen
+                    </Button>
+                  )}
+                </div>
               </CardContent>
             </Card>
           ))}
