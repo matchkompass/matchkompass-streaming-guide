@@ -8,7 +8,7 @@ import { navItems } from "./nav-items";
 import ClubDetail from "./pages/ClubDetail";
 import CompetitionDetail from "./pages/CompetitionDetail";
 import ProviderDetail from "./pages/ProviderDetail";
-import DetailVergleich from "./pages/DetailVergleich";
+import DetailVergleichDeprecated from "./pages/DetailVergleichDeprecated";
 import NotFound from "./pages/NotFound";
 import Vergleich from "./pages/Vergleich";
 import DetailVergleich2 from "./pages/DetailVergleich2";
@@ -31,7 +31,7 @@ const App = () => (
           <Route path="/club/:slug" element={<ClubDetail />} />
           <Route path="/competition/:slug" element={<CompetitionDetail />} />
           <Route path="/streaming-provider/:slug" element={<ProviderDetail />} />
-          <Route path="/detailvergleich" element={<DetailVergleich />} />
+          <Route path="/detailvergleich-deprecated" element={<DetailVergleichDeprecated />} />
           <Route path="/classic-vergleich" element={<Vergleich />} />
           <Route path="/detailvergleich2" element={<DetailVergleich2 />} />
           <Route path="*" element={<NotFound />} />
