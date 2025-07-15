@@ -14,6 +14,7 @@ const Header = () => {
     { name: "Vergleich", href: "/vergleich" },
     { name: "Detailvergleich", href: "/detailvergleich" },
     { name: "Ligen", href: "/ligen" },
+    { name: "Alle Anbieter", href: "/anbieter" },
     { name: "Deals & News", href: "/deals" },
   ];
 
