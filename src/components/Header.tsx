@@ -12,7 +12,7 @@ const Header = () => {
   const navigation = [
     { name: "Wizard", href: "/wizard" },
     { name: "Vergleich", href: "/vergleich" },
-    { name: "Detailvergleich 2", href: "/detailvergleich2" },
+    { name: "Detailvergleich", href: "/detailvergleich" },
     { name: "Ligen", href: "/ligen" },
     { name: "Deals & News", href: "/deals" },
   ];

@@ -1,7 +1,7 @@
 import Index from "./pages/Index";
 import Wizard from "./pages/Wizard";
 import EnhancedVergleich from "./pages/EnhancedVergleich";
-import DetailVergleich2 from "./pages/DetailVergleich2";
+import DetailVergleich from "./pages/DetailVergleich";
 import Leagues from "./pages/Leagues";
 import Deals from "./pages/Deals";
 import Impressum from "./pages/Impressum";
@@ -27,9 +27,9 @@ export const navItems = [
     page: <EnhancedVergleich />,
   },
   {
-    title: "Detaillvergleich2",
-    to: "/detailvergleich2",
-    page: <DetailVergleich2 />,
+    title: "Detailvergleich",
+    to: "/detailvergleich",
+    page: <DetailVergleich />,
   },
   {
     title: "Ligen",
