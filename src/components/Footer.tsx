@@ -8,8 +8,7 @@ const Footer = () => {
     produkt: [
       { name: "Empfehlungs-Wizard", href: "/wizard" },
       { name: "Anbieter-Vergleich", href: "/vergleich" },
-      { name: "Aktuelle Deals", href: "/deals" },
-      { name: "Spielplan & News", href: "/news" }
+      { name: "Deals & News", href: "/deals" },
     ],
     vereine: [
       { name: "Bayern München", href: "/clubs/bayern-muenchen" },

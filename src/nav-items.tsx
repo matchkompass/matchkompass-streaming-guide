@@ -32,7 +32,7 @@ export const navItems = [
     page: <Leagues />,
   },
   {
-    title: "News & Deals",
+    title: "Deals & News",
     to: "/deals",
     page: <Deals />,
   },
