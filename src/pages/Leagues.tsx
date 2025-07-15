@@ -191,11 +191,11 @@ const Leagues = () => {
                               <div key={item.provider.streamer_id} className="flex items-center justify-between bg-white rounded-lg p-3 border">
                                 <div className="flex items-center gap-3 flex-1 min-w-0">
                                   {item.provider.logo_url ? (
-                                    <img src={item.provider.logo_url} alt={item.provider.provider_name} className="w-6 h-6 object-contain rounded-full flex-shrink-0" />
+                                    <img src={item.provider.logo_url} alt={item.provider.name} className="w-6 h-6 object-contain rounded-full flex-shrink-0" />
                                   ) : (
                                     <span className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">📺</span>
                                   )}
-                                  <span className="font-medium text-sm truncate">{item.provider.provider_name}</span>
+                                  <span className="font-medium text-sm truncate">{item.provider.name}</span>
                                 </div>
                                 <div className="flex items-center gap-3 flex-shrink-0">
                                   <Badge
