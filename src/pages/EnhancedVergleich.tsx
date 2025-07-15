@@ -1,6 +1,6 @@
 // Minor change: Triggering a commit for push
 import React, { useState, useMemo } from "react";
-import { Filter, Star, Check, X, Menu, Euro, Calendar, Tv, ChevronUp, ChevronDown } from "lucide-react";
+import { Filter, Star, Check, X, Menu, Euro, Calendar, Tv, ChevronUp, ChevronDown, Pin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -41,6 +41,7 @@ const EnhancedVergleich = () => {
   const [paymentType, setPaymentType] = useState<'monthly' | 'yearly'>('monthly');
   const [expandedProvider, setExpandedProvider] = useState<number | null>(null);
   const [expandedMobileCard, setExpandedMobileCard] = useState<number | null>(null);
+  const [pinnedProviders, setPinnedProviders] = useState<number[]>([]);
 
   const { providers, loading: providersLoading, error: providersError } = useStreaming();
   const { leagues, loading: leaguesLoading, error: leaguesError } = useLeagues();
@@ -170,6 +171,22 @@ const EnhancedVergleich = () => {
     }));
   };
 
+  // Pinning logic
+  const togglePin = (providerId: number) => {
+    setPinnedProviders(prev =>
+      prev.includes(providerId)
+        ? prev.filter(id => id !== providerId)
+        : [...prev, providerId]
+    );
+  };
+
+  // Sort providers: pinned first
+  const displayProviders = useMemo(() => {
+    const pinned = filteredProviders.filter(p => pinnedProviders.includes(p.streamer_id));
+    const unpinned = filteredProviders.filter(p => !pinnedProviders.includes(p.streamer_id));
+    return [...pinned, ...unpinned];
+  }, [filteredProviders, pinnedProviders]);
+
   if (providersLoading || leaguesLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -249,7 +266,7 @@ const EnhancedVergleich = () => {
               {/* Main provider/league display */}
               {isMobile ? (
                 <div className="space-y-4">
-                  {filteredProviders.map((provider) => {
+                  {displayProviders.map((provider) => {
                     const price = parsePrice(provider.monthly_price);
                     const yearlyPrice = parsePrice(provider.yearly_price);
                     const features = parseFeatures(provider);
@@ -261,6 +278,7 @@ const EnhancedVergleich = () => {
                       covered: provider[league.league_slug] > 0
                     }));
                     const isExpanded = expandedMobileCard === provider.streamer_id;
+                    const isPinned = pinnedProviders.includes(provider.streamer_id);
                     return (
                       <Card key={provider.streamer_id} className="shadow-md">
                         <CardHeader className="pb-4">
@@ -281,6 +299,15 @@ const EnhancedVergleich = () => {
                                 )}
                               </div>
                             </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => togglePin(provider.streamer_id)}
+                              className={isPinned ? "bg-green-50 border-green-300 ml-auto" : "ml-auto"}
+                              aria-label={isPinned ? "Unpin provider" : "Pin provider"}
+                            >
+                              <Pin className={`h-4 w-4 ${isPinned ? "text-green-600" : ""}`} />
+                            </Button>
                           </div>
                           
                           <div className="flex flex-wrap gap-2 mb-3">
@@ -359,11 +386,12 @@ const EnhancedVergleich = () => {
                 </div>
               ) : (
                 <div className="flex flex-col gap-6">
-                  {filteredProviders.map((provider) => {
+                  {displayProviders.map((provider) => {
                     const price = parsePrice(provider.monthly_price);
                     const yearlyPrice = parsePrice(provider.yearly_price);
                     const features = parseFeatures(provider);
                     const isExpanded = expandedProvider === provider.streamer_id;
+                    const isPinned = pinnedProviders.includes(provider.streamer_id);
                     // Dynamic leagues list from DB
                     const dynamicLeaguesList = [...leagues]
                       .sort((a, b) => (a.popularity || 0) - (b.popularity || 0))
@@ -398,111 +426,75 @@ const EnhancedVergleich = () => {
                     return (
                       <div key={provider.streamer_id} className="rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden">
                         <div className="flex flex-col space-y-1.5 p-6 pb-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-4">
-                              <span className="text-3xl">
-                                {provider.logo_url ? (
-                                  <img src={provider.logo_url} alt={provider.provider_name} className="w-10 h-10 object-contain rounded-full bg-white border" />
-                                ) : (
-                                  "🔵"
+                          <div className="flex items-center gap-3 mb-3">
+                            {provider.logo_url ? (
+                              <img src={provider.logo_url} alt={provider.provider_name} className="w-10 h-10 object-contain rounded-full bg-white border" />
+                            ) : (
+                              <span className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-200">📺</span>
+                            )}
+                            <div>
+                              <h3 className="font-bold text-lg">{provider.name}</h3>
+                              <div className="text-sm text-gray-600">
+                                €{price.toFixed(2)}/Monat
+                                {yearlyPrice > 0 && (
+                                  <span className="ml-2 text-green-600">
+                                    • €{yearlyPrice.toFixed(2)}/Jahr
+                                  </span>
                                 )}
-                              </span>
-                              <div>
-                                <div className="flex items-center space-x-2">
-                                  <h3 className="font-semibold tracking-tight text-xl">{provider.name}</h3>
-                                </div>
-                                <div className="flex items-center space-x-4 mt-1">
-                                  <div className="text-lg font-bold text-green-600">€{price.toFixed(2)}/Monat</div>
-                                  <div className="flex items-center space-x-1">
-                                    {StarIcon}
-                                    <span className="text-sm font-medium">4</span>
-                                  </div>
-                                </div>
                               </div>
                             </div>
-                            <div className="flex items-center space-x-2">
-                              <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 text-primary-foreground h-9 rounded-md px-3 bg-green-600 hover:bg-green-700" onClick={() => handleAffiliateClick(provider)}>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-external-link h-4 w-4 mr-1"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>
-                                Zum Anbieter
-                              </button>
-                              <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3" onClick={() => setExpandedProvider(isExpanded ? null : provider.streamer_id)}>
-                                {ChevronIcon}
-                              </button>
-                            </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => togglePin(provider.streamer_id)}
+                              className={isPinned ? "bg-green-50 border-green-300 ml-auto" : "ml-auto"}
+                              aria-label={isPinned ? "Unpin provider" : "Pin provider"}
+                            >
+                              <Pin className={`h-4 w-4 ${isPinned ? "text-green-600" : ""}`} />
+                            </Button>
                           </div>
-                           {/* Leagues row - dynamic */}
-                           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4 mt-4">
-                             {dynamicLeaguesList.slice(0, 8).map(league => {
-                               const leagueData = leagues.find(l => l.league_slug === league.key);
-                               const totalGames = leagueData ? leagueData['number of games'] : 0;
-                               const providerGames = provider[league.key] || 0;
-                               const isFullCoverage = providerGames >= totalGames && totalGames > 0;
-                               
-                               return (
-                                 <div key={league.key} className="flex items-center space-x-2">
-                                   <span className="text-sm">{league.icon}</span>
-                                   <span className="text-xs text-gray-600 flex-1">{league.label}</span>
-                                   <div className="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs bg-gray-100">
-                                     {league.covered ? (isFullCoverage ? CheckIcon : <span className="text-orange-500">❗</span>) : CrossIcon}
-                                   </div>
-                                 </div>
-                               );
-                             })}
-                           </div>
-                          {isExpanded && (
-                            <>
-                              {/* Features and Coverage */}
-                              <div className="border-t pt-4 space-y-4">
-                                <div>
-                                  <h4 className="font-medium mb-2">Alle Features:</h4>
-                                  <div className="grid grid-cols-2 gap-2">
-                                    {featuresList.map(feature => (
-                                      <div key={feature.key} className="flex items-center justify-between text-sm">
-                                        <span>{feature.label}</span>
-                                        {feature.value ? CheckIcon : CrossIcon}
-                                      </div>
-                                    ))}
+                          
+                          <div className="flex flex-wrap gap-2 mb-3">
+                            {features.fourK && <Badge className="bg-green-100 text-green-800 text-xs">4K</Badge>}
+                            {features.mobile && <Badge className="bg-blue-100 text-blue-800 text-xs">Mobile</Badge>}
+                            {features.download && <Badge className="bg-purple-100 text-purple-800 text-xs">Download</Badge>}
+                            {features.streams > 1 && <Badge className="bg-orange-100 text-orange-800 text-xs">{features.streams} Streams</Badge>}
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2 mb-3">
+                            {dynamicLeaguesList.slice(0, 8).map(league => {
+                              const leagueData = leagues.find(l => l.league_slug === league.key);
+                              const totalGames = leagueData ? leagueData['number of games'] : 0;
+                              const providerGames = provider[league.key] || 0;
+                              const isFullCoverage = providerGames >= totalGames && totalGames > 0;
+                              
+                              return (
+                                <div key={league.key} className="flex items-center gap-2">
+                                  <span className="text-sm">{league.icon}</span>
+                                  <span className="text-xs text-gray-600 flex-1 truncate">{league.label}</span>
+                                  <div className="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs bg-gray-100 flex-shrink-0">
+                                    {league.covered ? (isFullCoverage ? CheckIcon : <span className="text-orange-500">❗</span>) : CrossIcon}
                                   </div>
                                 </div>
-                                <div>
-                                  <h4 className="font-medium mb-2">Vollständige Liga-Abdeckung:</h4>
-                                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                     {dynamicLeaguesList.map(league => {
-                                       const leagueData = leagues.find(l => l.league_slug === league.key);
-                                       const totalGames = leagueData ? leagueData['number of games'] : 0;
-                                       const providerGames = provider[league.key] || 0;
-                                       const percentage = totalGames > 0 ? Math.round((Math.min(providerGames, totalGames) / totalGames) * 100) : 0;
-                                       
-                                       return (
-                                         <div key={league.key} className="flex items-center justify-between text-sm">
-                                           <div className="flex items-center space-x-2">
-                                             <span>{league.icon}</span>
-                                             <span>{league.label}</span>
-                                           </div>
-                                           <div className={`px-2 py-1 rounded text-xs font-medium ${league.covered ? (percentage >= 100 ? 'text-green-600 bg-green-100' : 'text-orange-600 bg-orange-100') : 'text-gray-400 bg-gray-100'}`}>
-                                             {league.covered ? `${percentage}% (${Math.min(providerGames, totalGames)}/${totalGames})` : '0%'}
-                                           </div>
-                                         </div>
-                                       );
-                                     })}
-                                   </div>
-                                </div>
-                              </div>
-                              {/* Price row */}
-                              <div className="border-t pt-4">
-                                <div className="grid grid-cols-2 gap-4 text-center">
-                                  <div>
-                                    <div className="text-lg font-bold">€{price.toFixed(2)}</div>
-                                    <div className="text-xs text-gray-500">Monatlich</div>
-                                  </div>
-                                  <div>
-                                    <div className="text-lg font-bold text-green-600">€{yearlyPrice ? yearlyPrice.toFixed(2) : (price * 12).toFixed(2)}</div>
-                                    <div className="text-xs text-gray-500">Jahrespreis</div>
-                                  </div>
-                                </div>
-                              </div>
-                            </>
-                          )}
+                              );
+                            })}
+                          </div>
+
+                          <Button 
+                            className="w-full mb-3 bg-green-600 hover:bg-green-700 text-white"
+                            onClick={() => handleAffiliateClick(provider)}
+                          >
+                            Zum Anbieter
+                          </Button>
+
+                          <Button
+                            variant="outline"
+                            className="w-full"
+                            onClick={() => setExpandedProvider(isExpanded ? null : provider.streamer_id)}
+                          >
+                            {isExpanded ? 'Details ausblenden' : 'Details anzeigen'}
+                            {isExpanded ? <ChevronUp className="ml-2 h-4 w-4" /> : <ChevronDown className="ml-2 h-4 w-4" />}
+                          </Button>
                         </div>
                       </div>
                     );

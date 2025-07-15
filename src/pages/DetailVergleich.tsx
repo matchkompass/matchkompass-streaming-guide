@@ -356,18 +356,30 @@ const DetailVergleich2 = () => {
                       {/* Provider Logo/Name Row */}
                       <tr className="border-b sticky top-0 bg-white z-20">
                         <th className="w-40 p-3 bg-gray-50 font-medium border-r text-sm text-left sticky left-0 z-30"></th>
-                        {displayProviders.map(provider => (
-                          <th key={provider.streamer_id} className="w-48 p-3 text-center border-r last:border-r-0 bg-white">
-                            <div className="flex flex-col items-center justify-center">
-                              {provider.logo_url ? (
-                                <img src={provider.logo_url} alt={provider.name} className="w-10 h-10 object-contain rounded-full bg-white border mb-1" />
-                              ) : (
-                                <span className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-200 mb-1">📺</span>
-                              )}
-                              <span className="text-sm font-semibold text-gray-900">{provider.name}</span>
-                            </div>
-                          </th>
-                        ))}
+                        {displayProviders.map(provider => {
+                          const isPinned = pinnedProviders.includes(provider.streamer_id);
+                          return (
+                            <th key={provider.streamer_id} className="w-48 p-3 text-center border-r last:border-r-0 bg-white">
+                              <div className="flex flex-col items-center justify-center">
+                                {provider.logo_url ? (
+                                  <img src={provider.logo_url} alt={provider.name} className="w-10 h-10 object-contain rounded-full bg-white border mb-1" />
+                                ) : (
+                                  <span className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-200 mb-1">📺</span>
+                                )}
+                                <span className="text-sm font-semibold text-gray-900">{provider.name}</span>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => togglePin(provider.streamer_id)}
+                                  className={isPinned ? "bg-green-50 border-green-300 mt-2" : "mt-2"}
+                                  aria-label={isPinned ? "Unpin provider" : "Pin provider"}
+                                >
+                                  <Pin className={`h-4 w-4 ${isPinned ? "text-green-600" : ""}`} />
+                                </Button>
+                              </div>
+                            </th>
+                          );
+                        })}
                       </tr>
                       {/* Jetzt abonnieren Button Row */}
                       <tr className="border-b sticky top-[73px] bg-white z-20">
