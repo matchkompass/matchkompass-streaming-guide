@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { ExternalLink, Users, Calendar, MapPin, Trophy } from "lucide-react";
+import { ExternalLink, Users, Calendar, MapPin, Trophy, ChevronDown, ChevronUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -20,6 +20,7 @@ const ClubDetail = () => {
   const [club, setClub] = useState<Club | null>(null);
   const { providers } = useStreaming();
   const isMobile = useIsMobile();
+  const [openProvider, setOpenProvider] = useState<number | null>(null);
 
   useEffect(() => {
     if (clubs.length > 0 && slug) {
@@ -149,35 +150,54 @@ const ClubDetail = () => {
                       </thead>
                       <tbody>
                         {providerCoverages.map((item) => (
-                          <tr key={item.provider.streamer_id} className="border-b last:border-b-0 border-dotted border-gray-200">
-                            <td className="py-2 px-2">
-                              <div className="flex items-center gap-2">
-                                {item.provider.logo_url ? (
-                                  <img src={item.provider.logo_url} alt={item.provider.provider_name} className="w-5 h-5 object-contain rounded-full" />
-                                ) : (
-                                  <span className="w-5 h-5 bg-gray-200 rounded-full flex items-center justify-center">📺</span>
-                                )}
-                                <span className="font-medium">{item.provider.provider_name}</span>
-                              </div>
-                            </td>
-                            <td className="py-2 px-2 text-center">
-                              <Badge className={
-                                `${item.percentage >= 90 ? 'bg-green-500' : item.percentage >= 50 ? 'bg-orange-500' : 'bg-red-500'} mx-auto flex justify-center`
-                              }>
-                                {item.percentage}%
-                              </Badge>
-                            </td>
-                            <td className="py-2 px-2 text-right">
-                              <div className="flex items-center justify-end gap-2">
-                                <span className="text-xs text-gray-700 font-semibold">€{item.price.toFixed(2)}</span>
-                                {item.provider.affiliate_url && (
-                                  <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 text-xs" onClick={() => window.open(item.provider.affiliate_url, '_blank')}>
-                                    Abonnieren
-                                  </Button>
-                                )}
-                              </div>
-                            </td>
-                          </tr>
+                          <>
+                            <tr key={item.provider.streamer_id} className="border-b last:border-b-0 border-dotted border-gray-200">
+                              <td className="py-2 px-2">
+                                <div className="flex items-center gap-2">
+                                  {item.provider.logo_url ? (
+                                    <img src={item.provider.logo_url} alt={item.provider.name} className="w-5 h-5 object-contain rounded-full" />
+                                  ) : (
+                                    <span className="w-5 h-5 bg-gray-200 rounded-full flex items-center justify-center">📺</span>
+                                  )}
+                                  <span className="font-medium">{item.provider.name}</span>
+                                </div>
+                              </td>
+                              <td className="py-2 px-2 text-center">
+                                <Badge className={
+                                  `${item.percentage >= 90 ? 'bg-green-500' : item.percentage >= 50 ? 'bg-orange-500' : 'bg-red-500'} mx-auto flex justify-center`
+                                }>
+                                  {item.percentage}%
+                                </Badge>
+                              </td>
+                              <td className="py-2 px-2 text-right">
+                                <div className="flex items-center justify-end gap-2">
+                                  <span className="text-xs text-gray-700 font-semibold">€{item.price.toFixed(2)}</span>
+                                  {item.provider.affiliate_url && (
+                                    <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 text-xs" onClick={() => window.open(item.provider.affiliate_url, '_blank')}>
+                                      Abonnieren
+                                    </Button>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                            {openProvider === item.provider.streamer_id && (
+                              <tr>
+                                <td colSpan={4} className="bg-gray-50 p-3">
+                                  <div className="space-y-1">
+                                    {clubLeagues.filter(slug => item.provider[slug] > 0).map(slug => {
+                                      const league = leagues.find(l => l.league_slug === slug);
+                                      return (
+                                        <div key={slug} className="flex items-center gap-2">
+                                          <span>{league?.league || slug}</span>
+                                          <Badge variant="outline">{item.provider[slug]} Spiele</Badge>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </>
                         ))}
                       </tbody>
                     </table>
@@ -190,11 +210,11 @@ const ClubDetail = () => {
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-3">
                             {item.provider.logo_url ? (
-                              <img src={item.provider.logo_url} alt={item.provider.provider_name} className="w-8 h-8 object-contain" />
+                              <img src={item.provider.logo_url} alt={item.provider.name} className="w-8 h-8 object-contain" />
                             ) : (
                               <span className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">📺</span>
                             )}
-                            <span className="font-medium text-sm">{item.provider.provider_name}</span>
+                            <span className="font-medium text-sm">{item.provider.name}</span>
                           </div>
                           <Badge className={
                             item.percentage >= 90 ? 'bg-green-500' : item.percentage >= 50 ? 'bg-orange-500' : 'bg-red-500'
@@ -210,6 +230,22 @@ const ClubDetail = () => {
                             </Button>
                           )}
                         </div>
+                        <Button variant="ghost" size="sm" onClick={() => setOpenProvider(openProvider === item.provider.streamer_id ? null : item.provider.streamer_id)} className="mt-3">
+                          Details {openProvider === item.provider.streamer_id ? <ChevronUp className="inline w-4 h-4" /> : <ChevronDown className="inline w-4 h-4" />}
+                        </Button>
+                        {openProvider === item.provider.streamer_id && (
+                          <div className="bg-gray-100 rounded-lg p-2 mt-2">
+                            {clubLeagues.filter(slug => item.provider[slug] > 0).map(slug => {
+                              const league = leagues.find(l => l.league_slug === slug);
+                              return (
+                                <div key={slug} className="flex items-center gap-2">
+                                  <span>{league?.league || slug}</span>
+                                  <Badge variant="outline">{item.provider[slug]} Spiele</Badge>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
