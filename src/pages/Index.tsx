@@ -10,6 +10,7 @@ import { LEAGUE_CLUSTERS } from "./Wizard";
 import { useLeagues } from "@/hooks/useLeagues";
 import { useStreaming } from "@/hooks/useStreaming";
 import { useIsMobile } from "@/hooks/use-mobile";
+import EnhancedGlobalSearch from "@/components/enhanced/EnhancedGlobalSearch";
 
 // Helper: slug to flag
 const LEAGUE_SLUG_TO_FLAG = Object.fromEntries(
@@ -90,7 +91,12 @@ const Index = () => {
             MatchKompass berechnet präzise, welche Streaming-Dienste du brauchst, 
             um alle Spiele deiner Lieblingsvereine zu verfolgen – zum besten Preis.
           </p>
-          
+
+          {/* Global Search Field */}
+          <div className="mb-8 flex justify-center">
+            <EnhancedGlobalSearch />
+          </div>
+
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button asChild size="lg" className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 text-lg">
               <Link to="/wizard">
