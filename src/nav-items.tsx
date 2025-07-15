@@ -1,7 +1,7 @@
 import Index from "./pages/Index";
 import Wizard from "./pages/Wizard";
 import EnhancedVergleich from "./pages/EnhancedVergleich";
-import DetailVergleich from "./pages/DetailVergleich";
+import DetailVergleich2 from "./pages/DetailVergleich2";
 import Leagues from "./pages/Leagues";
 import Deals from "./pages/Deals";
 import Impressum from "./pages/Impressum";
@@ -23,8 +23,13 @@ export const navItems = [
   },
   {
     title: "Vergleich",
-    to: "/vergleich", 
+    to: "/vergleich",
     page: <EnhancedVergleich />,
+  },
+  {
+    title: "Detaillvergleich2",
+    to: "/detailvergleich2",
+    page: <DetailVergleich2 />,
   },
   {
     title: "Ligen",
@@ -36,7 +41,7 @@ export const navItems = [
     to: "/deals",
     page: <Deals />,
   },
-  // Legal pages for footer
+  // Legal pages for footer only
   {
     title: "Impressum",
     to: "/impressum",
