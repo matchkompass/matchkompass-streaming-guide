@@ -22,17 +22,12 @@ export const navItems = [
     page: <EnhancedVergleich />,
   },
   {
-    title: "Detail-Vergleich",
-    to: "/detailvergleich",
-    page: <DetailVergleich />,
-  },
-  {
     title: "Ligen",
     to: "/ligen",
     page: <Leagues />,
   },
   {
-    title: "Deals",
+    title: "News & Deals",
     to: "/deals",
     page: <Deals />,
   },

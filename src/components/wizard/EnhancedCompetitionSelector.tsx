@@ -230,11 +230,11 @@ const EnhancedCompetitionSelector: React.FC<EnhancedCompetitionSelectorProps> = 
   // Instead of region grouping, use clusters for rendering
   return (
     <div className="space-y-6">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+      <div className="text-center px-4">
+        <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
           Wettbewerbe auswählen
         </h2>
-        <p className="text-gray-600 mb-6">
+        <p className="text-sm md:text-base text-gray-600 mb-6">
           Basierend auf deinen Vereinen empfehlen wir diese Wettbewerbe
         </p>
       </div>
@@ -279,7 +279,7 @@ const EnhancedCompetitionSelector: React.FC<EnhancedCompetitionSelectorProps> = 
             <h3 className="text-lg font-semibold mb-3 text-blue-800 flex items-center gap-2">
               {cluster.name}
             </h3>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {comps.map(competition => (
                 <Card
                   key={competition.id}

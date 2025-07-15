@@ -17,6 +17,7 @@ import DetailComparisonSidebar from "@/components/comparison/DetailComparisonSid
 const DetailVergleich2 = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [pinnedProviders, setPinnedProviders] = useState<number[]>([]);
+  const [expandedProvider, setExpandedProvider] = useState<number | null>(null);
   const [filters, setFilters] = useState({
     leagues: [] as string[],
     providers: [] as number[],
@@ -151,10 +152,14 @@ const DetailVergleich2 = () => {
 
   const togglePin = (providerId: number) => {
     setPinnedProviders(prev => 
-      prev.includes(providerId)
+      prev.includes(providerId) 
         ? prev.filter(id => id !== providerId)
         : [...prev, providerId]
     );
+  };
+  
+  const toggleExpanded = (providerId: number) => {
+    setExpandedProvider(prev => prev === providerId ? null : providerId);
   };
 
 
@@ -244,20 +249,39 @@ const DetailVergleich2 = () => {
                 icon: '🏆',
                 covered: provider[league.league_slug] > 0
               }));
+              const isExpanded = expandedProvider === provider.streamer_id;
+              const isPinned = pinnedProviders.includes(provider.streamer_id);
               return (
                 <Card key={provider.streamer_id} className="shadow-md">
                   <CardHeader>
                     <div className="flex items-center gap-3 mb-2">
                       <span className="text-2xl">{provider.logo_url ? <img src={provider.logo_url} alt={provider.name} className="w-8 h-8 object-contain rounded-full bg-white border" /> : "🔵"}</span>
-                      <div>
+                      <div className="flex-1">
                         <h3 className="font-bold text-lg mb-0.5">{provider.name}</h3>
                         <div className="text-xs text-gray-500">€{price.toFixed(2)}/Monat</div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => togglePin(provider.streamer_id)}
+                          className={isPinned ? "bg-green-50 border-green-300" : ""}
+                        >
+                          <Pin className={`h-4 w-4 ${isPinned ? "text-green-600" : ""}`} />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => toggleExpanded(provider.streamer_id)}
+                        >
+                          {isExpanded ? "Weniger" : "Details"}
+                        </Button>
                       </div>
                     </div>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-2 gap-2 mb-2">
-                      {dynamicLeaguesList.slice(0, 8).map(league => (
+                      {dynamicLeaguesList.slice(0, isExpanded ? dynamicLeaguesList.length : 8).map(league => (
                         <div key={league.key} className="flex items-center gap-1">
                           <span className="text-sm">{league.icon}</span>
                           <span className="text-xs text-gray-600 flex-1">{league.label}</span>
@@ -267,6 +291,39 @@ const DetailVergleich2 = () => {
                         </div>
                       ))}
                     </div>
+                    
+                    {isExpanded && (
+                      <div className="mt-4 space-y-3 border-t pt-3">
+                        <div>
+                          <h4 className="text-sm font-semibold mb-2">Preise</h4>
+                          <div className="grid grid-cols-2 gap-2 text-xs">
+                            <div>Monatlich: €{price.toFixed(2)}</div>
+                            <div>Jährlich: €{parsePrice(provider.yearly_price).toFixed(2)}</div>
+                          </div>
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-semibold mb-2">Highlights</h4>
+                          <div className="space-y-1">
+                            {provider.highlights?.highlight_1 && (
+                              <div className="text-xs text-green-700 bg-green-100 rounded px-2 py-1">
+                                {provider.highlights.highlight_1}
+                              </div>
+                            )}
+                            {provider.highlights?.highlight_2 && (
+                              <div className="text-xs text-blue-700 bg-blue-100 rounded px-2 py-1">
+                                {provider.highlights.highlight_2}
+                              </div>
+                            )}
+                            {provider.highlights?.highlight_3 && (
+                              <div className="text-xs text-purple-700 bg-purple-100 rounded px-2 py-1">
+                                {provider.highlights.highlight_3}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
                     <div className="flex flex-wrap gap-2 mt-2">
                       {features.fourK && <Badge className="bg-green-100 text-green-800">4K</Badge>}
                       {features.mobile && <Badge className="bg-blue-100 text-blue-800">Mobile</Badge>}

@@ -183,38 +183,53 @@ export type Database = {
         Row: {
           active: boolean | null
           affiliate_link: string | null
+          conditions: string | null
           created_at: string
+          deal_price: number | null
           end_date: string | null
           headline: string | null
+          highlights: string | null
           id: number
           name: string | null
+          normal_price: number | null
           provider_name: string | null
           streamer_id: number | null
           text: string | null
+          text_long: string | null
         }
         Insert: {
           active?: boolean | null
           affiliate_link?: string | null
+          conditions?: string | null
           created_at?: string
+          deal_price?: number | null
           end_date?: string | null
           headline?: string | null
+          highlights?: string | null
           id?: number
           name?: string | null
+          normal_price?: number | null
           provider_name?: string | null
           streamer_id?: number | null
           text?: string | null
+          text_long?: string | null
         }
         Update: {
           active?: boolean | null
           affiliate_link?: string | null
+          conditions?: string | null
           created_at?: string
+          deal_price?: number | null
           end_date?: string | null
           headline?: string | null
+          highlights?: string | null
           id?: number
           name?: string | null
+          normal_price?: number | null
           provider_name?: string | null
           streamer_id?: number | null
           text?: string | null
+          text_long?: string | null
         }
         Relationships: []
       }
