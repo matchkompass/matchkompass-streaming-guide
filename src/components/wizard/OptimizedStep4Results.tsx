@@ -53,10 +53,9 @@ const OptimizedStep4Results = ({
     return { coveredGames: Math.min(coveredGames, totalGames), totalGames, percentage };
   };
 
-  // Improved Set Cover Algorithm
+  // Improved Set Cover Algorithm (now prefers single full-coverage provider if cheaper or equal)
   const findOptimalCombinations = (targetCoverage: number): StreamingProviderEnhanced[] => {
     const availableProviders = providers.filter(p => !existingProviders.includes(p.streamer_id));
-    
     if (availableProviders.length === 0) return [];
 
     // Calculate total games needed
@@ -64,39 +63,98 @@ const OptimizedStep4Results = ({
       const league = leagues.find(l => l.league_slug === comp);
       return sum + (league?.['number of games'] || 0);
     }, 0);
-
     const targetGames = Math.ceil((totalGames * targetCoverage) / 100);
 
+    // 1. Find all single providers with 100% coverage
+    const fullCoverageProviders = availableProviders.filter(provider => {
+      return selectedCompetitions.every(comp => {
+        const league = leagues.find(l => l.league_slug === comp);
+        const total = league?.['number of games'] || 0;
+        const covered = (provider[comp as keyof StreamingProviderEnhanced] as number) || 0;
+        return total > 0 && Math.min(covered, total) === total;
+      });
+    });
+
+    // 2. Find all combinations of providers that together give exactly 100% coverage
+    // For performance, only check all pairs and triplets (not all possible sets)
+    function getCoverageForCombo(combo: StreamingProviderEnhanced[]): number {
+      let coveredGames = 0;
+      selectedCompetitions.forEach(comp => {
+        const league = leagues.find(l => l.league_slug === comp);
+        const total = league?.['number of games'] || 0;
+        let maxCovered = 0;
+        combo.forEach(provider => {
+          const covered = (provider[comp as keyof StreamingProviderEnhanced] as number) || 0;
+          maxCovered = Math.max(maxCovered, Math.min(covered, total));
+        });
+        coveredGames += maxCovered;
+      });
+      return coveredGames;
+    }
+    function getPriceForCombo(combo: StreamingProviderEnhanced[]): number {
+      return combo.reduce((sum, p) => sum + parsePrice(p.monthly_price), 0);
+    }
+    // Generate all pairs and triplets
+    const combos: StreamingProviderEnhanced[][] = [];
+    for (let i = 0; i < availableProviders.length; i++) {
+      for (let j = i + 1; j < availableProviders.length; j++) {
+        combos.push([availableProviders[i], availableProviders[j]]);
+        for (let k = j + 1; k < availableProviders.length; k++) {
+          combos.push([availableProviders[i], availableProviders[j], availableProviders[k]]);
+        }
+      }
+    }
+    // Only keep combos with exact 100% coverage
+    const exactCombos = combos.filter(combo => getCoverageForCombo(combo) === targetGames);
+    // Find the cheapest such combo
+    let cheapestCombo: StreamingProviderEnhanced[] | null = null;
+    let cheapestComboPrice = Infinity;
+    for (const combo of exactCombos) {
+      const price = getPriceForCombo(combo);
+      if (price < cheapestComboPrice) {
+        cheapestCombo = combo;
+        cheapestComboPrice = price;
+      }
+    }
+    // Find the cheapest single full-coverage provider
+    let cheapestSingle: StreamingProviderEnhanced | null = null;
+    let cheapestSinglePrice = Infinity;
+    for (const provider of fullCoverageProviders) {
+      const price = parsePrice(provider.monthly_price);
+      if (price < cheapestSinglePrice) {
+        cheapestSingle = provider;
+        cheapestSinglePrice = price;
+      }
+    }
+    // Decision logic
+    if (cheapestSingle && (cheapestCombo == null || cheapestSinglePrice <= cheapestComboPrice)) {
+      return [cheapestSingle];
+    } else if (cheapestCombo) {
+      return cheapestCombo;
+    }
+    // Fallback: use greedy set cover as before
     // Greedy set cover algorithm
     const selectedProviders: StreamingProviderEnhanced[] = [];
     const coveredGames = new Map<string, number>();
-    
     selectedCompetitions.forEach(comp => coveredGames.set(comp, 0));
-
     while (true) {
       let bestProvider: StreamingProviderEnhanced | null = null;
       let bestScore = 0;
       let bestNewCoverage = 0;
-
-      // Find provider that covers most uncovered games with best price ratio
       for (const provider of availableProviders) {
         if (selectedProviders.includes(provider)) continue;
-
         let newCoverage = 0;
         selectedCompetitions.forEach(comp => {
           const currentCovered = coveredGames.get(comp) || 0;
           const providerGames = (provider[comp as keyof StreamingProviderEnhanced] as number) || 0;
           const league = leagues.find(l => l.league_slug === comp);
           const maxGames = league?.['number of games'] || 0;
-          
           const additionalCoverage = Math.max(0, Math.min(providerGames, maxGames) - currentCovered);
           newCoverage += additionalCoverage;
         });
-
         if (newCoverage > 0) {
           const price = parsePrice(provider.monthly_price);
-          const score = newCoverage / Math.max(price, 1); // Games per euro
-          
+          const score = newCoverage / Math.max(price, 1);
           if (score > bestScore) {
             bestScore = score;
             bestProvider = provider;
@@ -104,26 +162,18 @@ const OptimizedStep4Results = ({
           }
         }
       }
-
       if (!bestProvider || bestNewCoverage === 0) break;
-
       selectedProviders.push(bestProvider);
-      
-      // Update covered games
       selectedCompetitions.forEach(comp => {
         const currentCovered = coveredGames.get(comp) || 0;
         const providerGames = (bestProvider![comp as keyof StreamingProviderEnhanced] as number) || 0;
         const league = leagues.find(l => l.league_slug === comp);
         const maxGames = league?.['number of games'] || 0;
-        
         coveredGames.set(comp, Math.max(currentCovered, Math.min(providerGames, maxGames)));
       });
-
-      // Check if we've reached target coverage
       const totalCovered = Array.from(coveredGames.values()).reduce((sum, games) => sum + games, 0);
       if (totalCovered >= targetGames) break;
     }
-
     return selectedProviders;
   };
 
