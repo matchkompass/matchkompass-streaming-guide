@@ -9,6 +9,7 @@ import Datenschutz from "./pages/Datenschutz";
 import AGB from "./pages/AGB";
 import CookieRichtlinie from "./pages/CookieRichtlinie";
 import Barrierefreiheit from "./pages/Barrierefreiheit";
+import Anbieter from "./pages/Anbieter";
 
 export const navItems = [
   {
@@ -40,6 +41,11 @@ export const navItems = [
     title: "Deals & News",
     to: "/deals",
     page: <Deals />,
+  },
+  {
+    title: "Alle Anbieter",
+    to: "/anbieter",
+    page: <Anbieter />,
   },
   // Legal pages for footer only
   {
