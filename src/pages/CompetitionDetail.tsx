@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { Trophy, Users, Play, ExternalLink } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -97,7 +97,9 @@ const CompetitionDetail = () => {
     );
   }
 
-  const participatingClubs = getParticipatingClubs();
+  const participatingClubs = getParticipatingClubs()
+    .sort((a, b) => (b.popularity_score || 0) - (a.popularity_score || 0))
+    .slice(0, 8);
   const streamingCoverage = getStreamingCoverage();
 
   return (
@@ -141,10 +143,10 @@ const CompetitionDetail = () => {
                 {participatingClubs.length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-3 sm:gap-4">
                     {participatingClubs.map((club) => (
-                      <div 
+                      <Link
                         key={club.club_id}
-                        className="flex flex-col items-center p-2 sm:p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
-                        onClick={() => window.location.href = `/club/${club.slug}`}
+                        to={`/club/${club.slug}`}
+                        className="flex flex-col items-center p-2 sm:p-3 bg-gray-50 rounded-lg hover:bg-green-50 border border-transparent hover:border-green-300 transition-colors"
                       >
                         <div className="mb-2">
                           {club.logo_url ? (
@@ -156,7 +158,7 @@ const CompetitionDetail = () => {
                           )}
                         </div>
                         <span className="text-xs text-center font-medium leading-tight">{club.name}</span>
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 ) : (
