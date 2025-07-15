@@ -262,6 +262,30 @@ const OptimizedStep4Results = ({
       .sort((a, b) => b.overallCoverage - a.overallCoverage);
   }, [providers, selectedCompetitions, leagues, existingProviders]);
 
+  // Helper to parse features
+  const parseFeatures = (provider: any) => {
+    const features = {
+      fourK: false,
+      mobile: false,
+      download: false,
+      multiStream: false,
+      streams: 1,
+    };
+    if (provider.features) {
+      try {
+        const featureObj = typeof provider.features === 'string'
+          ? JSON.parse(provider.features)
+          : provider.features;
+        features.fourK = featureObj['has_4k_streaming'] || false;
+        features.mobile = featureObj['has_mobile_app'] || false;
+        features.download = featureObj['has_offline_viewing'] || false;
+        features.streams = featureObj['max_simultaneous_streams'] || 1;
+        features.multiStream = features.streams > 1;
+      } catch (e) {}
+    }
+    return features;
+  };
+
   if (selectedCompetitions.length === 0) {
     return (
       <div className="text-center py-8">
@@ -320,17 +344,13 @@ const OptimizedStep4Results = ({
                   </div>
                    <div className="bg-gray-50 rounded-lg p-4 space-y-2">
                      <div className="flex justify-between">
-                       <span className="text-sm text-gray-600">Günstigster Gesamtpreis:</span>
+                       <span className="text-sm text-gray-600">Preis im Monatsabo:</span>
                        <span className="font-semibold text-green-600">€{rec.totalCost.toFixed(2)}</span>
                      </div>
                       <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Jährliches Abo:</span>
+                        <span className="text-sm text-gray-600">Preis im Jahresabo:</span>
                         <span className="font-semibold">€{rec.yearlyCost.toFixed(2)}</span>
                       </div>
-                     <div className="flex justify-between border-t pt-2">
-                       <span className="text-sm text-gray-600">Pro Spiel:</span>
-                       <span className="font-semibold">€{rec.costPerGame.toFixed(2)}</span>
-                     </div>
                    </div>
                 </div>
 
@@ -361,18 +381,24 @@ const OptimizedStep4Results = ({
                   </div>
                 </div>
 
-                {/* Other Coverage */}
+                {/* Features Section */}
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 mb-3">
                     <Tv className="h-4 w-4 text-purple-600" />
-                    <h4 className="font-semibold text-gray-900">Weitere Inhalte</h4>
+                    <h4 className="font-semibold text-gray-900">Features</h4>
                   </div>
-                  <div className="flex flex-wrap gap-1">
-                    {rec.otherSports.slice(0, 4).map((sport, idx) => (
-                      <Badge key={idx} variant="outline" className="text-xs">
-                        {sport}
-                      </Badge>
-                    ))}
+                  <div className="flex flex-wrap gap-2">
+                    {rec.providers.map((provider, idx) => {
+                      const features = parseFeatures(provider);
+                      return (
+                        <div key={idx} className="flex flex-wrap gap-2">
+                          {features.fourK && <Badge className="bg-green-100 text-green-800">4K</Badge>}
+                          {features.mobile && <Badge className="bg-blue-100 text-blue-800">Mobile</Badge>}
+                          {features.download && <Badge className="bg-purple-100 text-purple-800">Download</Badge>}
+                          {features.streams > 1 && <Badge className="bg-orange-100 text-orange-800">{features.streams} Streams</Badge>}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -384,10 +410,10 @@ const OptimizedStep4Results = ({
                       <div key={pIdx} className="flex items-center justify-between p-2 bg-gray-50 rounded">
                         <div className="flex items-center gap-2">
                           {provider.logo_url && (
-                            <img src={provider.logo_url} alt={provider.provider_name} className="w-6 h-6 object-contain" />
+                            <img src={provider.logo_url} alt={provider.name} className="w-6 h-6 object-contain" />
                           )}
                           <div className="flex flex-col">
-                            <span className="text-sm font-medium">{provider.provider_name}</span>
+                            <span className="text-sm font-medium">{provider.name}</span>
                             <span className="text-xs text-gray-500">
                               Monatlich: €{parsePrice(provider.monthly_price).toFixed(2)}
                             </span>
@@ -451,10 +477,10 @@ const OptimizedStep4Results = ({
                   <div className="space-y-4">
                     <div className="flex items-center gap-3">
                       {provider.logo_url && (
-                        <img src={provider.logo_url} alt={provider.provider_name} className="w-10 h-10 object-contain" />
+                        <img src={provider.logo_url} alt={provider.name} className="w-10 h-10 object-contain" />
                       )}
                       <div>
-                        <h4 className="font-semibold text-lg">{provider.provider_name}</h4>
+                        <h4 className="font-semibold text-lg">{provider.name}</h4>
                         <p className="text-sm text-gray-600">{provider.name}</p>
                       </div>
                     </div>
@@ -475,10 +501,6 @@ const OptimizedStep4Results = ({
                             <span>€{parsePrice(provider.yearly_price).toFixed(2)}</span>
                           </div>
                         )}
-                        <div className="flex justify-between text-sm border-t pt-1">
-                          <span>Pro Spiel:</span>
-                          <span className="font-semibold">€{provider.costPerGame.toFixed(2)}</span>
-                        </div>
                       </div>
                     </div>
                   </div>
@@ -512,18 +534,22 @@ const OptimizedStep4Results = ({
                     </div>
                   </div>
 
-                  {/* Other Sports */}
+                  {/* Features Section */}
                   <div className="space-y-3">
                     <div className="flex items-center gap-2">
                       <Tv className="h-4 w-4 text-purple-600" />
-                      <span className="font-semibold">Weitere Inhalte</span>
+                      <span className="font-semibold">Features</span>
                     </div>
-                    <div className="flex flex-wrap gap-1">
-                      {provider.otherSports.map((sport, idx) => (
-                        <Badge key={idx} variant="outline" className="text-xs">
-                          {sport}
-                        </Badge>
-                      ))}
+                    <div className="flex flex-wrap gap-2">
+                      {(() => {
+                        const features = parseFeatures(provider);
+                        return <>
+                          {features.fourK && <Badge className="bg-green-100 text-green-800">4K</Badge>}
+                          {features.mobile && <Badge className="bg-blue-100 text-blue-800">Mobile</Badge>}
+                          {features.download && <Badge className="bg-purple-100 text-purple-800">Download</Badge>}
+                          {features.streams > 1 && <Badge className="bg-orange-100 text-orange-800">{features.streams} Streams</Badge>}
+                        </>;
+                      })()}
                     </div>
                   </div>
 
