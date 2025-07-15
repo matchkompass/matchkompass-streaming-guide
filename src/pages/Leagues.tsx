@@ -173,7 +173,6 @@ const Leagues = () => {
                     .slice(0, 3);
                   // Use icon from league data, else flag, else trophy
                   const flag = league.icon || LEAGUE_CLUSTERS.flatMap(c => c.leagues).find(l => l.slug === league.league_slug)?.flag || "🏆";
-                  const leagueClubs = clubs.filter(club => club[league.league_slug] === true);
                   return (
                     <Card key={league.league_id} className="bg-blue-50 border-blue-200 hover:shadow-md transition-shadow">
                       <CardContent className="p-4">
@@ -188,19 +187,6 @@ const Leagues = () => {
                             </div>
                           </Link>
                         </div>
-                        {/* Clubs List */}
-                        {leagueClubs.length > 0 && (
-                          <div className="mb-4">
-                            <div className="text-xs text-gray-500 mb-1">Vereine:</div>
-                            <div className="flex flex-wrap gap-2">
-                              {leagueClubs.map(club => (
-                                <Link key={club.slug} to={`/club/${club.slug}`} className="text-blue-700 hover:underline text-xs bg-white rounded px-2 py-1 border border-blue-100">
-                                  {club.name}
-                                </Link>
-                              ))}
-                            </div>
-                          </div>
-                        )}
                         {providerCoverages.length === 0 ? (
                           <div className="text-sm text-gray-400 italic">Kein Anbieter verfügbar</div>
                         ) : (
