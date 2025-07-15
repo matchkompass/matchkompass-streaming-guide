@@ -496,6 +496,58 @@ const EnhancedVergleich = () => {
                             {isExpanded ? <ChevronUp className="ml-2 h-4 w-4" /> : <ChevronDown className="ml-2 h-4 w-4" />}
                           </Button>
                         </div>
+                        {isExpanded && (
+                          <div className="px-6 pb-6 pt-0">
+                            {/* Features Section */}
+                            <div className="mb-4">
+                              <h4 className="font-medium mb-2">Alle Features:</h4>
+                              <div className="grid grid-cols-2 gap-2">
+                                {featuresList.map(feature => (
+                                  <div key={feature.key} className="flex items-center justify-between text-sm">
+                                    <span>{feature.label}</span>
+                                    {feature.value ? CheckIcon : CrossIcon}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                            {/* League Coverage Section */}
+                            <div className="mb-4">
+                              <h4 className="font-medium mb-2">Vollständige Liga-Abdeckung:</h4>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                {dynamicLeaguesList.map(league => {
+                                  const leagueData = leagues.find(l => l.league_slug === league.key);
+                                  const totalGames = leagueData ? leagueData['number of games'] : 0;
+                                  const providerGames = provider[league.key] || 0;
+                                  const percentage = totalGames > 0 ? Math.round((Math.min(providerGames, totalGames) / totalGames) * 100) : 0;
+                                  return (
+                                    <div key={league.key} className="flex items-center justify-between text-sm">
+                                      <div className="flex items-center space-x-2">
+                                        <span>{league.icon}</span>
+                                        <span>{league.label}</span>
+                                      </div>
+                                      <div className={`px-2 py-1 rounded text-xs font-medium ${league.covered ? (percentage >= 100 ? 'text-green-600 bg-green-100' : 'text-orange-600 bg-orange-100') : 'text-gray-400 bg-gray-100'}`}>
+                                        {league.covered ? `${percentage}% (${Math.min(providerGames, totalGames)}/${totalGames})` : '0%'}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                            {/* Price Overview Section */}
+                            <div className="border-t pt-4">
+                              <div className="grid grid-cols-2 gap-4 text-center">
+                                <div>
+                                  <div className="text-lg font-bold">€{price.toFixed(2)}</div>
+                                  <div className="text-xs text-gray-500">Monatlich</div>
+                                </div>
+                                <div>
+                                  <div className="text-lg font-bold text-green-600">€{yearlyPrice ? yearlyPrice.toFixed(2) : (price * 12).toFixed(2)}</div>
+                                  <div className="text-xs text-gray-500">Jahrespreis</div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
