@@ -8,19 +8,20 @@ const Footer = () => {
     produkt: [
       { name: "Empfehlungs-Wizard", href: "/wizard" },
       { name: "Anbieter-Vergleich", href: "/vergleich" },
+      { name: "Detailvergleich", href: "/detailvergleich" },
       { name: "Deals & News", href: "/deals" },
     ],
     vereine: [
-      { name: "Bayern München", href: "/clubs/bayern-muenchen" },
-      { name: "Borussia Dortmund", href: "/clubs/borussia-dortmund" },
-      { name: "FC Barcelona", href: "/clubs/fc-barcelona" },
-      { name: "Real Madrid", href: "/clubs/real-madrid" }
+      { name: "Bayern München", href: "/club/bayern-muenchen" },
+      { name: "Borussia Dortmund", href: "/club/borussia-dortmund" },
+      { name: "FC Barcelona", href: "/club/fc-barcelona" },
+      { name: "Real Madrid", href: "/club/real-madrid" }
     ],
     ligen: [
-      { name: "Bundesliga", href: "/leagues/bundesliga" },
-      { name: "2. Bundesliga", href: "/leagues/2-bundesliga" },
-      { name: "Champions League", href: "/leagues/champions-league" },
-      { name: "DFB-Pokal", href: "/leagues/dfb-pokal" }
+      { name: "Bundesliga", href: "/competition/bundesliga" },
+      { name: "2. Bundesliga", href: "/competition/2-bundesliga" },
+      { name: "Champions League", href: "/competition/champions-league" },
+      { name: "DFB-Pokal", href: "/competition/dfb-pokal" }
     ],
     rechtliches: [
       { name: "Impressum", href: "/impressum" },

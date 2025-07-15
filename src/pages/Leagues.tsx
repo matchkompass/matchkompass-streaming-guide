@@ -176,7 +176,9 @@ const Leagues = () => {
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between mb-4">
                           <Link to={`/competition/${league.league_slug}`} className="flex items-center gap-3 hover:text-green-600 transition-colors">
-                            <span className="text-2xl">{flag}</span>
+                            <div className="bg-gray-100 rounded-lg p-3 sm:p-4 self-center sm:self-auto">
+                              <span className="text-3xl sm:text-4xl">{league.icon || flag}</span>
+                            </div>
                             <div>
                               <h3 className="font-bold text-lg text-gray-900">{league.league}</h3>
                               <p className="text-sm text-gray-600">{league['number of games']} Spiele</p>
