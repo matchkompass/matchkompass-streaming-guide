@@ -165,12 +165,18 @@ const Leagues = () => {
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {clusterLeagues.map((league) => {
-                  // Get top 3 cheapest providers with coverage > 0
-                  const providerCoverages = providers
+                  // Compute all provider coverages for this league
+                  const allProviderCoverages = providers
                     .map((provider) => getProviderCoverage(provider, league))
-                    .filter((item) => item.coveredGames > 0)
+                    .filter((item) => item.coveredGames > 0);
+                  // Find the cheapest 100% coverage provider
+                  const fullCoverageProviders = allProviderCoverages.filter(item => item.percentage === 100).sort((a, b) => a.price - b.price);
+                  const cheapestFullCoverage = fullCoverageProviders[0] || null;
+                  // Get up to 2 more providers with any coverage, excluding the 100% provider
+                  const otherProviders = allProviderCoverages
+                    .filter(item => !cheapestFullCoverage || item.provider.streamer_id !== cheapestFullCoverage.provider.streamer_id)
                     .sort((a, b) => a.price - b.price)
-                    .slice(0, 3);
+                    .slice(0, 2);
                   // Use icon from league data, else flag, else trophy
                   const flag = league.icon || LEAGUE_CLUSTERS.flatMap(c => c.leagues).find(l => l.slug === league.league_slug)?.flag || "🏆";
                   return (
@@ -187,11 +193,41 @@ const Leagues = () => {
                             </div>
                           </Link>
                         </div>
-                        {providerCoverages.length === 0 ? (
+                        {(!cheapestFullCoverage && otherProviders.length === 0) ? (
                           <div className="text-sm text-gray-400 italic">Kein Anbieter verfügbar</div>
                         ) : (
                           <div className="space-y-2">
-                            {providerCoverages.map((item) => (
+                            {cheapestFullCoverage && (
+                              <div key={cheapestFullCoverage.provider.streamer_id} className="flex items-center justify-between bg-white rounded-lg p-3 border border-green-500 shadow-sm">
+                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                  {cheapestFullCoverage.provider.logo_url ? (
+                                    <img src={cheapestFullCoverage.provider.logo_url} alt={cheapestFullCoverage.provider.name} className="w-6 h-6 object-contain rounded-full flex-shrink-0" />
+                                  ) : (
+                                    <span className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">📺</span>
+                                  )}
+                                  <span className="font-medium text-sm truncate">{cheapestFullCoverage.provider.name}</span>
+                                  <Badge className="bg-green-500 text-white ml-2">100% Abdeckung</Badge>
+                                </div>
+                                <div className="flex items-center gap-3 flex-shrink-0">
+                                  <Badge className="bg-green-500 text-xs">100%</Badge>
+                                  <span className="text-gray-700 font-semibold text-sm">€{cheapestFullCoverage.price.toFixed(2)}</span>
+                                  {cheapestFullCoverage.provider.affiliate_url && (
+                                    <Button 
+                                      size="sm" 
+                                      className="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        window.open(cheapestFullCoverage.provider.affiliate_url, '_blank');
+                                      }}
+                                    >
+                                      Jetzt abonnieren
+                                    </Button>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                            {otherProviders.map((item) => (
                               <div key={item.provider.streamer_id} className="flex items-center justify-between bg-white rounded-lg p-3 border">
                                 <div className="flex items-center gap-3 flex-1 min-w-0">
                                   {item.provider.logo_url ? (
@@ -202,11 +238,9 @@ const Leagues = () => {
                                   <span className="font-medium text-sm truncate">{item.provider.name}</span>
                                 </div>
                                 <div className="flex items-center gap-3 flex-shrink-0">
-                                  <Badge
-                                    className={
-                                      `${item.percentage >= 90 ? 'bg-green-500' : item.percentage >= 50 ? 'bg-orange-500' : 'bg-red-500'} text-xs`
-                                    }
-                                  >
+                                  <Badge className={
+                                    `${item.percentage >= 90 ? 'bg-green-500' : item.percentage >= 50 ? 'bg-orange-500' : 'bg-red-500'} text-xs`
+                                  }>
                                     {item.percentage}%
                                   </Badge>
                                   <span className="text-gray-700 font-semibold text-sm">€{item.price.toFixed(2)}</span>
