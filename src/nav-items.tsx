@@ -4,6 +4,9 @@ import EnhancedVergleich from "./pages/EnhancedVergleich";
 import DetailVergleich from "./pages/DetailVergleich";
 import Leagues from "./pages/Leagues";
 import Deals from "./pages/Deals";
+import Impressum from "./pages/Impressum";
+import Datenschutz from "./pages/Datenschutz";
+import AGB from "./pages/AGB";
 
 export const navItems = [
   {
@@ -30,5 +33,21 @@ export const navItems = [
     title: "News & Deals",
     to: "/deals",
     page: <Deals />,
+  },
+  // Legal pages for footer
+  {
+    title: "Impressum",
+    to: "/impressum",
+    page: <Impressum />,
+  },
+  {
+    title: "Datenschutz",
+    to: "/datenschutz",
+    page: <Datenschutz />,
+  },
+  {
+    title: "AGB",
+    to: "/agb",
+    page: <AGB />,
   },
 ];
