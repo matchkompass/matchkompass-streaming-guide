@@ -150,7 +150,7 @@ const Index = () => {
                     <h3 className={`text-xl font-bold mb-4 ${cluster.headerColor}`}>{cluster.name}</h3>
                     
                     {/* Card Layout like /ligen page */}
-                    <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {clusterLeagues.map((league) => {
                         // Get top 3 cheapest providers with coverage > 0
                         const providerCoverages = providers
