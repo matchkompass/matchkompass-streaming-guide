@@ -132,7 +132,7 @@ const OptimizedStep4Results = ({
 
     const scenarios = [
       { target: 100, name: "Beste Abdeckung (100%)", icon: <Trophy className="h-5 w-5 text-yellow-500" /> },
-      { target: 90, name: "Optimale Lösung (90%)", icon: <Award className="h-5 w-5 text-gray-400" /> },
+      { target: 90, name: "Preis-Leistungssieger (90%)", icon: <Award className="h-5 w-5 text-gray-400" /> },
       { target: 66, name: "Budget-Option (66%)", icon: <Star className="h-5 w-5 text-amber-600" /> }
     ];
 
@@ -169,6 +169,11 @@ const OptimizedStep4Results = ({
       const actualCoverage = totalGames > 0 ? Math.round((coveredGames / totalGames) * 100) : 0;
       const costPerGame = coveredGames > 0 ? totalCost / coveredGames : 0;
 
+      // Filter out results that don't meet the exact target for 100% scenarios
+      if (scenario.target === 100 && actualCoverage < 100) {
+        return null;
+      }
+
       // Mock other sports data
       const otherSports = providers.length > 0 ? 
         ["Tennis", "Basketball", "Golf", "Formel 1", "Champions League", "Europa League"].slice(0, 3 + providers.length) : 
@@ -187,7 +192,7 @@ const OptimizedStep4Results = ({
         icon: scenario.icon,
         rank: index + 1
       };
-    }).filter(rec => rec.providers.length > 0);
+    }).filter(rec => rec !== null && rec.providers.length > 0);
   }, [selectedClubs, selectedCompetitions, providers, leagues, existingProviders]);
 
   // Dynamic leagues mapping
@@ -313,20 +318,20 @@ const OptimizedStep4Results = ({
                     <Euro className="h-4 w-4 text-green-600" />
                     <h4 className="font-semibold text-gray-900">Preise</h4>
                   </div>
-                  <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Monatliches Abo:</span>
-                      <span className="font-semibold text-green-600">€{rec.totalCost.toFixed(2)}</span>
-                    </div>
+                   <div className="bg-gray-50 rounded-lg p-4 space-y-2">
                      <div className="flex justify-between">
-                       <span className="text-sm text-gray-600">Jährliches Abo:</span>
-                       <span className="font-semibold">€{rec.yearlyCost.toFixed(2)}</span>
+                       <span className="text-sm text-gray-600">Günstigster Gesamtpreis:</span>
+                       <span className="font-semibold text-green-600">€{rec.totalCost.toFixed(2)}</span>
                      </div>
-                    <div className="flex justify-between border-t pt-2">
-                      <span className="text-sm text-gray-600">Pro Spiel:</span>
-                      <span className="font-semibold">€{rec.costPerGame.toFixed(2)}</span>
-                    </div>
-                  </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Jährliches Abo:</span>
+                        <span className="font-semibold">€{rec.yearlyCost.toFixed(2)}</span>
+                      </div>
+                     <div className="flex justify-between border-t pt-2">
+                       <span className="text-sm text-gray-600">Pro Spiel:</span>
+                       <span className="font-semibold">€{rec.costPerGame.toFixed(2)}</span>
+                     </div>
+                   </div>
                 </div>
 
                 {/* Competitions Section */}
