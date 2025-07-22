@@ -27,7 +27,7 @@ const Header = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <div className="text-2xl">⚽</div>
-            <span className="text-xl font-bold text-green-600">MatchKompass</span>
+            <span className="text-xl font-bold text-green-600">MatchStream</span>
           </Link>
 
           {/* Desktop Navigation */}

@@ -42,7 +42,7 @@ const Footer = () => {
               <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
                 <span className="text-white font-bold">M</span>
               </div>
-              <span className="text-xl font-bold">MatchKompass</span>
+              <span className="text-xl font-bold">MatchStream</span>
             </Link>
             <p className="text-gray-400 mb-4">
               Ihre Plattform für die optimale Streaming-Lösung. Finden Sie die perfekte 
@@ -128,7 +128,7 @@ const Footer = () => {
               ))}
             </ul>
             <div className="mt-4 space-y-1 text-gray-400 text-sm">
-              <div>📧 info@matchkompass.de</div>
+              <div>📧 info@matchstream.de</div>
               <div>📞 +49 (0) 123 456 789</div>
               <div>📍 Deutschland</div>
             </div>
@@ -138,7 +138,7 @@ const Footer = () => {
         <div className="border-t border-gray-800 mt-8 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-400 text-sm">
-              © {currentYear} MatchKompass. Alle Rechte vorbehalten.
+              © {currentYear} MatchStream. Alle Rechte vorbehalten.
             </p>
             <p className="text-gray-400 text-sm mt-2 md:mt-0">
               * Affiliate-Links: Wir erhalten eine Provision bei Abschluss eines Abonnements

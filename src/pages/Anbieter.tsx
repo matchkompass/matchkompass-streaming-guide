@@ -39,7 +39,7 @@ const Anbieter = () => {
                     </div>
                     <div className="flex gap-2 mt-2">
                       <Button asChild size="sm" className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 text-xs">
-                        <a href={provider.affiliate_url || provider.website_url || "#"} target="_blank" rel="noopener noreferrer">
+                        <a href={provider.affiliate_url || "#"} target="_blank" rel="noopener noreferrer">
                           Zum Anbieter
                         </a>
                       </Button>
