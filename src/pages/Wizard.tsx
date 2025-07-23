@@ -277,7 +277,7 @@ const Wizard = () => {
             <div className="relative max-w-md mx-auto">
               <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
               <Input
-                placeholder="Verein oder Liga suchen..."
+                placeholder="Verein suchen ..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -291,7 +291,12 @@ const Wizard = () => {
             ) : (
               <div className="space-y-8">
                 {LEAGUE_CLUSTERS.map((cluster, idx) => {
-                  const clusterLeagues = cluster.leagues.filter(league => clubsByLeague[league.name] && clubsByLeague[league.name].clubs.length > 0);
+                  // Skip national cups in step 1
+                  if (cluster.key === "pokale") return null;
+                  const clusterLeagues = cluster.leagues.filter(league => 
+                    clubsByLeague[league.name] && clubsByLeague[league.name].clubs.length > 0 &&
+                    !["DFB Pokal", "Copa del Rey", "Eredivisie"].includes(league.name)
+                  );
                   if (clusterLeagues.length === 0) return null;
                   return (
                      <div key={cluster.name} className={`border-2 rounded-lg ${cluster.color}`}>
@@ -346,19 +351,6 @@ const Wizard = () => {
                                               )}
                                             </div>
                                             <h3 className="font-medium text-xs md:text-sm mb-1 md:mb-2 text-center line-clamp-2">{club.name}</h3>
-                                            <div className="hidden md:flex flex-wrap gap-1 justify-center mb-2">
-                                              {getClubCompetitions(club).slice(0, 2).map((slug, idx) => {
-                                                // Get icon from database
-                                                const league = leagues.find(l => l.league_slug === slug);
-                                                const leagueIcon = league?.icon || LEAGUE_SLUG_TO_FLAG[slug] || "🏆";
-                                                return (
-                                                  <Badge key={idx} variant="secondary" className="text-xs flex items-center gap-1">
-                                                    <span>{leagueIcon}</span>
-                                                    <span>{LEAGUE_SLUG_TO_NAME[slug] || slug.replace('_', ' ')}</span>
-                                                  </Badge>
-                                                );
-                                              })}
-                                            </div>
                                             {selectedClubIds.includes(club.club_id) && (
                                               <div className="mt-auto">
                                                 <Check className="h-3 w-3 md:h-4 md:w-4 text-green-600 mx-auto" />
@@ -588,15 +580,25 @@ const Wizard = () => {
           {renderStepContent()}
         </div>
 
-        <div className="flex justify-between">
-          <Button
-            variant="outline"
-            onClick={() => setCurrentStep(prev => Math.max(1, prev - 1))}
-            disabled={currentStep === 1}
-          >
-            <ChevronLeft className="mr-2 h-4 w-4" />
-            Zurück
-          </Button>
+        <div className="flex justify-between items-center">
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setCurrentStep(prev => Math.max(1, prev - 1))}
+              disabled={currentStep === 1}
+            >
+              <ChevronLeft className="mr-2 h-4 w-4" />
+              Zurück
+            </Button>
+            {(currentStep === 1 || currentStep === 2) && (
+              <Button
+                variant="outline"
+                onClick={() => setCurrentStep(3)}
+              >
+                Überspringen
+              </Button>
+            )}
+          </div>
 
           {currentStep < 3 ? (
             <Button

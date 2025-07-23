@@ -11,8 +11,8 @@ const LeagueSlider = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [itemsPerView, setItemsPerView] = useState(4);
 
-  // Sort leagues by popularity (descending)
-  const sortedLeagues = [...leagues].sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
+  // Sort leagues by popularity (ascending - reverse)
+  const sortedLeagues = [...leagues].sort((a, b) => (a.popularity || 0) - (b.popularity || 0));
 
   useEffect(() => {
     const updateItemsPerView = () => {

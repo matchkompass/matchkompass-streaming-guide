@@ -472,6 +472,23 @@ const OptimizedStep4Results = ({
         <p className="text-gray-600 mb-6">
           Die besten Kombinationen für deine ausgewählten Wettbewerbe
         </p>
+        
+        {/* Selected Leagues Display */}
+        {selectedCompetitions.length > 0 && (
+          <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+            <p className="text-sm text-gray-700 mb-2">Ausgewählte Ligen:</p>
+            <div className="flex flex-wrap gap-1 justify-center">
+              {selectedCompetitions.map(comp => {
+                const league = dynamicLeaguesList.find(l => l.key === comp);
+                return (
+                  <Badge key={comp} variant="secondary" className="text-xs">
+                    {league?.icon} {league?.label || comp}
+                  </Badge>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* All Providers List */}
@@ -501,16 +518,16 @@ const OptimizedStep4Results = ({
                         <span className="font-semibold text-green-600">Preise</span>
                       </div>
                       <div className="bg-gray-50 rounded p-3 space-y-1">
-                        <div className="flex justify-between text-sm">
-                          <span>Monatliches Abo:</span>
-                          <span className="font-semibold">€{parsePrice(provider.monthly_price).toFixed(2)}</span>
-                        </div>
-                        {provider.yearly_price && (
-                          <div className="flex justify-between text-sm">
-                            <span>Jährliches Abo:</span>
-                            <span>€{parsePrice(provider.yearly_price).toFixed(2)}</span>
-                          </div>
-                        )}
+                         <div className="flex justify-between text-sm">
+                           <span>Im Monatsabo:</span>
+                           <span className="font-semibold">€{parsePrice(provider.monthly_price).toFixed(2)}</span>
+                         </div>
+                         {provider.yearly_price && (
+                           <div className="flex justify-between text-sm">
+                             <span>Im Jahresabo:</span>
+                             <span>€{parsePrice(provider.yearly_price).toFixed(2)}</span>
+                           </div>
+                         )}
                       </div>
                     </div>
                   </div>

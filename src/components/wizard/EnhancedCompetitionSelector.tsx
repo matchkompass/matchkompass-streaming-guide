@@ -239,6 +239,28 @@ const EnhancedCompetitionSelector: React.FC<EnhancedCompetitionSelectorProps> = 
         </p>
       </div>
 
+      {/* Filter Bar */}
+      <div className="flex flex-wrap gap-2 justify-center mb-6">
+        <Button variant="secondary" size="sm" onClick={() => {
+          const deutschlandElement = document.getElementById('deutschland-section');
+          deutschlandElement?.scrollIntoView({ behavior: 'smooth' });
+        }}>
+          🇩🇪 Deutschland
+        </Button>
+        <Button variant="secondary" size="sm" onClick={() => {
+          const europaElement = document.getElementById('europa-section');
+          europaElement?.scrollIntoView({ behavior: 'smooth' });
+        }}>
+          🌍 Europa
+        </Button>
+        <Button variant="secondary" size="sm" onClick={() => {
+          const internationalElement = document.getElementById('international-section');
+          internationalElement?.scrollIntoView({ behavior: 'smooth' });
+        }}>
+          🏆 International
+        </Button>
+      </div>
+
       {/* Top row: selected leagues as cards */}
       {selectedCompetitions.length > 0 && (
         <div className="mb-4 grid grid-cols-1 md:grid-cols-4 gap-2">
@@ -271,11 +293,17 @@ const EnhancedCompetitionSelector: React.FC<EnhancedCompetitionSelectorProps> = 
       )}
 
       {/* Clustered Competitions */}
-      {LEAGUE_CLUSTERS.map(cluster => {
+      {LEAGUE_CLUSTERS.map((cluster, index) => {
         const comps = allCompetitions.filter(comp => cluster.competitions.some(l => slugToName[comp.id] === l.name));
         if (comps.length === 0) return null;
+        
+        let sectionId = '';
+        if (cluster.name.includes('Deutschland')) sectionId = 'deutschland-section';
+        else if (cluster.name.includes('Europa')) sectionId = 'europa-section';
+        else if (cluster.name.includes('Internationale')) sectionId = 'international-section';
+        
         return (
-          <div key={cluster.name} className="mb-6">
+          <div key={cluster.name} className="mb-6" id={sectionId}>
             <h3 className="text-lg font-semibold mb-3 text-blue-800 flex items-center gap-2">
               {cluster.name}
             </h3>
