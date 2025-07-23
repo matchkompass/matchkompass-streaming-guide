@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -91,42 +90,6 @@ const EnhancedCompetitionSelector: React.FC<EnhancedCompetitionSelectorProps> = 
         : [...prev, region]
     );
   };
-
-  // Define the new competition clusters
-  const COMPETITION_CLUSTERS = [
-    {
-      name: "🇩🇪 Deutschland",
-      competitions: [
-        "Bundesliga",
-        "2. Bundesliga",
-        "3. Bundesliga",
-        "DFB Pokal"
-      ]
-    },
-    {
-      name: "🌍 Europa",
-      competitions: [
-        "Champions League",
-        "Europa League",
-        "Conference League",
-        "Klub Weltmeisterschaft",
-        "Premier League",
-        "La Liga",
-        "Serie A",
-        "Ligue 1",
-        "Süper Lig"
-      ]
-    },
-    {
-      name: "🏆 Internationale Wettbewerbe",
-      competitions: [
-        "MLS",
-        "Saudi Pro League",
-        "Liga Portugal",
-        "Eredivisie"
-      ]
-    }
-  ];
 
   // Map league_slug to display name for cluster matching
   const slugToName = {
@@ -227,7 +190,6 @@ const EnhancedCompetitionSelector: React.FC<EnhancedCompetitionSelectorProps> = 
     </Card>
   );
 
-  // Instead of region grouping, use clusters for rendering
   return (
     <div className="space-y-6">
       <div className="text-center px-4">
@@ -237,28 +199,6 @@ const EnhancedCompetitionSelector: React.FC<EnhancedCompetitionSelectorProps> = 
         <p className="text-sm md:text-base text-gray-600 mb-6">
           Basierend auf deinen Vereinen empfehlen wir diese Wettbewerbe
         </p>
-      </div>
-
-      {/* Filter Bar */}
-      <div className="flex flex-wrap gap-2 justify-center mb-6">
-        <Button variant="secondary" size="sm" onClick={() => {
-          const deutschlandElement = document.getElementById('deutschland-section');
-          deutschlandElement?.scrollIntoView({ behavior: 'smooth' });
-        }}>
-          🇩🇪 Deutschland
-        </Button>
-        <Button variant="secondary" size="sm" onClick={() => {
-          const europaElement = document.getElementById('europa-section');
-          europaElement?.scrollIntoView({ behavior: 'smooth' });
-        }}>
-          🌍 Europa
-        </Button>
-        <Button variant="secondary" size="sm" onClick={() => {
-          const internationalElement = document.getElementById('international-section');
-          internationalElement?.scrollIntoView({ behavior: 'smooth' });
-        }}>
-          🏆 International
-        </Button>
       </div>
 
       {/* Selected Competitions Section */}
@@ -301,77 +241,86 @@ const EnhancedCompetitionSelector: React.FC<EnhancedCompetitionSelectorProps> = 
         </div>
       )}
 
-      {/* Clustered Competitions */}
-      {LEAGUE_CLUSTERS.map((cluster, index) => {
-        const comps = allCompetitions.filter(comp => cluster.competitions.some(l => slugToName[comp.id] === l.name));
-        if (comps.length === 0) return null;
+      {/* Available Competitions Section */}
+      <div className="mb-6">
+        <div className="flex items-center justify-center mb-4">
+          <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-full border border-gray-200">
+            <span className="text-sm font-medium text-gray-700">Weitere Wettbewerbe</span>
+          </div>
+        </div>
         
-        let sectionId = '';
-        if (cluster.name.includes('Deutschland')) sectionId = 'deutschland-section';
-        else if (cluster.name.includes('Europa')) sectionId = 'europa-section';
-        else if (cluster.name.includes('Internationale')) sectionId = 'international-section';
-        
-        return (
-          <div key={cluster.name} className="mb-6" id={sectionId}>
-            <h3 className="text-lg font-semibold mb-3 text-blue-800 flex items-center gap-2">
-              {cluster.name}
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-              {comps.map(competition => (
-                <Card
-                  key={competition.id}
-                  className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
-                    selectedCompetitions.includes(competition.id)
-                      ? 'ring-2 ring-green-500 bg-green-50'
-                      : 'hover:bg-gray-50'
-                  }`}
-                  onClick={() => onCompetitionToggle(competition.id)}
-                >
-                  <CardContent className="p-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-xl">{LEAGUE_SLUG_TO_FLAG[competition.id] || competition.logo}</span>
-                        <div>
-                          <h4 className="font-medium text-sm">{LEAGUE_SLUG_TO_NAME[competition.id] || competition.name}</h4>
-                          <p className="text-xs text-gray-500">{competition.gameCount} Spiele</p>
+        {/* Clustered Competitions */}
+        {LEAGUE_CLUSTERS.map((cluster, index) => {
+          const comps = allCompetitions.filter(comp => cluster.competitions.some(l => slugToName[comp.id] === l.name));
+          if (comps.length === 0) return null;
+          
+          let sectionId = '';
+          if (cluster.name.includes('Deutschland')) sectionId = 'deutschland-section';
+          else if (cluster.name.includes('Europa')) sectionId = 'europa-section';
+          else if (cluster.name.includes('Internationale')) sectionId = 'international-section';
+          
+          return (
+            <div key={cluster.name} className="mb-6" id={sectionId}>
+              <h3 className="text-lg font-semibold mb-3 text-blue-800 flex items-center gap-2">
+                {cluster.name}
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                {comps.map(competition => (
+                  <Card
+                    key={competition.id}
+                    className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
+                      selectedCompetitions.includes(competition.id)
+                        ? 'ring-2 ring-green-500 bg-green-50'
+                        : 'hover:bg-gray-50'
+                    }`}
+                    onClick={() => onCompetitionToggle(competition.id)}
+                  >
+                    <CardContent className="p-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-xl">{LEAGUE_SLUG_TO_FLAG[competition.id] || competition.logo}</span>
+                          <div>
+                            <h4 className="font-medium text-sm">{LEAGUE_SLUG_TO_NAME[competition.id] || competition.name}</h4>
+                            <p className="text-xs text-gray-500">{competition.gameCount} Spiele</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          {selectedCompetitions.includes(competition.id) && (
+                            <Check className="h-4 w-4 text-green-600" />
+                          )}
                         </div>
                       </div>
-                      <div className="text-right">
-                        {selectedCompetitions.includes(competition.id) && (
-                          <Check className="h-4 w-4 text-green-600" />
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
 
-      {/* Weitere Wettbewerbe cluster */}
-      {(() => {
-        const allClusterNames = LEAGUE_CLUSTERS.flatMap(cluster => cluster.competitions.map(l => l.name));
-        const weitereComps = allCompetitions.filter(comp => !allClusterNames.includes(slugToName[comp.id] || comp.name));
-        if (weitereComps.length === 0) return null;
-        return (
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-3 text-gray-700">
-              📋 Weitere Wettbewerbe
-            </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
-              {weitereComps.map(competition => (
-                <CompetitionCard
-                  key={competition.id}
-                  competition={competition}
-                  isSelected={selectedCompetitions.includes(competition.id)}
-                />
-              ))}
+        {/* Weitere Wettbewerbe cluster */}
+        {(() => {
+          const allClusterNames = LEAGUE_CLUSTERS.flatMap(cluster => cluster.competitions.map(l => l.name));
+          const weitereComps = allCompetitions.filter(comp => !allClusterNames.includes(slugToName[comp.id] || comp.name));
+          if (weitereComps.length === 0) return null;
+          return (
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-3 text-gray-700">
+                📋 Weitere Wettbewerbe
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
+                {weitereComps.map(competition => (
+                  <CompetitionCard
+                    key={competition.id}
+                    competition={competition}
+                    isSelected={selectedCompetitions.includes(competition.id)}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-        );
-      })()}
+          );
+        })()}
+      </div>
 
       {selectedCompetitions.length > 0 && (
         <div className="text-center">
