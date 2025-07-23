@@ -28,10 +28,14 @@ const Anbieter = () => {
 
   // Filter providers based on search term
   const filteredProviders = useMemo(() => {
-    if (!searchTerm) return providers;
+    if (!searchTerm.trim()) return providers;
+    const searchLower = searchTerm.toLowerCase().trim();
     return providers.filter(provider => 
-      provider.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      provider.provider_name.toLowerCase().includes(searchTerm.toLowerCase())
+      provider.name?.toLowerCase().includes(searchLower) ||
+      provider.provider_name?.toLowerCase().includes(searchLower) ||
+      provider.highlights?.highlight_1?.toLowerCase().includes(searchLower) ||
+      provider.highlights?.highlight_2?.toLowerCase().includes(searchLower) ||
+      provider.highlights?.highlight_3?.toLowerCase().includes(searchLower)
     );
   }, [providers, searchTerm]);
 

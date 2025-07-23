@@ -36,10 +36,16 @@ const Leagues = () => {
     return countries.size;
   }, [leagues]);
 
-  const filteredLeagues = leagues.filter(league =>
-    league.league?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    league.country?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter leagues based on search term
+  const filteredLeagues = useMemo(() => {
+    if (!searchTerm.trim()) return leagues;
+    const searchLower = searchTerm.toLowerCase().trim();
+    return leagues.filter(league =>
+      league.league?.toLowerCase().includes(searchLower) ||
+      league.country?.toLowerCase().includes(searchLower) ||
+      league.league_slug?.toLowerCase().includes(searchLower)
+    );
+  }, [leagues, searchTerm]);
 
   // Group leagues by competition type
   const groupedLeagues = filteredLeagues.reduce((acc, league) => {
