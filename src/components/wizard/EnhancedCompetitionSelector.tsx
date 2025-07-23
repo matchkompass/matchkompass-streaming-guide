@@ -270,20 +270,20 @@ const EnhancedCompetitionSelector: React.FC<EnhancedCompetitionSelectorProps> = 
             return (
               <div
                 key={slug}
-                className="rounded-lg border text-card-foreground shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md ring-2 ring-green-500 bg-green-50 min-h-[100px]"
+                className="rounded-lg border text-card-foreground shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md ring-2 ring-green-500 bg-green-50"
                 onClick={() => onCompetitionToggle(slug)}
               >
-                <div className="p-4">
+                <div className="p-3">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <span className="text-2xl">{LEAGUE_SLUG_TO_FLAG[comp.id] || comp.logo}</span>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-xl">{LEAGUE_SLUG_TO_FLAG[comp.id] || comp.logo}</span>
                       <div>
-                        <h4 className="font-semibold text-lg">{LEAGUE_SLUG_TO_NAME[comp.id] || comp.name}</h4>
-                        <p className="text-sm text-gray-500">{comp.gameCount} Spiele</p>
+                        <h4 className="font-medium text-sm">{LEAGUE_SLUG_TO_NAME[comp.id] || comp.name}</h4>
+                        <p className="text-xs text-gray-500">{comp.gameCount} Spiele</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <Check className="h-5 w-5 text-green-600" />
+                      <Check className="h-4 w-4 text-green-600" />
                     </div>
                   </div>
                 </div>
@@ -312,25 +312,25 @@ const EnhancedCompetitionSelector: React.FC<EnhancedCompetitionSelectorProps> = 
               {comps.map(competition => (
                 <Card
                   key={competition.id}
-                  className={`rounded-lg border text-card-foreground shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md min-h-[100px] ${
+                  className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
                     selectedCompetitions.includes(competition.id)
                       ? 'ring-2 ring-green-500 bg-green-50'
-                      : ''
+                      : 'hover:bg-gray-50'
                   }`}
                   onClick={() => onCompetitionToggle(competition.id)}
                 >
-                  <CardContent className="p-4">
+                  <CardContent className="p-3">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <span className="text-2xl">{LEAGUE_SLUG_TO_FLAG[competition.id] || competition.logo}</span>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-xl">{LEAGUE_SLUG_TO_FLAG[competition.id] || competition.logo}</span>
                         <div>
-                          <h4 className="font-semibold text-lg">{LEAGUE_SLUG_TO_NAME[competition.id] || competition.name}</h4>
-                          <p className="text-sm text-gray-500">{competition.gameCount} Spiele</p>
+                          <h4 className="font-medium text-sm">{LEAGUE_SLUG_TO_NAME[competition.id] || competition.name}</h4>
+                          <p className="text-xs text-gray-500">{competition.gameCount} Spiele</p>
                         </div>
                       </div>
                       <div className="text-right">
                         {selectedCompetitions.includes(competition.id) && (
-                          <Check className="h-5 w-5 text-green-600" />
+                          <Check className="h-4 w-4 text-green-600" />
                         )}
                       </div>
                     </div>
