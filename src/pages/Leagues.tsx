@@ -248,7 +248,6 @@ const Leagues = () => {
                                     <span className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">📺</span>
                                   )}
                                   <span className="font-medium text-sm truncate">{cheapestFullCoverage.provider.name}</span>
-                                  <Badge className="bg-green-500 text-white ml-2">100% Abdeckung</Badge>
                                 </div>
                                 <div className="flex items-center gap-3 flex-shrink-0">
                                   <Badge className="bg-green-500 text-xs">100%</Badge>
