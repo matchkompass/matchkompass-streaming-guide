@@ -262,6 +262,16 @@ const EnhancedVergleich = () => {
               )}
             </div>
 
+            {/* Detail comparison button */}
+            <div className="mb-6">
+              <Button
+                onClick={() => window.location.href = '/detailvergleich'}
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground h-12 text-base font-medium"
+              >
+                Im Detail vergleichen
+              </Button>
+            </div>
+
             <div className="space-y-4">
               {/* Main provider/league display */}
               {isMobile ? (
