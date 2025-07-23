@@ -342,21 +342,21 @@ const Wizard = () => {
                                           }`}
                                           onClick={() => handleClubToggle(club.club_id)}
                                         >
-                                          <CardContent className="p-2 md:p-3 flex flex-col items-center min-h-[100px] md:min-h-[120px]">
-                                            <div className="text-xl md:text-2xl mb-1 md:mb-2">
-                                              {club.logo_url ? (
-                                                <img src={club.logo_url} alt={club.name} className="w-6 h-6 md:w-8 md:h-8 object-contain" />
-                                              ) : (
-                                                "⚽"
-                                              )}
-                                            </div>
-                                            <h3 className="font-medium text-xs md:text-sm mb-1 md:mb-2 text-center line-clamp-2">{club.name}</h3>
-                                            {selectedClubIds.includes(club.club_id) && (
-                                              <div className="mt-auto">
-                                                <Check className="h-3 w-3 md:h-4 md:w-4 text-green-600 mx-auto" />
-                                              </div>
-                                            )}
-                                          </CardContent>
+                                           <CardContent className="p-1 md:p-2 flex flex-col items-center min-h-[60px] md:min-h-[80px]">
+                                             <div className="text-lg md:text-xl mb-1">
+                                               {club.logo_url ? (
+                                                 <img src={club.logo_url} alt={club.name} className="w-5 h-5 md:w-6 md:h-6 object-contain" />
+                                               ) : (
+                                                 "⚽"
+                                               )}
+                                             </div>
+                                             <h3 className="font-medium text-xs md:text-sm text-center line-clamp-2 leading-tight">{club.name}</h3>
+                                             {selectedClubIds.includes(club.club_id) && (
+                                               <div className="mt-1">
+                                                 <Check className="h-3 w-3 md:h-4 md:w-4 text-green-600 mx-auto" />
+                                               </div>
+                                             )}
+                                           </CardContent>
                                        </Card>
                                      ))}
                                    </div>
@@ -432,34 +432,34 @@ const Wizard = () => {
                                          }`}
                                          onClick={() => handleClubToggle(club.club_id)}
                                        >
-                                         <CardContent className="p-3 flex flex-col items-center min-h-[120px]">
-                                           <div className="text-2xl mb-2">
-                                             {club.logo_url ? (
-                                               <img src={club.logo_url} alt={club.name} className="w-8 h-8 object-contain" />
-                                             ) : (
-                                               "⚽"
-                                             )}
-                                           </div>
-                                           <h3 className="font-medium text-sm mb-2 text-center line-clamp-2">{club.name}</h3>
-                                           <div className="flex flex-wrap gap-1 justify-center mb-2">
-                                             {getClubCompetitions(club).slice(0, 2).map((slug, idx) => {
-                                               // Get icon from database
-                                               const league = leagues.find(l => l.league_slug === slug);
-                                               const leagueIcon = league?.icon || LEAGUE_SLUG_TO_FLAG[slug] || "🏆";
-                                               return (
-                                                 <Badge key={idx} variant="secondary" className="text-xs flex items-center gap-1">
-                                                   <span>{leagueIcon}</span>
-                                                   <span>{LEAGUE_SLUG_TO_NAME[slug] || slug.replace('_', ' ')}</span>
-                                                 </Badge>
-                                               );
-                                             })}
-                                           </div>
-                                           {selectedClubIds.includes(club.club_id) && (
-                                             <div className="mt-auto">
-                                               <Check className="h-4 w-4 text-green-600 mx-auto" />
-                                             </div>
-                                           )}
-                                         </CardContent>
+                                          <CardContent className="p-2 flex flex-col items-center min-h-[80px]">
+                                            <div className="text-xl mb-1">
+                                              {club.logo_url ? (
+                                                <img src={club.logo_url} alt={club.name} className="w-6 h-6 object-contain" />
+                                              ) : (
+                                                "⚽"
+                                              )}
+                                            </div>
+                                            <h3 className="font-medium text-sm text-center line-clamp-2 leading-tight">{club.name}</h3>
+                                            <div className="flex flex-wrap gap-1 justify-center mt-1">
+                                              {getClubCompetitions(club).slice(0, 2).map((slug, idx) => {
+                                                // Get icon from database
+                                                const league = leagues.find(l => l.league_slug === slug);
+                                                const leagueIcon = league?.icon || LEAGUE_SLUG_TO_FLAG[slug] || "🏆";
+                                                return (
+                                                  <Badge key={idx} variant="secondary" className="text-xs flex items-center gap-1">
+                                                    <span>{leagueIcon}</span>
+                                                    <span>{LEAGUE_SLUG_TO_NAME[slug] || slug.replace('_', ' ')}</span>
+                                                  </Badge>
+                                                );
+                                              })}
+                                            </div>
+                                            {selectedClubIds.includes(club.club_id) && (
+                                              <div className="mt-1">
+                                                <Check className="h-4 w-4 text-green-600 mx-auto" />
+                                              </div>
+                                            )}
+                                          </CardContent>
                                       </Card>
                                     ))}
                                   </div>
