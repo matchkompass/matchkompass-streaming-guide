@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { Search, Trophy, Users } from "lucide-react";
+import { Search, Trophy, Users, ArrowRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FAQSection from "@/components/FAQSection";
-import { useLeagues } from "@/hooks/useLeagues";
-import { useStreaming } from "@/hooks/useStreaming";
+import { useLeaguesEnhanced } from "@/hooks/useLeaguesEnhanced";
+import { useStreamingEnhanced } from "@/hooks/useStreamingEnhanced";
 import { LEAGUE_CLUSTERS } from "./Wizard";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useClubs } from "@/hooks/useClubs";
@@ -20,20 +20,30 @@ const LEAGUE_SLUG_TO_FLAG = Object.fromEntries(
 );
 
 const Leagues = () => {
-  const { leagues, loading } = useLeagues();
+  const { leagues, loading } = useLeaguesEnhanced();
   const { clubs } = useClubs();
   const [searchTerm, setSearchTerm] = useState("");
-  const { providers, loading: providersLoading } = useStreaming();
+  const { providers, loading: providersLoading } = useStreamingEnhanced();
   const isMobile = useIsMobile();
+
+  // Calculate statistics
+  const totalGames = useMemo(() => {
+    return leagues.reduce((sum, league) => sum + (league['number of games'] || 0), 0);
+  }, [leagues]);
+
+  const totalCountries = useMemo(() => {
+    const countries = new Set(leagues.map(league => league.country));
+    return countries.size;
+  }, [leagues]);
 
   const filteredLeagues = leagues.filter(league =>
     league.league?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (league as any).country?.toLowerCase().includes(searchTerm.toLowerCase())
+    league.country?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Group leagues by competition type
   const groupedLeagues = filteredLeagues.reduce((acc, league) => {
-    const type = (league as any).competition_type || 'Sonstige';
+    const type = 'Sonstige';
     if (!acc[type]) acc[type] = [];
     acc[type].push(league);
     return acc;
@@ -45,7 +55,7 @@ const Leagues = () => {
     const coveredGames = (provider[leagueKey] as number) || 0;
     const totalGames = league['number of games'] || 0;
     const percentage = totalGames > 0 ? Math.round((coveredGames / totalGames) * 100) : 0;
-    const price = parseFloat(provider.monthly_price) || 0;
+    const price = parseFloat(provider.monthly_price?.replace(/[^\d.,]/g, '').replace(',', '.')) || 0;
     return {
       provider,
       coveredGames,
@@ -99,7 +109,7 @@ const Leagues = () => {
           <div className="flex items-center justify-center mb-4">
             <Trophy className="h-10 w-10 text-green-600 mr-3" />
             <h1 className="text-4xl font-bold text-gray-900">
-              Alle Fußball-Ligen
+              Alle Vereine & Ligen
             </h1>
           </div>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
@@ -119,8 +129,8 @@ const Leagues = () => {
           </div>
         </div>
 
-        {/* Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        {/* Statistics - Hidden on mobile */}
+        <div className="hidden md:grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           <Card className="text-center">
             <CardContent className="p-6">
               <div className="text-3xl font-bold text-green-600 mb-2">
@@ -132,7 +142,7 @@ const Leagues = () => {
           <Card className="text-center">
             <CardContent className="p-6">
               <div className="text-3xl font-bold text-blue-600 mb-2">
-                {leagues.reduce((sum, league) => sum + (league['number of games'] || 0), 0)}
+                {totalGames}
               </div>
               <p className="text-gray-600">Spiele pro Saison</p>
             </CardContent>
@@ -140,15 +150,47 @@ const Leagues = () => {
           <Card className="text-center">
             <CardContent className="p-6">
               <div className="text-3xl font-bold text-orange-600 mb-2">
-                {new Set(leagues.map(l => (l as any).country)).size}
+                {totalCountries}
               </div>
               <p className="text-gray-600">Länder</p>
             </CardContent>
           </Card>
         </div>
 
+        {/* Conversion Elements */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold mb-2">Optimale Kombination finden</h3>
+                  <p className="opacity-90">Lass uns die perfekte Streaming-Kombination für deine Vereine berechnen</p>
+                </div>
+                <ArrowRight className="h-8 w-8" />
+              </div>
+              <Button asChild className="mt-4 bg-white text-green-600 hover:bg-gray-100">
+                <Link to="/wizard">Wizard starten</Link>
+              </Button>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold mb-2">Alle Anbieter vergleichen</h3>
+                  <p className="opacity-90">Detaillierter Vergleich aller Features und Preise</p>
+                </div>
+                <ArrowRight className="h-8 w-8" />
+              </div>
+              <Button asChild className="mt-4 bg-white text-blue-600 hover:bg-gray-100">
+                <Link to="/vergleich">Vergleich starten</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Leagues by Category */}
-        {/* Table layout for better alignment */}
         {LEAGUE_CLUSTERS.map((cluster) => {
           // Get leagues in this cluster that exist in the fetched leagues data
           const clusterLeagues = cluster.leagues

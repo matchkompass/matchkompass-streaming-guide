@@ -12,7 +12,7 @@ const Header = () => {
   const navigation = [
     { name: "Wizard", href: "/wizard" },
     { name: "Vergleich", href: "/vergleich" },
-    { name: "Ligen", href: "/ligen" },
+    { name: "Alle Vereine & Ligen", href: "/ligen" },
     { name: "Alle Anbieter", href: "/anbieter" },
     { name: "Deals & News", href: "/deals" },
   ];
