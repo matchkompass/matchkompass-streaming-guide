@@ -261,35 +261,43 @@ const EnhancedCompetitionSelector: React.FC<EnhancedCompetitionSelectorProps> = 
         </Button>
       </div>
 
-      {/* Top row: selected leagues as cards */}
+      {/* Selected Competitions Section */}
       {selectedCompetitions.length > 0 && (
-        <div className="mb-4 grid grid-cols-1 md:grid-cols-4 gap-2">
-          {selectedCompetitions.map(slug => {
-            const comp = allCompetitions.find(c => c.id === slug);
-            if (!comp) return null;
-            return (
-              <div
-                key={slug}
-                className="rounded-lg border text-card-foreground shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md ring-2 ring-green-500 bg-green-50"
-                onClick={() => onCompetitionToggle(slug)}
-              >
-                <div className="p-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-xl">{LEAGUE_SLUG_TO_FLAG[comp.id] || comp.logo}</span>
-                      <div>
-                        <h4 className="font-medium text-sm">{LEAGUE_SLUG_TO_NAME[comp.id] || comp.name}</h4>
-                        <p className="text-xs text-gray-500">{comp.gameCount} Spiele</p>
+        <div className="mb-6">
+          <div className="flex items-center justify-center mb-4">
+            <div className="flex items-center gap-2 px-4 py-2 bg-green-100 rounded-full border border-green-200">
+              <Check className="h-4 w-4 text-green-600" />
+              <span className="text-sm font-medium text-green-800">Bereits ausgewählt</span>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+            {selectedCompetitions.map(slug => {
+              const comp = allCompetitions.find(c => c.id === slug);
+              if (!comp) return null;
+              return (
+                <div
+                  key={slug}
+                  className="rounded-lg border text-card-foreground shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md ring-2 ring-green-500 bg-green-50"
+                  onClick={() => onCompetitionToggle(slug)}
+                >
+                  <div className="p-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-xl">{LEAGUE_SLUG_TO_FLAG[comp.id] || comp.logo}</span>
+                        <div>
+                          <h4 className="font-medium text-sm">{LEAGUE_SLUG_TO_NAME[comp.id] || comp.name}</h4>
+                          <p className="text-xs text-gray-500">{comp.gameCount} Spiele</p>
+                        </div>
                       </div>
-                    </div>
-                    <div className="text-right">
-                      <Check className="h-4 w-4 text-green-600" />
+                      <div className="text-right">
+                        <Check className="h-4 w-4 text-green-600" />
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       )}
 
