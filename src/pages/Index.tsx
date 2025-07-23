@@ -55,7 +55,7 @@ const Index = () => {
             <span className="text-green-600 block">Streaming-Kombination</span>
           </h1>
           
-          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto hidden md:block">
             MatchStream berechnet präzise, welche Streaming-Dienste du brauchst, 
             um alle Spiele deiner Lieblingsvereine zu verfolgen – zum besten Preis.
           </p>
