@@ -8,10 +8,10 @@ import { LEAGUE_CLUSTERS } from "@/pages/Wizard";
 
 const LeagueSlider = () => {
   const { leagues, loading } = useLeagues();
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentPage, setCurrentPage] = useState(0);
   const [itemsPerView, setItemsPerView] = useState(4);
 
-  // Sort leagues by popularity
+  // Sort leagues by popularity (descending)
   const sortedLeagues = [...leagues].sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
 
   useEffect(() => {
@@ -33,22 +33,23 @@ const LeagueSlider = () => {
   }, []);
 
   const totalPages = Math.ceil(sortedLeagues.length / itemsPerView);
-  const currentPage = Math.floor(currentIndex / itemsPerView);
+  const startIndex = currentPage * itemsPerView;
+  const currentLeagues = sortedLeagues.slice(startIndex, startIndex + itemsPerView);
 
   const nextSlide = () => {
-    setCurrentIndex((prev) => 
-      prev + itemsPerView >= sortedLeagues.length ? 0 : prev + itemsPerView
+    setCurrentPage((prev) => 
+      prev + 1 >= totalPages ? 0 : prev + 1
     );
   };
 
   const prevSlide = () => {
-    setCurrentIndex((prev) => 
-      prev === 0 ? Math.max(0, sortedLeagues.length - itemsPerView) : Math.max(0, prev - itemsPerView)
+    setCurrentPage((prev) => 
+      prev === 0 ? totalPages - 1 : prev - 1
     );
   };
 
   const goToPage = (page: number) => {
-    setCurrentIndex(page * itemsPerView);
+    setCurrentPage(page);
   };
 
   if (loading || sortedLeagues.length === 0) {
@@ -73,7 +74,7 @@ const LeagueSlider = () => {
             variant="outline" 
             size="icon" 
             onClick={prevSlide}
-            disabled={currentIndex === 0}
+            disabled={totalPages <= 1}
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -81,63 +82,51 @@ const LeagueSlider = () => {
             variant="outline" 
             size="icon" 
             onClick={nextSlide}
-            disabled={currentIndex + itemsPerView >= sortedLeagues.length}
+            disabled={totalPages <= 1}
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
       </div>
       
-      <div className="overflow-hidden">
-        <div 
-          className="flex transition-transform duration-300 ease-in-out"
-          style={{ 
-            transform: `translateX(-${(currentIndex * 100) / itemsPerView}%)`,
-            width: `${(sortedLeagues.length * 100) / itemsPerView}%`
-          }}
-        >
-          {sortedLeagues.map((league) => (
-            <div 
-              key={league.league_id} 
-              className="flex-shrink-0 px-2"
-              style={{ width: `${100 / sortedLeagues.length}%` }}
-            >
-              <Link to={`/competition/${league.league_slug}`}>
-                <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
-                  <CardContent className="p-6 text-center">
-                    <div className="flex justify-center mb-4">
-                      <span className="text-4xl">{getLeagueFlag(league)}</span>
-                    </div>
-                    <h4 className="font-semibold text-lg mb-2">{league.league}</h4>
-                    <p className="text-gray-600 text-sm mb-4">
-                      {league['number of games']} Spiele
-                    </p>
-                    <Button 
-                      size="sm"
-                      className="bg-green-600 hover:bg-green-700"
-                    >
-                      Mehr erfahren
-                    </Button>
-                  </CardContent>
-                </Card>
-              </Link>
-            </div>
-          ))}
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {currentLeagues.map((league) => (
+          <Link key={league.league_id} to={`/competition/${league.league_slug}`}>
+            <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
+              <CardContent className="p-6 text-center">
+                <div className="flex justify-center mb-4">
+                  <span className="text-4xl">{getLeagueFlag(league)}</span>
+                </div>
+                <h4 className="font-semibold text-lg mb-2">{league.league}</h4>
+                <p className="text-gray-600 text-sm mb-4">
+                  {league['number of games']} Spiele
+                </p>
+                <Button 
+                  size="sm"
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  Mehr erfahren
+                </Button>
+              </CardContent>
+            </Card>
+          </Link>
+        ))}
       </div>
       
       {/* Pagination dots */}
-      <div className="flex justify-center mt-6 gap-2">
-        {Array.from({ length: Math.min(totalPages, 4) }).map((_, index) => (
-          <button
-            key={index}
-            onClick={() => goToPage(index)}
-            className={`w-3 h-3 rounded-full transition-colors ${
-              currentPage === index ? 'bg-green-600' : 'bg-gray-300'
-            }`}
-          />
-        ))}
-      </div>
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-6 gap-2">
+          {Array.from({ length: Math.min(totalPages, 4) }).map((_, index) => (
+            <button
+              key={index}
+              onClick={() => goToPage(index)}
+              className={`w-3 h-3 rounded-full transition-colors ${
+                currentPage === index ? 'bg-green-600' : 'bg-gray-300'
+              }`}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

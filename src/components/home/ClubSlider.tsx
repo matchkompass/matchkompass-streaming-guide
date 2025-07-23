@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
 const ClubSlider = () => {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentPage, setCurrentPage] = useState(0);
   const [itemsPerView, setItemsPerView] = useState(4);
 
   const { data: clubs = [], isLoading } = useQuery({
@@ -43,22 +43,23 @@ const ClubSlider = () => {
   }, []);
 
   const totalPages = Math.ceil(clubs.length / itemsPerView);
-  const currentPage = Math.floor(currentIndex / itemsPerView);
+  const startIndex = currentPage * itemsPerView;
+  const currentClubs = clubs.slice(startIndex, startIndex + itemsPerView);
 
   const nextSlide = () => {
-    setCurrentIndex((prev) => 
-      prev + itemsPerView >= clubs.length ? 0 : prev + itemsPerView
+    setCurrentPage((prev) => 
+      prev + 1 >= totalPages ? 0 : prev + 1
     );
   };
 
   const prevSlide = () => {
-    setCurrentIndex((prev) => 
-      prev === 0 ? Math.max(0, clubs.length - itemsPerView) : Math.max(0, prev - itemsPerView)
+    setCurrentPage((prev) => 
+      prev === 0 ? totalPages - 1 : prev - 1
     );
   };
 
   const goToPage = (page: number) => {
-    setCurrentIndex(page * itemsPerView);
+    setCurrentPage(page);
   };
 
   if (isLoading || clubs.length === 0) {
@@ -78,7 +79,7 @@ const ClubSlider = () => {
             variant="outline" 
             size="icon" 
             onClick={prevSlide}
-            disabled={currentIndex === 0}
+            disabled={totalPages <= 1}
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -86,74 +87,62 @@ const ClubSlider = () => {
             variant="outline" 
             size="icon" 
             onClick={nextSlide}
-            disabled={currentIndex + itemsPerView >= clubs.length}
+            disabled={totalPages <= 1}
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
       </div>
       
-      <div className="overflow-hidden">
-        <div 
-          className="flex transition-transform duration-300 ease-in-out"
-          style={{ 
-            transform: `translateX(-${(currentIndex * 100) / itemsPerView}%)`,
-            width: `${(clubs.length * 100) / itemsPerView}%`
-          }}
-        >
-          {clubs.map((club) => (
-            <div 
-              key={club.club_id} 
-              className="flex-shrink-0 px-2"
-              style={{ width: `${100 / clubs.length}%` }}
-            >
-              <Link to={`/club/${club.slug}`}>
-                <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
-                  <CardContent className="p-6 text-center">
-                    <div className="flex justify-center mb-4">
-                      {club.logo_url ? (
-                        <img 
-                          src={club.logo_url} 
-                          alt={club.name} 
-                          className="h-12 w-12 object-contain rounded-full"
-                        />
-                      ) : (
-                        <div 
-                          className="h-12 w-12 rounded-full flex items-center justify-center text-white font-bold"
-                          style={{ backgroundColor: club.primary_color || '#666' }}
-                        >
-                          {club.name?.charAt(0) || '?'}
-                        </div>
-                      )}
-                    </div>
-                    <h4 className="font-semibold text-lg mb-1">{club.name}</h4>
-                    <p className="text-gray-600 text-sm mb-4">{club.country}</p>
-                    <Button 
-                      size="sm"
-                      className="bg-green-600 hover:bg-green-700"
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {currentClubs.map((club) => (
+          <Link key={club.club_id} to={`/club/${club.slug}`}>
+            <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
+              <CardContent className="p-6 text-center">
+                <div className="flex justify-center mb-4">
+                  {club.logo_url ? (
+                    <img 
+                      src={club.logo_url} 
+                      alt={club.name} 
+                      className="h-12 w-12 object-contain rounded-full"
+                    />
+                  ) : (
+                    <div 
+                      className="h-12 w-12 rounded-full flex items-center justify-center text-white font-bold"
+                      style={{ backgroundColor: club.primary_color || '#666' }}
                     >
-                      Mehr erfahren
-                    </Button>
-                  </CardContent>
-                </Card>
-              </Link>
-            </div>
-          ))}
-        </div>
+                      {club.name?.charAt(0) || '?'}
+                    </div>
+                  )}
+                </div>
+                <h4 className="font-semibold text-lg mb-1">{club.name}</h4>
+                <p className="text-gray-600 text-sm mb-4">{club.country}</p>
+                <Button 
+                  size="sm"
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  Mehr erfahren
+                </Button>
+              </CardContent>
+            </Card>
+          </Link>
+        ))}
       </div>
       
       {/* Pagination dots */}
-      <div className="flex justify-center mt-6 gap-2">
-        {Array.from({ length: Math.min(totalPages, 4) }).map((_, index) => (
-          <button
-            key={index}
-            onClick={() => goToPage(index)}
-            className={`w-3 h-3 rounded-full transition-colors ${
-              currentPage === index ? 'bg-green-600' : 'bg-gray-300'
-            }`}
-          />
-        ))}
-      </div>
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-6 gap-2">
+          {Array.from({ length: Math.min(totalPages, 4) }).map((_, index) => (
+            <button
+              key={index}
+              onClick={() => goToPage(index)}
+              className={`w-3 h-3 rounded-full transition-colors ${
+                currentPage === index ? 'bg-green-600' : 'bg-gray-300'
+              }`}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

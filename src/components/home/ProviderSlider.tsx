@@ -7,8 +7,13 @@ import { Link } from "react-router-dom";
 
 const ProviderSlider = () => {
   const { providers, loading } = useStreaming();
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentPage, setCurrentPage] = useState(0);
   const [itemsPerView, setItemsPerView] = useState(4);
+
+  // Sort providers by name (alphabetical)
+  const sortedProviders = [...providers].sort((a, b) => 
+    a.name.localeCompare(b.name)
+  );
 
   useEffect(() => {
     const updateItemsPerView = () => {
@@ -28,26 +33,27 @@ const ProviderSlider = () => {
     return () => window.removeEventListener('resize', updateItemsPerView);
   }, []);
 
-  const totalPages = Math.ceil(providers.length / itemsPerView);
-  const currentPage = Math.floor(currentIndex / itemsPerView);
+  const totalPages = Math.ceil(sortedProviders.length / itemsPerView);
+  const startIndex = currentPage * itemsPerView;
+  const currentProviders = sortedProviders.slice(startIndex, startIndex + itemsPerView);
 
   const nextSlide = () => {
-    setCurrentIndex((prev) => 
-      prev + itemsPerView >= providers.length ? 0 : prev + itemsPerView
+    setCurrentPage((prev) => 
+      prev + 1 >= totalPages ? 0 : prev + 1
     );
   };
 
   const prevSlide = () => {
-    setCurrentIndex((prev) => 
-      prev === 0 ? Math.max(0, providers.length - itemsPerView) : Math.max(0, prev - itemsPerView)
+    setCurrentPage((prev) => 
+      prev === 0 ? totalPages - 1 : prev - 1
     );
   };
 
   const goToPage = (page: number) => {
-    setCurrentIndex(page * itemsPerView);
+    setCurrentPage(page);
   };
 
-  if (loading || providers.length === 0) {
+  if (loading || sortedProviders.length === 0) {
     return (
       <div className="flex justify-center py-8">
         <div className="text-gray-500">Lade Streaming-Anbieter...</div>
@@ -64,7 +70,7 @@ const ProviderSlider = () => {
             variant="outline" 
             size="icon" 
             onClick={prevSlide}
-            disabled={currentIndex === 0}
+            disabled={totalPages <= 1}
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -72,74 +78,62 @@ const ProviderSlider = () => {
             variant="outline" 
             size="icon" 
             onClick={nextSlide}
-            disabled={currentIndex + itemsPerView >= providers.length}
+            disabled={totalPages <= 1}
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
       </div>
       
-      <div className="overflow-hidden">
-        <div 
-          className="flex transition-transform duration-300 ease-in-out"
-          style={{ 
-            transform: `translateX(-${(currentIndex * 100) / itemsPerView}%)`,
-            width: `${(providers.length * 100) / itemsPerView}%`
-          }}
-        >
-          {providers.map((provider) => (
-            <div 
-              key={provider.streamer_id} 
-              className="flex-shrink-0 px-2"
-              style={{ width: `${100 / providers.length}%` }}
-            >
-              <Link to={`/provider/${provider.slug}`}>
-                <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
-                  <CardContent className="p-6 text-center">
-                    <div className="flex justify-center mb-4">
-                      {provider.logo_url ? (
-                        <img 
-                          src={provider.logo_url} 
-                          alt={provider.name} 
-                          className="h-12 w-auto object-contain"
-                        />
-                      ) : (
-                        <div className="h-12 w-12 bg-gray-200 rounded-lg flex items-center justify-center">
-                          <span className="text-gray-500 font-bold">
-                            {provider.name.charAt(0)}
-                          </span>
-                        </div>
-                      )}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {currentProviders.map((provider) => (
+          <Link key={provider.streamer_id} to={`/provider/${provider.slug}`}>
+            <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
+              <CardContent className="p-6 text-center">
+                <div className="flex justify-center mb-4">
+                  {provider.logo_url ? (
+                    <img 
+                      src={provider.logo_url} 
+                      alt={provider.name} 
+                      className="h-12 w-auto object-contain"
+                    />
+                  ) : (
+                    <div className="h-12 w-12 bg-gray-200 rounded-lg flex items-center justify-center">
+                      <span className="text-gray-500 font-bold">
+                        {provider.name.charAt(0)}
+                      </span>
                     </div>
-                    <h4 className="font-semibold text-lg mb-2">{provider.name}</h4>
-                    <p className="text-green-600 font-bold text-xl mb-4">
-                      ab €{provider.monthly_price}
-                    </p>
-                    <Button 
-                      className="w-full bg-green-600 hover:bg-green-700"
-                    >
-                      Mehr erfahren
-                    </Button>
-                  </CardContent>
-                </Card>
-              </Link>
-            </div>
-          ))}
-        </div>
+                  )}
+                </div>
+                <h4 className="font-semibold text-lg mb-2">{provider.name}</h4>
+                <p className="text-green-600 font-bold text-xl mb-4">
+                  ab €{provider.monthly_price}
+                </p>
+                <Button 
+                  className="w-full bg-green-600 hover:bg-green-700"
+                >
+                  Mehr erfahren
+                </Button>
+              </CardContent>
+            </Card>
+          </Link>
+        ))}
       </div>
       
       {/* Pagination dots */}
-      <div className="flex justify-center mt-6 gap-2">
-        {Array.from({ length: Math.min(totalPages, 4) }).map((_, index) => (
-          <button
-            key={index}
-            onClick={() => goToPage(index)}
-            className={`w-3 h-3 rounded-full transition-colors ${
-              currentPage === index ? 'bg-green-600' : 'bg-gray-300'
-            }`}
-          />
-        ))}
-      </div>
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-6 gap-2">
+          {Array.from({ length: Math.min(totalPages, 4) }).map((_, index) => (
+            <button
+              key={index}
+              onClick={() => goToPage(index)}
+              className={`w-3 h-3 rounded-full transition-colors ${
+                currentPage === index ? 'bg-green-600' : 'bg-gray-300'
+              }`}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
