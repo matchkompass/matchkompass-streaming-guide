@@ -262,14 +262,19 @@ const EnhancedVergleich = () => {
               )}
             </div>
 
-            {/* Detail comparison button */}
-            <div className="mb-6">
-              <Button
-                onClick={() => window.location.href = '/detailvergleich'}
-                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground h-12 text-base font-medium"
-              >
-                Im Detail vergleichen
-              </Button>
+            {/* Detail comparison button - Desktop only */}
+            <div className="mb-6 hidden md:block">
+              <div className="relative">
+                <Button
+                  onClick={() => window.location.href = '/detailvergleich'}
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground h-12 text-base font-medium"
+                >
+                  Im Detail vergleichen
+                </Button>
+                <Badge className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 py-1 animate-pulse">
+                  Jetzt neu
+                </Badge>
+              </div>
             </div>
 
             <div className="space-y-4">
