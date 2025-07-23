@@ -11,6 +11,9 @@ const LeagueSlider = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [itemsPerView, setItemsPerView] = useState(4);
 
+  // Sort leagues by popularity
+  const sortedLeagues = [...leagues].sort((a, b) => (b.popularity || 0) - (a.popularity || 0));
+
   useEffect(() => {
     const updateItemsPerView = () => {
       if (window.innerWidth < 640) {
@@ -29,19 +32,26 @@ const LeagueSlider = () => {
     return () => window.removeEventListener('resize', updateItemsPerView);
   }, []);
 
+  const totalPages = Math.ceil(sortedLeagues.length / itemsPerView);
+  const currentPage = Math.floor(currentIndex / itemsPerView);
+
   const nextSlide = () => {
     setCurrentIndex((prev) => 
-      prev + itemsPerView >= leagues.length ? 0 : prev + itemsPerView
+      prev + itemsPerView >= sortedLeagues.length ? 0 : prev + itemsPerView
     );
   };
 
   const prevSlide = () => {
     setCurrentIndex((prev) => 
-      prev === 0 ? Math.max(0, leagues.length - itemsPerView) : Math.max(0, prev - itemsPerView)
+      prev === 0 ? Math.max(0, sortedLeagues.length - itemsPerView) : Math.max(0, prev - itemsPerView)
     );
   };
 
-  if (loading || leagues.length === 0) {
+  const goToPage = (page: number) => {
+    setCurrentIndex(page * itemsPerView);
+  };
+
+  if (loading || sortedLeagues.length === 0) {
     return (
       <div className="flex justify-center py-8">
         <div className="text-gray-500">Lade Ligen...</div>
@@ -71,7 +81,7 @@ const LeagueSlider = () => {
             variant="outline" 
             size="icon" 
             onClick={nextSlide}
-            disabled={currentIndex + itemsPerView >= leagues.length}
+            disabled={currentIndex + itemsPerView >= sortedLeagues.length}
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
@@ -83,14 +93,14 @@ const LeagueSlider = () => {
           className="flex transition-transform duration-300 ease-in-out"
           style={{ 
             transform: `translateX(-${(currentIndex * 100) / itemsPerView}%)`,
-            width: `${(leagues.length * 100) / itemsPerView}%`
+            width: `${(sortedLeagues.length * 100) / itemsPerView}%`
           }}
         >
-          {leagues.map((league) => (
+          {sortedLeagues.map((league) => (
             <div 
               key={league.league_id} 
               className="flex-shrink-0 px-2"
-              style={{ width: `${100 / leagues.length}%` }}
+              style={{ width: `${100 / sortedLeagues.length}%` }}
             >
               <Link to={`/competition/${league.league_slug}`}>
                 <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
@@ -99,15 +109,34 @@ const LeagueSlider = () => {
                       <span className="text-4xl">{getLeagueFlag(league)}</span>
                     </div>
                     <h4 className="font-semibold text-lg mb-2">{league.league}</h4>
-                    <p className="text-gray-600 text-sm">
+                    <p className="text-gray-600 text-sm mb-4">
                       {league['number of games']} Spiele
                     </p>
+                    <Button 
+                      size="sm"
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      Mehr erfahren
+                    </Button>
                   </CardContent>
                 </Card>
               </Link>
             </div>
           ))}
         </div>
+      </div>
+      
+      {/* Pagination dots */}
+      <div className="flex justify-center mt-6 gap-2">
+        {Array.from({ length: Math.min(totalPages, 4) }).map((_, index) => (
+          <button
+            key={index}
+            onClick={() => goToPage(index)}
+            className={`w-3 h-3 rounded-full transition-colors ${
+              currentPage === index ? 'bg-green-600' : 'bg-gray-300'
+            }`}
+          />
+        ))}
       </div>
     </div>
   );

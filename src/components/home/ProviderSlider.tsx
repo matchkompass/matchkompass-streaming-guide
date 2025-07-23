@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 
 const ProviderSlider = () => {
   const { providers, loading } = useStreaming();
@@ -27,6 +28,9 @@ const ProviderSlider = () => {
     return () => window.removeEventListener('resize', updateItemsPerView);
   }, []);
 
+  const totalPages = Math.ceil(providers.length / itemsPerView);
+  const currentPage = Math.floor(currentIndex / itemsPerView);
+
   const nextSlide = () => {
     setCurrentIndex((prev) => 
       prev + itemsPerView >= providers.length ? 0 : prev + itemsPerView
@@ -37,6 +41,10 @@ const ProviderSlider = () => {
     setCurrentIndex((prev) => 
       prev === 0 ? Math.max(0, providers.length - itemsPerView) : Math.max(0, prev - itemsPerView)
     );
+  };
+
+  const goToPage = (page: number) => {
+    setCurrentIndex(page * itemsPerView);
   };
 
   if (loading || providers.length === 0) {
@@ -85,40 +93,52 @@ const ProviderSlider = () => {
               className="flex-shrink-0 px-2"
               style={{ width: `${100 / providers.length}%` }}
             >
-              <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
-                <CardContent className="p-6 text-center">
-                  <div className="flex justify-center mb-4">
-                    {provider.logo_url ? (
-                      <img 
-                        src={provider.logo_url} 
-                        alt={provider.name} 
-                        className="h-12 w-auto object-contain"
-                      />
-                    ) : (
-                      <div className="h-12 w-12 bg-gray-200 rounded-lg flex items-center justify-center">
-                        <span className="text-gray-500 font-bold">
-                          {provider.name.charAt(0)}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  <h4 className="font-semibold text-lg mb-2">{provider.name}</h4>
-                  <p className="text-green-600 font-bold text-xl mb-4">
-                    ab €{provider.monthly_price}
-                  </p>
-                  {provider.affiliate_url && (
+              <Link to={`/provider/${provider.slug}`}>
+                <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
+                  <CardContent className="p-6 text-center">
+                    <div className="flex justify-center mb-4">
+                      {provider.logo_url ? (
+                        <img 
+                          src={provider.logo_url} 
+                          alt={provider.name} 
+                          className="h-12 w-auto object-contain"
+                        />
+                      ) : (
+                        <div className="h-12 w-12 bg-gray-200 rounded-lg flex items-center justify-center">
+                          <span className="text-gray-500 font-bold">
+                            {provider.name.charAt(0)}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <h4 className="font-semibold text-lg mb-2">{provider.name}</h4>
+                    <p className="text-green-600 font-bold text-xl mb-4">
+                      ab €{provider.monthly_price}
+                    </p>
                     <Button 
                       className="w-full bg-green-600 hover:bg-green-700"
-                      onClick={() => window.open(provider.affiliate_url, '_blank')}
                     >
-                      Jetzt abonnieren
+                      Mehr erfahren
                     </Button>
-                  )}
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </Link>
             </div>
           ))}
         </div>
+      </div>
+      
+      {/* Pagination dots */}
+      <div className="flex justify-center mt-6 gap-2">
+        {Array.from({ length: Math.min(totalPages, 4) }).map((_, index) => (
+          <button
+            key={index}
+            onClick={() => goToPage(index)}
+            className={`w-3 h-3 rounded-full transition-colors ${
+              currentPage === index ? 'bg-green-600' : 'bg-gray-300'
+            }`}
+          />
+        ))}
       </div>
     </div>
   );

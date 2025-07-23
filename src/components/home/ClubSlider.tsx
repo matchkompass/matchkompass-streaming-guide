@@ -42,6 +42,9 @@ const ClubSlider = () => {
     return () => window.removeEventListener('resize', updateItemsPerView);
   }, []);
 
+  const totalPages = Math.ceil(clubs.length / itemsPerView);
+  const currentPage = Math.floor(currentIndex / itemsPerView);
+
   const nextSlide = () => {
     setCurrentIndex((prev) => 
       prev + itemsPerView >= clubs.length ? 0 : prev + itemsPerView
@@ -52,6 +55,10 @@ const ClubSlider = () => {
     setCurrentIndex((prev) => 
       prev === 0 ? Math.max(0, clubs.length - itemsPerView) : Math.max(0, prev - itemsPerView)
     );
+  };
+
+  const goToPage = (page: number) => {
+    setCurrentIndex(page * itemsPerView);
   };
 
   if (isLoading || clubs.length === 0) {
@@ -120,13 +127,32 @@ const ClubSlider = () => {
                       )}
                     </div>
                     <h4 className="font-semibold text-lg mb-1">{club.name}</h4>
-                    <p className="text-gray-600 text-sm">{club.country}</p>
+                    <p className="text-gray-600 text-sm mb-4">{club.country}</p>
+                    <Button 
+                      size="sm"
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      Mehr erfahren
+                    </Button>
                   </CardContent>
                 </Card>
               </Link>
             </div>
           ))}
         </div>
+      </div>
+      
+      {/* Pagination dots */}
+      <div className="flex justify-center mt-6 gap-2">
+        {Array.from({ length: Math.min(totalPages, 4) }).map((_, index) => (
+          <button
+            key={index}
+            onClick={() => goToPage(index)}
+            className={`w-3 h-3 rounded-full transition-colors ${
+              currentPage === index ? 'bg-green-600' : 'bg-gray-300'
+            }`}
+          />
+        ))}
       </div>
     </div>
   );

@@ -83,6 +83,13 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Provider Slider Section */}
+      <section className="py-16 px-4 bg-gray-50">
+        <div className="max-w-6xl mx-auto">
+          <ProviderSlider />
+        </div>
+      </section>
+
       {/* Features Section */}
       <section className="py-16 px-4 bg-white">
         <div className="max-w-6xl mx-auto">
@@ -104,13 +111,6 @@ const Index = () => {
               </Card>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* Provider Slider Section */}
-      <section className="py-16 px-4 bg-gray-50">
-        <div className="max-w-6xl mx-auto">
-          <ProviderSlider />
         </div>
       </section>
 
