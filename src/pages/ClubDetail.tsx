@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import AppBreadcrumb from "@/components/Breadcrumb";
 import { ExternalLink, Users, Calendar, MapPin, Trophy, ChevronDown, ChevronUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -112,12 +113,18 @@ const ClubDetail = () => {
       />
       <Header />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
+        <AppBreadcrumb 
+          items={[
+            { label: 'Vereine', href: '/clubs' },
+            { label: club.name }
+          ]}
+        />
         {/* Club Info Card (top, styled with club colors) */}
         <div className="rounded-lg shadow-sm mb-6 overflow-hidden" style={{ background: `linear-gradient(135deg, ${club.primary_color || '#2E7D32'}, ${club.secondary_color || '#1565C0'})` }}>
           <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 p-4 sm:p-6">
             <div className="bg-white rounded-lg p-3 sm:p-4 shadow-lg flex items-center justify-center self-center sm:self-auto" style={{ minWidth: 64, minHeight: 64 }}>
               {club.logo_url ? (
-                <img src={club.logo_url} alt={club.name} className="w-16 h-16 sm:w-20 sm:h-20 object-contain" />
+                <img src={club.logo_url} alt={`${club.name} Logo`} className="w-16 h-16 sm:w-20 sm:h-20 object-contain" />
               ) : (
                 <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-200 rounded-lg flex items-center justify-center text-2xl sm:text-3xl">⚽</div>
               )}

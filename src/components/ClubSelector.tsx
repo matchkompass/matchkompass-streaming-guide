@@ -53,7 +53,7 @@ export default function ClubSelector() {
                   {club.logo_url ? (
                     <img 
                       src={club.logo_url} 
-                      alt={club.name} 
+                      alt={`${club.name} Logo`}
                       className="w-8 h-8 mx-auto object-contain" 
                     />
                   ) : (

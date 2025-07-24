@@ -157,7 +157,7 @@ const CompetitionDetail = () => {
                       >
                         <div className="mb-2">
                           {club.logo_url ? (
-                            <img src={club.logo_url} alt={club.name} className="w-6 h-6 sm:w-8 sm:h-8 object-contain" />
+                            <img src={club.logo_url} alt={`${club.name} Logo`} className="w-6 h-6 sm:w-8 sm:h-8 object-contain" />
                           ) : (
                             <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gray-300 rounded-full flex items-center justify-center text-xs sm:text-sm">
                               ⚽

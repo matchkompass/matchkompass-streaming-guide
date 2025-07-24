@@ -74,17 +74,30 @@ const Index = () => {
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-lg mx-auto">
-            <Button asChild size="lg" className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 text-lg flex-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg mx-auto">
+            <Button asChild size="lg" className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 text-lg">
               <Link to="/wizard">
                 <Search className="mr-2 h-5 w-5" />
                 Jetzt optimale Kombination finden
               </Link>
             </Button>
-            <Button asChild variant="outline" size="lg" className="px-8 py-4 text-lg border-2 flex-1">
+            <Button asChild variant="outline" size="lg" className="px-8 py-4 text-lg border-2">
               <Link to="/vergleich">
                 Anbieter vergleichen
               </Link>
+            </Button>
+          </div>
+          
+          {/* Additional Internal Links */}
+          <div className="flex flex-wrap gap-3 justify-center mt-6">
+            <Button asChild variant="outline" size="sm">
+              <Link to="/ligen">Alle Ligen</Link>
+            </Button>
+            <Button asChild variant="outline" size="sm">
+              <Link to="/anbieter">Alle Anbieter</Link>
+            </Button>
+            <Button asChild variant="outline" size="sm">
+              <Link to="/deals">Deals & News</Link>
             </Button>
           </div>
         </div>

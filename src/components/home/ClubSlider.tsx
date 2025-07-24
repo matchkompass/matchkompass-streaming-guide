@@ -103,7 +103,7 @@ const ClubSlider = () => {
                   {club.logo_url ? (
                     <img 
                       src={club.logo_url} 
-                      alt={club.name} 
+                      alt={`${club.name} Logo`}
                       className="h-12 w-12 object-contain rounded-full"
                     />
                   ) : (

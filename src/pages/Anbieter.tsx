@@ -135,7 +135,7 @@ const Anbieter = () => {
                 <Card key={provider.streamer_id} className="bg-white border border-gray-200 hover:shadow-md transition-shadow">
                   <CardContent className="flex items-center gap-6 p-6">
                     {provider.logo_url ? (
-                      <img src={provider.logo_url} alt={provider.name} className="w-16 h-16 object-contain rounded-full" />
+                      <img src={provider.logo_url} alt={`${provider.name} Logo`} className="w-16 h-16 object-contain rounded-full" />
                     ) : (
                       <span className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center text-2xl">📺</span>
                     )}

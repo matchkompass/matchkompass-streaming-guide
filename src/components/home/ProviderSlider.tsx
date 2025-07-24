@@ -94,7 +94,7 @@ const ProviderSlider = () => {
                   {provider.logo_url ? (
                     <img 
                       src={provider.logo_url} 
-                      alt={provider.name} 
+                      alt={`${provider.name} Logo`}
                       className="h-12 w-auto object-contain"
                     />
                   ) : (
