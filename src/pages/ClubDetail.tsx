@@ -141,7 +141,7 @@ const ClubDetail = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <span className="text-2xl">📺</span>
-                    Top Streaming-Anbieter für {club.name}
+                    <h2>Top Streaming-Anbieter für {club.name}</h2>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -264,7 +264,7 @@ const ClubDetail = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Trophy className="h-5 w-5" />
-                  Aktuelle Wettbewerbe
+                  <h2>Aktuelle Wettbewerbe</h2>
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -272,7 +272,7 @@ const ClubDetail = () => {
                   {competitions.map((comp, index) => (
                     <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-sm sm:text-base truncate">{comp.name}</h4>
+                        <h3 className="font-medium text-sm sm:text-base truncate">{comp.name}</h3>
                         <p className="text-xs sm:text-sm text-gray-600">{comp.games} Spiele</p>
                       </div>
                       <Badge variant="outline" className="ml-2 text-xs whitespace-nowrap">{comp.slug.replace('_', ' ')}</Badge>
@@ -284,7 +284,7 @@ const ClubDetail = () => {
             {/* Best Streaming Combo Section (unchanged) */}
             <Card>
               <CardHeader>
-                <CardTitle>Beste Streaming-Kombination</CardTitle>
+                <CardTitle><h2>Beste Streaming-Kombination</h2></CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600 mb-4">
@@ -306,7 +306,7 @@ const ClubDetail = () => {
           <div>
             <Card>
               <CardHeader>
-                <CardTitle>Quick Facts</CardTitle>
+                <CardTitle><h2>Quick Facts</h2></CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {club.website_url && (

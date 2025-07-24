@@ -144,7 +144,7 @@ const CompetitionDetail = () => {
             {/* Participating Teams */}
             <Card>
               <CardHeader>
-                <CardTitle>Teilnehmer</CardTitle>
+                <CardTitle><h2>Teilnehmer</h2></CardTitle>
               </CardHeader>
               <CardContent>
                 {participatingClubs.length > 0 ? (
@@ -180,7 +180,7 @@ const CompetitionDetail = () => {
             {/* Streaming Coverage */}
             <Card>
               <CardHeader>
-                <CardTitle>Streaming-Verfügbarkeit</CardTitle>
+                <CardTitle><h2>Streaming-Verfügbarkeit</h2></CardTitle>
               </CardHeader>
               <CardContent>
                 {streamingCoverage.length > 0 ? (
@@ -314,7 +314,7 @@ const CompetitionDetail = () => {
           <div>
             <Card>
               <CardHeader>
-                <CardTitle>Beste Kombi für {league.league}</CardTitle>
+                <CardTitle><h2>Beste Kombi für {league.league}</h2></CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600 mb-4">
@@ -334,7 +334,7 @@ const CompetitionDetail = () => {
             {/* Quick Stats */}
             <Card className="mt-4">
               <CardHeader>
-                <CardTitle>Liga-Statistiken</CardTitle>
+                <CardTitle><h2>Liga-Statistiken</h2></CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex justify-between">
