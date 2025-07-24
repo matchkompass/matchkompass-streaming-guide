@@ -1,14 +1,43 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
+# MatchStream Robots.txt
+# Allow all important pages for SEO
 
 User-agent: *
+
+# Allow important pages
 Allow: /
+Allow: /wizard
+Allow: /vergleich
+Allow: /detailvergleich
+Allow: /ligen
+Allow: /anbieter
+Allow: /deals
+Allow: /club/*
+Allow: /competition/*
+Allow: /provider/*
+
+# Allow legal pages
+Allow: /impressum
+Allow: /datenschutz
+Allow: /agb
+Allow: /cookies
+Allow: /barrierefreiheit
+Allow: /widerrufsrecht
+
+# Block development and temporary files (if any exist)
+Disallow: /dev/
+Disallow: /test/
+Disallow: /temp/
+Disallow: /_*
+Disallow: /api/internal/
+
+# Block duplicate content patterns
+Disallow: /*?utm_*
+Disallow: /*&utm_*
+Disallow: /*?ref=*
+Disallow: /*&ref=*
+
+# Crawl delay to be respectful
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://matchstream.de/sitemap.xml
