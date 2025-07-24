@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEOHead from "@/components/SEOHead";
 import EnhancedCompetitionSelector from "@/components/wizard/EnhancedCompetitionSelector";
 
 import EnhancedStep4Results from "@/components/wizard/EnhancedStep4Results";
@@ -533,6 +534,12 @@ const Wizard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <SEOHead 
+        title="Streaming-Optimizer Wizard | Perfekte Kombination finden | MatchStream"
+        description="Finde in nur 3 Schritten die optimale Streaming-Kombination für deine Lieblingsvereine. ✓ Persönliche Empfehlungen ✓ Beste Preise ✓ 100% Abdeckung"
+        keywords="Streaming Optimizer, Fußball Streaming Wizard, Personalisierte Empfehlung, Streaming Kombination"
+        canonical="https://matchstream.de/wizard"
+      />
       <Header />
       
       <div className="max-w-7xl mx-auto px-4 py-6">

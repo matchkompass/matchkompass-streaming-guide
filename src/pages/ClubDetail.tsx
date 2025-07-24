@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEOHead from "@/components/SEOHead";
 import { useClubs, Club } from "@/hooks/useClubs";
 import { useLeagues } from "@/hooks/useLeagues";
 import { getClubCompetitions } from "@/utils/enhancedCoverageCalculator";
@@ -103,6 +104,12 @@ const ClubDetail = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <SEOHead 
+        title={`${club?.name} - Streaming-Guide | MatchStream`}
+        description={`Alle Streaming-Optionen für ${club?.name} Spiele. Finde die beste Kombination aus Sky, DAZN & Co für alle ${club?.name} Partien.`}
+        keywords={`${club?.name} Stream, ${club?.name} Spiele schauen, Fußball Streaming, ${club?.country || ''}`}
+        canonical={`https://matchstream.de/club/${slug}`}
+      />
       <Header />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
         {/* Club Info Card (top, styled with club colors) */}

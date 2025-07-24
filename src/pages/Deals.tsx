@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEOHead from "@/components/SEOHead";
 import { supabase } from "@/integrations/supabase/client";
 
 const Deals = () => {
@@ -90,6 +91,12 @@ const Deals = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-green-50">
+      <SEOHead 
+        title="Aktuelle Deals & News | Streaming-Angebote | MatchStream"
+        description="Entdecke aktuelle Angebote und Neuigkeiten aus der Welt des Fußball-Streamings. ✓ Exklusive Deals ✓ Preise vergleichen ✓ Geld sparen"
+        keywords="Streaming Deals, Sky Angebote, DAZN Rabatt, Fußball Streaming News, Streaming Angebote"
+        canonical="https://matchstream.de/deals"
+      />
       <Header />
       
       <div className="max-w-6xl mx-auto px-4 py-8">

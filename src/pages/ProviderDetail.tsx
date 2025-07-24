@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/table";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEOHead from "@/components/SEOHead";
 import { useStreaming, StreamingProvider } from "@/hooks/useStreaming";
 import { useLeagues } from "@/hooks/useLeagues";
 
@@ -129,6 +130,12 @@ const ProviderDetail = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <SEOHead 
+        title={`${provider?.provider_name} Streaming - Preise & Test | MatchStream`}
+        description={`${provider?.provider_name} im Test: Alle Infos zu Preisen, Liga-Abdeckung und Features. Ab ${monthlyPrice.toFixed(2)}€/Monat für Fußball-Streaming.`}
+        keywords={`${provider?.provider_name} Test, ${provider?.provider_name} Preis, Fußball Streaming, Streaming Anbieter`}
+        canonical={`https://matchstream.de/streaming-provider/${slug}`}
+      />
       <Header />
       
       <div className="max-w-6xl mx-auto px-4 py-6">

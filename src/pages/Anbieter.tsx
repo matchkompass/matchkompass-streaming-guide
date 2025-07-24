@@ -3,6 +3,7 @@ import { useStreamingEnhanced } from "@/hooks/useStreamingEnhanced";
 import { useLeaguesEnhanced } from "@/hooks/useLeaguesEnhanced";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEOHead from "@/components/SEOHead";
 import FAQSection from "@/components/FAQSection";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -41,6 +42,12 @@ const Anbieter = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <SEOHead 
+        title="Alle Streaming-Anbieter für Fußball | Übersicht & Vergleich | MatchStream"
+        description="Entdecke alle verfügbaren Streaming-Anbieter für Fußball. ✓ Sky ✓ DAZN ✓ Amazon Prime Video ✓ Vollständige Übersicht mit Preisen und Liga-Abdeckung."
+        keywords="Streaming Anbieter, Fußball Streaming Dienste, Sky, DAZN, Amazon Prime Video, Streaming Services"
+        canonical="https://matchstream.de/anbieter"
+      />
       <Header />
       
       <div className="max-w-5xl mx-auto px-4 py-10">

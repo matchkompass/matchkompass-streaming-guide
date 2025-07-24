@@ -1,9 +1,15 @@
 import React from 'react';
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEOHead from "@/components/SEOHead";
 
 const Impressum = () => (
   <div className="min-h-screen bg-gray-50 flex flex-col">
+    <SEOHead 
+      title="Impressum | MatchStream"
+      description="Impressum und rechtliche Informationen von MatchStream - dem führenden Streaming-Guide für Fußball."
+      canonical="https://matchstream.de/impressum"
+    />
     <Header />
     <main className="flex-1 flex items-center justify-center py-12 px-4">
       <div className="bg-white rounded-lg shadow-md max-w-2xl w-full p-8">

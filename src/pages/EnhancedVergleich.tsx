@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEOHead from "@/components/SEOHead";
 import { useStreaming } from "@/hooks/useStreaming";
 import { useLeagues } from "@/hooks/useLeagues";
 import ComparisonSidebar from "@/components/comparison/ComparisonSidebar";
@@ -204,6 +205,12 @@ const EnhancedVergleich = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <SEOHead 
+        title="Streaming-Anbieter Vergleich | Alle Fußball-Dienste | MatchStream"
+        description="Vergleiche alle wichtigen Streaming-Dienste für Fußball. ✓ Sky ✓ DAZN ✓ Amazon Prime Video. Finde die beste Option für deine Lieblingsvereine."
+        keywords="Streaming Vergleich, Sky vs DAZN, Fußball Streaming Anbieter, Streaming Dienste Vergleich"
+        canonical="https://matchstream.de/vergleich"
+      />
       <Header />
       
       <div className="max-w-7xl mx-auto px-4 py-6">

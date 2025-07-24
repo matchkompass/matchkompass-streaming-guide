@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEOHead from "@/components/SEOHead";
 import EnhancedGlobalSearch from "@/components/enhanced/EnhancedGlobalSearch";
 import ProviderSlider from "@/components/home/ProviderSlider";
 import LeagueSlider from "@/components/home/LeagueSlider";
@@ -39,6 +40,12 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-green-50">
+      <SEOHead 
+        title="MatchStream - Streaming Guide für Fußball | Optimaler Streaming-Vergleich"
+        description="Finde die perfekte Streaming-Kombination für deine Lieblingsvereine. Vergleiche alle Anbieter und spare Geld beim Fußball-Streaming. ✓ Bundesliga ✓ Champions League ✓ Premier League"
+        keywords="Fußball Streaming, Bundesliga Stream, Champions League, Sky, DAZN, Streaming Vergleich, Fußball schauen"
+        canonical="https://matchstream.de/"
+      />
       <Header />
       
       {/* Hero Section */}

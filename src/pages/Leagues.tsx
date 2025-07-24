@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEOHead from "@/components/SEOHead";
 import FAQSection from "@/components/FAQSection";
 import { useLeaguesEnhanced } from "@/hooks/useLeaguesEnhanced";
 import { useStreamingEnhanced } from "@/hooks/useStreamingEnhanced";
@@ -107,6 +108,12 @@ const Leagues = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <SEOHead 
+        title="Alle Fußball-Ligen & Wettbewerbe | Streaming-Guide | MatchStream"
+        description="Entdecke alle verfügbaren Fußballligen und Wettbewerbe. ✓ Bundesliga ✓ Champions League ✓ Premier League ✓ La Liga. Finde die besten Streaming-Optionen."
+        keywords="Fußball Ligen, Bundesliga, Champions League, Premier League, La Liga, Serie A, Wettbewerbe"
+        canonical="https://matchstream.de/ligen"
+      />
       <Header />
       
       <div className="max-w-7xl mx-auto px-4 py-8">

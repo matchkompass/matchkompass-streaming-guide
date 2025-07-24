@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/table";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEOHead from "@/components/SEOHead";
 import { useLeagues, League } from "@/hooks/useLeagues";
 import { useClubs } from "@/hooks/useClubs";
 import { useStreaming } from "@/hooks/useStreaming";
@@ -104,6 +105,12 @@ const CompetitionDetail = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <SEOHead 
+        title={`${league?.league} Streaming-Guide | MatchStream`}
+        description={`Alle Streaming-Optionen für ${league?.league}. Vergleiche Sky, DAZN & Co für alle ${league?.['number of games']} Spiele der Saison.`}
+        keywords={`${league?.league} Stream, ${league?.league} schauen, Fußball Streaming, ${league?.['country code'] || ''}`}
+        canonical={`https://matchstream.de/competition/${slug}`}
+      />
       <Header />
       
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
