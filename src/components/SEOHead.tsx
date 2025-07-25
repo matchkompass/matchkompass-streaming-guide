@@ -7,6 +7,9 @@ interface SEOHeadProps {
   keywords?: string;
   ogImage?: string;
   ogType?: string;
+  ogSiteName?: string;
+  twitterHandle?: string;
+  structuredData?: any;
 }
 
 const SEOHead = ({ 
@@ -15,7 +18,10 @@ const SEOHead = ({
   canonical,
   keywords = "Fußball Streaming, Bundesliga Stream, Champions League, Sky, DAZN, Streaming Vergleich",
   ogImage = "https://lovable.dev/opengraph-image-p98pqg.png",
-  ogType = "website"
+  ogType = "website",
+  ogSiteName = "MatchStream",
+  twitterHandle = "@matchstream",
+  structuredData
 }: SEOHeadProps) => {
   const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
   const canonicalUrl = canonical || currentUrl;
@@ -67,8 +73,11 @@ const SEOHead = ({
       { property: 'og:description', content: description },
       { property: 'og:type', content: ogType },
       { property: 'og:image', content: ogImage },
+      { property: 'og:image:width', content: '1200' },
+      { property: 'og:image:height', content: '630' },
       { property: 'og:url', content: canonicalUrl },
-      { property: 'og:locale', content: 'de_DE' }
+      { property: 'og:locale', content: 'de_DE' },
+      { property: 'og:site_name', content: ogSiteName }
     ];
     
     ogTags.forEach(({ property, content }) => {
@@ -84,10 +93,12 @@ const SEOHead = ({
     // Update Twitter Card tags
     const twitterTags = [
       { name: 'twitter:card', content: 'summary_large_image' },
-      { name: 'twitter:site', content: '@matchstream' },
+      { name: 'twitter:site', content: twitterHandle },
+      { name: 'twitter:creator', content: twitterHandle },
       { name: 'twitter:title', content: title },
       { name: 'twitter:description', content: description },
-      { name: 'twitter:image', content: ogImage }
+      { name: 'twitter:image', content: ogImage },
+      { name: 'twitter:image:alt', content: `${title} - MatchStream` }
     ];
     
     twitterTags.forEach(({ name, content }) => {
@@ -99,7 +110,18 @@ const SEOHead = ({
       }
       twitterMeta.setAttribute('content', content);
     });
-  }, [title, description, keywords, canonicalUrl, ogType, ogImage]);
+
+    // Add structured data
+    if (structuredData) {
+      let structuredDataScript = document.querySelector('script[type="application/ld+json"]');
+      if (!structuredDataScript) {
+        structuredDataScript = document.createElement('script');
+        structuredDataScript.setAttribute('type', 'application/ld+json');
+        document.head.appendChild(structuredDataScript);
+      }
+      structuredDataScript.textContent = JSON.stringify(structuredData);
+    }
+  }, [title, description, keywords, canonicalUrl, ogType, ogImage, structuredData]);
 
   return null;
 };

@@ -110,6 +110,20 @@ const CompetitionDetail = () => {
         description={`Alle Streaming-Optionen für ${league?.league}. Vergleiche Sky, DAZN & Co für alle ${league?.['number of games']} Spiele der Saison.`}
         keywords={`${league?.league} Stream, ${league?.league} schauen, Fußball Streaming, ${league?.['country code'] || ''}`}
         canonical={`https://matchstream.de/competition/${slug}`}
+        ogType="website"
+        ogImage={league?.icon || "https://lovable.dev/opengraph-image-p98pqg.png"}
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "SportsOrganization",
+          "name": league?.league,
+          "sport": "Fußball",
+          "url": `https://matchstream.de/competition/${slug}`,
+          "numberOfGames": league?.['number of games'],
+          "memberOf": {
+            "@type": "Country",
+            "name": league?.['country code']
+          }
+        }}
       />
       <Header />
       

@@ -135,6 +135,22 @@ const ProviderDetail = () => {
         description={`${provider?.provider_name} im Test: Alle Infos zu Preisen, Liga-Abdeckung und Features. Ab ${monthlyPrice.toFixed(2)}€/Monat für Fußball-Streaming.`}
         keywords={`${provider?.provider_name} Test, ${provider?.provider_name} Preis, Fußball Streaming, Streaming Anbieter`}
         canonical={`https://matchstream.de/streaming-provider/${slug}`}
+        ogType="product"
+        ogImage={provider?.logo_url || "https://lovable.dev/opengraph-image-p98pqg.png"}
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "Product",
+          "name": provider?.provider_name,
+          "description": `Streaming-Service für Fußball ab ${monthlyPrice.toFixed(2)}€/Monat`,
+          "brand": provider?.provider_name,
+          "image": provider?.logo_url,
+          "offers": {
+            "@type": "Offer",
+            "price": monthlyPrice.toFixed(2),
+            "priceCurrency": "EUR",
+            "availability": "https://schema.org/InStock"
+          }
+        }}
       />
       <Header />
       

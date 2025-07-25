@@ -45,6 +45,20 @@ const Index = () => {
         description="Finde die perfekte Streaming-Kombination für deine Lieblingsvereine. Vergleiche alle Anbieter und spare Geld beim Fußball-Streaming. ✓ Bundesliga ✓ Champions League ✓ Premier League"
         keywords="Fußball Streaming, Bundesliga Stream, Champions League, Sky, DAZN, Streaming Vergleich, Fußball schauen"
         canonical="https://matchstream.de/"
+        ogType="website"
+        ogImage="https://lovable.dev/opengraph-image-p98pqg.png"
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "MatchStream",
+          "description": "Streaming Guide für Fußball - Finde die perfekte Kombination",
+          "url": "https://matchstream.de",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://matchstream.de/search?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        }}
       />
       <Header />
       

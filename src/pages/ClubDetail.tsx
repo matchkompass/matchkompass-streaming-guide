@@ -110,6 +110,18 @@ const ClubDetail = () => {
         description={`Alle Streaming-Optionen für ${club?.name} Spiele. Finde die beste Kombination aus Sky, DAZN & Co für alle ${club?.name} Partien.`}
         keywords={`${club?.name} Stream, ${club?.name} Spiele schauen, Fußball Streaming, ${club?.country || ''}`}
         canonical={`https://matchstream.de/club/${slug}`}
+        ogType="profile"
+        ogImage={club?.logo_url || "https://lovable.dev/opengraph-image-p98pqg.png"}
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "SportsTeam",
+          "name": club?.name,
+          "sport": "Fußball",
+          "logo": club?.logo_url,
+          "url": `https://matchstream.de/club/${slug}`,
+          "foundingDate": club?.founded_year?.toString(),
+          "address": club?.stadium_location
+        }}
       />
       <Header />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
