@@ -7,8 +7,9 @@ import Deals from "./pages/Deals";
 import Impressum from "./pages/Impressum";
 import Datenschutz from "./pages/Datenschutz";
 import AGB from "./pages/AGB";
-import CookieRichtlinie from "./pages/CookieRichtlinie";
+import CookieDeclaration from "./pages/CookieDeclaration";
 import Barrierefreiheit from "./pages/Barrierefreiheit";
+import Widerrufsrecht from "./pages/Widerrufsrecht";
 import Anbieter from "./pages/Anbieter";
 
 export const navItems = [
@@ -64,13 +65,18 @@ export const navItems = [
     page: <AGB />,
   },
   {
-    title: "Cookie-Richtlinie",
+    title: "Cookie-Erklärung",
     to: "/cookies",
-    page: <CookieRichtlinie />,
+    page: <CookieDeclaration />,
   },
   {
     title: "Barrierefreiheit",
     to: "/barrierefreiheit",
     page: <Barrierefreiheit />,
+  },
+  {
+    title: "Widerrufsrecht",
+    to: "/widerrufsrecht",
+    page: <Widerrufsrecht />,
   },
 ];
