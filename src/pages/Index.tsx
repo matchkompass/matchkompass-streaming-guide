@@ -116,10 +116,10 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Provider Slider Section */}
+      {/* League Slider Section */}
       <section className="py-12 px-4 bg-gray-50">
         <div className="max-w-6xl mx-auto">
-          <ProviderSlider />
+          <LeagueSlider />
         </div>
       </section>
 
@@ -147,10 +147,10 @@ const Index = () => {
         </div>
       </section>
 
-      {/* League Slider Section */}
+      {/* Provider Slider Section */}
       <section className="py-16 px-4 bg-white">
         <div className="max-w-6xl mx-auto">
-          <LeagueSlider />
+          <ProviderSlider />
         </div>
       </section>
 
