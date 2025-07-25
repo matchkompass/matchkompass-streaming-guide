@@ -10,6 +10,11 @@ interface SEOHeadProps {
   ogSiteName?: string;
   twitterHandle?: string;
   structuredData?: any;
+  customScripts?: Array<{
+    id: string;
+    src: string;
+    attributes?: Record<string, string>;
+  }>;
 }
 
 const SEOHead = ({ 
@@ -21,7 +26,8 @@ const SEOHead = ({
   ogType = "website",
   ogSiteName = "MatchStream",
   twitterHandle = "@matchstream",
-  structuredData
+  structuredData,
+  customScripts = []
 }: SEOHeadProps) => {
   const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
   const canonicalUrl = canonical || currentUrl;
@@ -121,7 +127,26 @@ const SEOHead = ({
       }
       structuredDataScript.textContent = JSON.stringify(structuredData);
     }
-  }, [title, description, keywords, canonicalUrl, ogType, ogImage, structuredData]);
+
+    // Add custom scripts
+    customScripts.forEach(script => {
+      let existingScript = document.querySelector(`script[id="${script.id}"]`);
+      if (!existingScript) {
+        const scriptElement = document.createElement('script');
+        scriptElement.setAttribute('id', script.id);
+        scriptElement.setAttribute('src', script.src);
+        
+        // Add custom attributes
+        if (script.attributes) {
+          Object.entries(script.attributes).forEach(([key, value]) => {
+            scriptElement.setAttribute(key, value);
+          });
+        }
+        
+        document.head.appendChild(scriptElement);
+      }
+    });
+  }, [title, description, keywords, canonicalUrl, ogType, ogImage, structuredData, customScripts]);
 
   return null;
 };
