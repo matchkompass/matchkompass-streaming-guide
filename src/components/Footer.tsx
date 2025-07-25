@@ -56,8 +56,8 @@ const Footer = () => {
               <a href="#" className="text-gray-400 hover:text-green-400 transition-colors">
                 Twitter
               </a>
-              <a href="#" className="text-gray-400 hover:text-green-400 transition-colors">
-                Facebook
+              <a href="https://www.instagram.com/matchstream?igsh=eHZvNXp0M3BmeDlx" className="text-gray-400 hover:text-green-400 transition-colors">
+                Instagram
               </a>
               <a href="#" className="text-gray-400 hover:text-green-400 transition-colors">
                 Youtube
