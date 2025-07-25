@@ -15,7 +15,6 @@ const Impressum = () => (
       <div className="bg-white rounded-lg shadow-md max-w-2xl w-full p-8">
         <h1 className="text-3xl font-bold mb-6">Impressum</h1>
         <div className="space-y-4 text-base text-gray-800">
-          <p><strong>Angaben gemäß § 5 TMG:</strong></p>
           <p>
             Alexander Schmidt, Daniel Jagob, David Aschauer GbR<br />
             Rothenburgstr. 4a<br />
@@ -37,6 +36,11 @@ const Impressum = () => (
           <p>
             <strong>Haftungsausschluss:</strong><br />
             Trotz sorgfältiger inhaltlicher Kontrolle übernehmen wir keine Haftung für die Inhalte externer Links. Für den Inhalt der verlinkten Seiten sind ausschließlich deren Betreiber verantwortlich.
+          </p>
+          <p>
+            <strong>Streitschlichtung:</strong><br />
+            Die Europäische Kommission bietet eine Plattform zur Online-Streitbeilegung (OS): <a href="https://ec.europa.eu/consumers/odr" className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">https://ec.europa.eu/consumers/odr</a><br />
+            Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.
           </p>
         </div>
       </div>
