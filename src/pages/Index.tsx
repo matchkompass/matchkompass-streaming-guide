@@ -92,7 +92,7 @@ const Index = () => {
             <Button asChild size="lg" className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 text-lg">
               <Link to="/wizard">
                 <Search className="mr-2 h-5 w-5" />
-                Jetzt optimale Kombination finden
+                Optimale Kombination finden
               </Link>
             </Button>
             <Button asChild variant="outline" size="lg" className="px-8 py-4 text-lg border-2">
@@ -103,14 +103,14 @@ const Index = () => {
           </div>
           
           {/* Additional Internal Links */}
-          <div className="flex flex-wrap gap-3 justify-center mt-6">
-            <Button asChild variant="outline" size="sm">
+          <div className="grid grid-cols-3 gap-2 max-w-lg mx-auto mt-6">
+            <Button asChild variant="outline" size="sm" className="w-full">
               <Link to="/ligen">Alle Ligen</Link>
             </Button>
-            <Button asChild variant="outline" size="sm">
+            <Button asChild variant="outline" size="sm" className="w-full">
               <Link to="/anbieter">Alle Anbieter</Link>
             </Button>
-            <Button asChild variant="outline" size="sm">
+            <Button asChild variant="outline" size="sm" className="w-full">
               <Link to="/deals">Deals & News</Link>
             </Button>
           </div>
@@ -118,7 +118,7 @@ const Index = () => {
       </section>
 
       {/* Provider Slider Section */}
-      <section className="py-16 px-4 bg-gray-50">
+      <section className="py-12 px-4 bg-gray-50">
         <div className="max-w-6xl mx-auto">
           <ProviderSlider />
         </div>
