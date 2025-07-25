@@ -8,6 +8,13 @@ const CookieDeclaration = () => (
       title="Cookie-Erklärung | MatchStream"
       description="Cookie-Erklärung von MatchStream. Detaillierte Informationen über die auf unserer Website verwendeten Cookies."
       canonical="https://matchstream.de/cookies"
+      customScripts={[
+        {
+          id: "CookieDeclaration",
+          src: "https://consent.cookiebot.com/828eeb3b-e804-4969-85ae-2c7692721f0e/cd.js",
+          attributes: { "type": "text/javascript", "async": "true" }
+        }
+      ]}
     />
     <Header />
     <main className="flex-1 py-12 px-4">
@@ -20,13 +27,8 @@ const CookieDeclaration = () => (
               Nachfolgend finden Sie eine detaillierte Übersicht über alle auf dieser Website verwendeten Cookies.
             </p>
             
-            {/* Cookiebot Cookie Declaration */}
-            <script 
-              id="CookieDeclaration" 
-              src="https://consent.cookiebot.com/828eeb3b-e804-4969-85ae-2c7692721f0e/cd.js" 
-              type="text/javascript" 
-              async
-            ></script>
+            {/* Cookie declaration will be loaded here by the Cookiebot script */}
+            <div id="CookieDeclaration"></div>
           </div>
         </div>
       </div>
