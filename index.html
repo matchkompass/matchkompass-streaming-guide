@@ -24,14 +24,45 @@
     <meta name="twitter:image:alt" content="MatchStream - Fußball Streaming Guide" />
     <script id="Cookiebot" src="https://consent.cookiebot.com/uc.js" data-cbid="828eeb3b-e804-4969-85ae-2c7692721f0e" data-blockingmode="auto" type="text/javascript"></script>
     
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q10BF6NZ59"></script>
-    <script>
+    <!-- Google Analytics - Controlled by Cookiebot -->
+    <script data-cookieconsent="statistics" type="text/javascript">
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-
       gtag('config', 'G-Q10BF6NZ59');
+    </script>
+    
+    <script>
+      // Cookiebot callback functions
+      function CookiebotCallback_OnAccept() {
+        if (Cookiebot.consent.statistics) {
+          // Load Google Analytics when statistics cookies are accepted
+          var script = document.createElement('script');
+          script.async = true;
+          script.src = 'https://www.googletagmanager.com/gtag/js?id=G-Q10BF6NZ59';
+          document.head.appendChild(script);
+          
+          // Initialize Google Analytics
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-Q10BF6NZ59');
+        }
+      }
+      
+      function CookiebotCallback_OnDecline() {
+        // Disable Google Analytics when cookies are declined
+        if (typeof gtag === 'function') {
+          gtag('consent', 'update', {
+            'analytics_storage': 'denied'
+          });
+        }
+      }
+      
+      // Handle consent changes
+      function CookiebotCallback_OnDialogDisplay() {
+        // Called when consent dialog is displayed
+      }
     </script>
   </head>
 
