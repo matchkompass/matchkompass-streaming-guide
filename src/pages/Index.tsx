@@ -63,7 +63,7 @@ const Index = () => {
       <Header />
       
       {/* Hero Section */}
-      <section className="relative py-20 px-4">
+      <section className="relative py-16 px-4">
         <div className="max-w-6xl mx-auto text-center">
           <div className="mb-8">
             <Badge className="mb-4 bg-green-100 text-green-800 hover:bg-green-200">
