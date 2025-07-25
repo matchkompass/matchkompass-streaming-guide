@@ -91,7 +91,6 @@ const Index = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg mx-auto">
             <Button asChild size="lg" className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 text-lg">
               <Link to="/wizard">
-                <Search className="mr-2 h-5 w-5" />
                 Optimale Kombination finden
               </Link>
             </Button>
