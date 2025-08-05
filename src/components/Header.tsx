@@ -25,7 +25,7 @@ const Header = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <div className="text-2xl">⚽</div>
+            <img src="/favicon.ico" alt="MatchStream" className="w-8 h-8 object-contain" />
             <span className="text-xl font-bold text-green-600">MatchStream</span>
           </Link>
 
