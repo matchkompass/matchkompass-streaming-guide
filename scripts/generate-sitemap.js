@@ -1,18 +1,23 @@
-import { supabase } from '@/integrations/supabase/client';
+import { createClient } from '@supabase/supabase-js';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-export interface SitemapUrl {
-  url: string;
-  lastmod?: string;
-  changefreq: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never';
-  priority: number;
-}
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-export const generateSitemap = async (): Promise<string> => {
+// Supabase configuration
+const SUPABASE_URL = "https://emgsdptbhoupocvvpogl.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtZ3NkcHRiaG91cG9jdnZwb2dsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA4NzYyNjcsImV4cCI6MjA2NjQ1MjI2N30.VCqXbSuZZcYhY8TCp6DkHavEX_lEjSK8g4d63E0_MJk";
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+const generateSitemap = async () => {
   const baseUrl = 'https://matchstream.de';
   const currentDate = new Date().toISOString().split('T')[0];
 
   // Static pages with high priority
-  const staticPages: SitemapUrl[] = [
+  const staticPages = [
     {
       url: `${baseUrl}/`,
       changefreq: 'daily',
@@ -87,7 +92,7 @@ export const generateSitemap = async (): Promise<string> => {
     }
   ];
 
-  const dynamicPages: SitemapUrl[] = [];
+  const dynamicPages = [];
 
   try {
     // Fetch all clubs from Supabase
@@ -183,67 +188,21 @@ ${allPages.map(page => `  <url>
   </url>`).join('\n')}
 </urlset>`;
 
+  // Save to public folder
+  const publicPath = path.join(__dirname, '..', 'public', 'sitemap.xml');
+  fs.writeFileSync(publicPath, sitemapXml);
+  console.log(`Sitemap saved to: ${publicPath}`);
+
   return sitemapXml;
 };
 
-export const generateRobotsTxt = (): string => {
-  return `User-agent: *
-Allow: /
-
-# Sitemap
-Sitemap: https://matchstream.de/sitemap.xml
-
-# Crawl-delay
-Crawl-delay: 1
-
-# Disallow admin and private areas
-Disallow: /admin/
-Disallow: /private/
-Disallow: /api/
-
-# Allow important pages
-Allow: /ligen
-Allow: /anbieter
-Allow: /vergleich
-Allow: /wizard
-Allow: /deals
-Allow: /club/
-Allow: /competition/
-Allow: /streaming-provider/
-
-# Block unnecessary files
-Disallow: /*.json$
-Disallow: /*.xml$
-Disallow: /api/
-Disallow: /_next/
-Disallow: /static/
-`;
-};
-
-// Function to save sitemap to public folder
-export const saveSitemap = async (): Promise<void> => {
-  try {
-    const sitemapXml = await generateSitemap();
-    
-    // In a real environment, you would write this to the public folder
-    // For now, we'll log it and you can manually save it
-    console.log('Generated Sitemap XML:');
-    console.log(sitemapXml);
-    
-    // You can also download it
-    const blob = new Blob([sitemapXml], { type: 'application/xml' });
-    const url = URL.createObjectURL(blob);
-    
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'sitemap.xml';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    console.log('Sitemap downloaded successfully');
-  } catch (error) {
+// Run the script
+generateSitemap()
+  .then(() => {
+    console.log('Sitemap generation completed successfully!');
+    process.exit(0);
+  })
+  .catch((error) => {
     console.error('Error generating sitemap:', error);
-  }
-};
+    process.exit(1);
+  }); 
