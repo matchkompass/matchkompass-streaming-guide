@@ -111,7 +111,7 @@ const ClubDetail = () => {
         keywords={`${club?.name} Stream, ${club?.name} Spiele schauen, Fußball Streaming, ${club?.country || ''}`}
         canonical={`https://matchstream.de/club/${slug}`}
         ogType="profile"
-        ogImage={club?.logo_url || "https://lovable.dev/opengraph-image-p98pqg.png"}
+        ogImage={club?.logo_url || "/banner.png"}
         structuredData={{
           "@context": "https://schema.org",
           "@type": "SportsTeam",

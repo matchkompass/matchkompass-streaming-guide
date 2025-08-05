@@ -136,7 +136,7 @@ const ProviderDetail = () => {
         keywords={`${provider?.provider_name} Test, ${provider?.provider_name} Preis, Fußball Streaming, Streaming Anbieter`}
         canonical={`https://matchstream.de/streaming-provider/${slug}`}
         ogType="product"
-        ogImage={provider?.logo_url || "https://lovable.dev/opengraph-image-p98pqg.png"}
+        ogImage={provider?.logo_url || "/banner.png"}
         structuredData={{
           "@context": "https://schema.org",
           "@type": "Product",

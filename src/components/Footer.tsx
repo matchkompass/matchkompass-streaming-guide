@@ -40,7 +40,7 @@ const Footer = () => {
           <div className="col-span-2 md:col-span-3 lg:col-span-2">
             <Link to="/" className="flex items-center space-x-2 mb-4">
               <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold">M</span>
+                <img src="/favicon.ico" alt="MatchStream" className="w-6 h-6 object-contain" />
               </div>
               <span className="text-xl font-bold">MatchStream</span>
             </Link>

@@ -22,7 +22,7 @@ const SEOHead = ({
   description = "Finde die perfekte Streaming-Kombination für deine Lieblingsvereine. Vergleiche Anbieter und spare Geld beim Fußball-Streaming.",
   canonical,
   keywords = "Fußball Streaming, Bundesliga Stream, Champions League, Sky, DAZN, Streaming Vergleich",
-  ogImage = "https://lovable.dev/opengraph-image-p98pqg.png",
+  ogImage = "/banner.png",
   ogType = "website",
   ogSiteName = "MatchStream",
   twitterHandle = "@matchstream",

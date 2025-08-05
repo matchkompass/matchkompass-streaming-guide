@@ -46,7 +46,7 @@ const Index = () => {
         keywords="Fußball Streaming, Bundesliga Stream, Champions League, Sky, DAZN, Streaming Vergleich, Fußball schauen"
         canonical="https://matchstream.de/"
         ogType="website"
-        ogImage="https://lovable.dev/opengraph-image-p98pqg.png"
+        ogImage="/banner.png"
         structuredData={{
           "@context": "https://schema.org",
           "@type": "WebSite",

@@ -111,7 +111,7 @@ const CompetitionDetail = () => {
         keywords={`${league?.league} Stream, ${league?.league} schauen, Fußball Streaming, ${league?.['country code'] || ''}`}
         canonical={`https://matchstream.de/competition/${slug}`}
         ogType="website"
-        ogImage={league?.icon || "https://lovable.dev/opengraph-image-p98pqg.png"}
+        ogImage={league?.icon || "/banner.png"}
         structuredData={{
           "@context": "https://schema.org",
           "@type": "SportsOrganization",
