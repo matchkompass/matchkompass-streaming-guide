@@ -9,6 +9,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEOHead from "@/components/SEOHead";
 import FAQSection from "@/components/FAQSection";
+import StructuredData from "@/components/StructuredData";
 import { useLeaguesEnhanced } from "@/hooks/useLeaguesEnhanced";
 import { useStreamingEnhanced } from "@/hooks/useStreamingEnhanced";
 import { LEAGUE_CLUSTERS } from "./Wizard";
@@ -113,6 +114,29 @@ const Leagues = () => {
         description="Entdecke alle verfügbaren Fußballligen und Wettbewerbe. ✓ Bundesliga ✓ Champions League ✓ Premier League ✓ La Liga. Finde die besten Streaming-Optionen."
         keywords="Fußball Ligen, Bundesliga, Champions League, Premier League, La Liga, Serie A, Wettbewerbe"
         canonical="https://matchstream.de/ligen"
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          "name": "Fußball-Ligen und Wettbewerbe",
+          "description": "Alle verfügbaren Fußballligen und Wettbewerbe mit Streaming-Informationen",
+          "numberOfItems": leagues.length,
+          "itemListElement": leagues.map((league, index) => ({
+            "@type": "ListItem",
+            "position": index + 1,
+            "item": {
+              "@type": "SportsOrganization",
+              "name": league.league,
+              "url": `https://matchstream.de/competition/${league.league_slug}`,
+              "description": `${league.league} - ${league.country}`
+            }
+          }))
+        }}
+      />
+      <StructuredData 
+        type="faq" 
+        data={{ 
+          questions: leagueFAQs 
+        }} 
       />
       <Header />
       
@@ -198,6 +222,21 @@ const Leagues = () => {
               </div>
               <Button asChild className="mt-4 bg-white text-blue-600 hover:bg-gray-100">
                 <Link to="/vergleich">Vergleich starten</Link>
+              </Button>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold mb-2">Alle Streaming-Anbieter</h3>
+                  <p className="opacity-90">Übersicht aller verfügbaren Streaming-Dienste für Fußball</p>
+                </div>
+                <ArrowRight className="h-8 w-8" />
+              </div>
+              <Button asChild className="mt-4 bg-white text-orange-600 hover:bg-gray-100">
+                <Link to="/anbieter">Anbieter anzeigen</Link>
               </Button>
             </CardContent>
           </Card>

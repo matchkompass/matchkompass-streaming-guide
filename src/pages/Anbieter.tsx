@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEOHead from "@/components/SEOHead";
 import FAQSection from "@/components/FAQSection";
+import StructuredData from "@/components/StructuredData";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -47,6 +48,31 @@ const Anbieter = () => {
         description="Entdecke alle verfügbaren Streaming-Anbieter für Fußball. ✓ Sky ✓ DAZN ✓ Amazon Prime Video ✓ Vollständige Übersicht mit Preisen und Liga-Abdeckung."
         keywords="Streaming Anbieter, Fußball Streaming Dienste, Sky, DAZN, Amazon Prime Video, Streaming Services"
         canonical="https://matchstream.de/anbieter"
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          "name": "Streaming-Anbieter für Fußball",
+          "description": "Alle verfügbaren Streaming-Anbieter für Fußball mit Preisen und Liga-Abdeckung",
+          "numberOfItems": providers.length,
+          "itemListElement": providers.map((provider, index) => ({
+            "@type": "ListItem",
+            "position": index + 1,
+            "item": {
+              "@type": "Service",
+              "name": provider.name || provider.provider_name,
+              "url": `https://matchstream.de/streaming-provider/${provider.slug}`,
+              "description": `Streaming-Service für Fußball: ${provider.highlights?.highlight_1 || ''}`,
+              "provider": {
+                "@type": "Organization",
+                "name": provider.name || provider.provider_name
+              }
+            }
+          }))
+        }}
+      />
+      <StructuredData 
+        type="organization" 
+        data={{}} 
       />
       <Header />
       
