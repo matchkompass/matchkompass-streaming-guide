@@ -21,7 +21,7 @@ const SEOHead = ({
   title = "MatchStream - Streaming Guide für Fußball",
   description = "Finde die perfekte Streaming-Kombination für deine Lieblingsvereine. Vergleiche Anbieter und spare Geld beim Fußball-Streaming.",
   canonical,
-  keywords = "Fußball Streaming, Bundesliga Stream, Champions League, Sky, DAZN, Streaming Vergleich",
+  keywords = "Fußball Streaming, Bundesliga Stream, Champions League, Sky, DAZN, Streaming Vergleich, Fußball schauen, Premier League Stream, La Liga Stream",
   ogImage = "/banner.png",
   ogType = "website",
   ogSiteName = "MatchStream",
@@ -44,6 +44,15 @@ const SEOHead = ({
       document.head.appendChild(descMeta);
     }
     descMeta.setAttribute('content', description);
+    
+    // Update robots meta
+    let robotsMeta = document.querySelector('meta[name="robots"]');
+    if (!robotsMeta) {
+      robotsMeta = document.createElement('meta');
+      robotsMeta.setAttribute('name', 'robots');
+      document.head.appendChild(robotsMeta);
+    }
+    robotsMeta.setAttribute('content', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
     
     // Update meta keywords
     let keywordsMeta = document.querySelector('meta[name="keywords"]');

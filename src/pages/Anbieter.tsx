@@ -3,6 +3,7 @@ import { useStreamingEnhanced } from "@/hooks/useStreamingEnhanced";
 import { useLeaguesEnhanced } from "@/hooks/useLeaguesEnhanced";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import BreadcrumbNavigation from "@/components/BreadcrumbNavigation";
 import SEOHead from "@/components/SEOHead";
 import FAQSection from "@/components/FAQSection";
 import StructuredData from "@/components/StructuredData";
@@ -74,7 +75,8 @@ const Anbieter = () => {
         type="organization" 
         data={{}} 
       />
-      <Header />
+    <Header />
+    <BreadcrumbNavigation />
       
       <div className="max-w-5xl mx-auto px-4 py-10">
         <div className="text-center mb-8">

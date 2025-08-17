@@ -11,6 +11,8 @@ import CookieDeclaration from "./pages/CookieDeclaration";
 import Barrierefreiheit from "./pages/Barrierefreiheit";
 import Widerrufsrecht from "./pages/Widerrufsrecht";
 import Anbieter from "./pages/Anbieter";
+import BundesligaStreaming from "./pages/BundesligaStreaming";
+import ChampionsLeagueStreaming from "./pages/ChampionsLeagueStreaming";
 
 export const navItems = [
   {
@@ -78,5 +80,16 @@ export const navItems = [
     title: "Widerrufsrecht",
     to: "/widerrufsrecht",
     page: <Widerrufsrecht />,
+  },
+  // SEO Landing Pages
+  {
+    title: "Bundesliga Streaming",
+    to: "/bundesliga-streaming",
+    page: <BundesligaStreaming />,
+  },
+  {
+    title: "Champions League Streaming", 
+    to: "/champions-league-streaming",
+    page: <ChampionsLeagueStreaming />,
   },
 ];

@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import BreadcrumbNavigation from "@/components/BreadcrumbNavigation";
 import SEOHead from "@/components/SEOHead";
 import FAQSection from "@/components/FAQSection";
 import StructuredData from "@/components/StructuredData";
@@ -91,7 +92,8 @@ const Leagues = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Header />
+    <Header />
+    <BreadcrumbNavigation />
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="animate-pulse space-y-8">
             <div className="h-12 bg-gray-300 rounded w-64 mx-auto"></div>
