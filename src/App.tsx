@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,10 +7,7 @@ import { navItems } from "./nav-items";
 import ClubDetail from "./pages/ClubDetail";
 import CompetitionDetail from "./pages/CompetitionDetail";
 import ProviderDetail from "./pages/ProviderDetail";
-import DetailVergleichDeprecated from "./pages/DetailVergleichDeprecated";
 import NotFound from "./pages/NotFound";
-import Vergleich from "./pages/Vergleich";
-import DetailVergleich from "./pages/DetailVergleich";
 
 const queryClient = new QueryClient();
 
@@ -23,7 +19,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           {navItems
-            .filter(item => item.title !== "News") // Remove news route
+            .filter(item => item.title !== "News")
             .map(({ to, page }) => (
               <Route key={to} path={to} element={page} />
             ))}
@@ -31,9 +27,6 @@ const App = () => (
           <Route path="/club/:slug" element={<ClubDetail />} />
           <Route path="/competition/:slug" element={<CompetitionDetail />} />
           <Route path="/streaming-provider/:slug" element={<ProviderDetail />} />
-          <Route path="/detailvergleich-deprecated" element={<DetailVergleichDeprecated />} />
-          <Route path="/classic-vergleich" element={<Vergleich />} />
-          <Route path="/detailvergleich" element={<DetailVergleich />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
