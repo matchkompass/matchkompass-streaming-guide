@@ -1,19 +1,14 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { Download, Filter, Pin, X, Check, TrendingUp, Sliders, Award, Users, ShieldCheck, Shield, Sparkles, CreditCard, Monitor, Trophy, Info } from "lucide-react";
+import { Download, Pin, X, Check, TrendingUp, Award, Users, ShieldCheck, Shield, Sparkles, CreditCard, Monitor, Trophy, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Slider } from "@/components/ui/slider";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useStreamingEnhanced } from "@/hooks/useStreamingEnhanced";
 import { useLeaguesEnhanced } from "@/hooks/useLeaguesEnhanced";
 import { useClubs } from "@/hooks/useClubs";
 import { useIsMobile } from "@/hooks/use-mobile";
-import DetailComparisonSidebar from "@/components/comparison/DetailComparisonSidebar";
 import HorizontalFilterBar, { HorizontalFilterBarFilters } from "@/components/comparison/HorizontalFilterBar";
 import ComparisonSearch, { SearchEntity } from "@/components/comparison/ComparisonSearch";
 import { getClubCompetitions } from "@/utils/enhancedCoverageCalculator";
@@ -21,7 +16,6 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 const DetailVergleich = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [pinnedProviders, setPinnedProviders] = useState<number[]>([]);
   const [expandedProvider, setExpandedProvider] = useState<number | null>(null);
   const [activeTabs, setActiveTabs] = useState<{ [key: number]: string }>({});
@@ -42,7 +36,7 @@ const DetailVergleich = () => {
 
   const { providers, loading: providersLoading } = useStreamingEnhanced();
   const { leagues, loading: leaguesLoading } = useLeaguesEnhanced();
-  const { clubs, loading: clubsLoading } = useClubs();
+  const { clubs } = useClubs();
   const isMobile = useIsMobile();
 
   // Fetch latest deal for header badge
@@ -136,7 +130,6 @@ const DetailVergleich = () => {
     const monthlyPrice = parsePrice(provider.monthly_price);
     let totalGames = 0;
 
-    // Logic for cost per game based on selected leagues or all displayed leagues
     const leaguesToCheck = filters.leagues.length > 0 ? filters.leagues : leagues.map(l => l.league_slug);
     leaguesToCheck.forEach(leagueSlug => {
       const coverage = getProviderCoverage(provider, leagueSlug);
@@ -175,13 +168,12 @@ const DetailVergleich = () => {
         if (!matchesAny) return false;
       }
 
-      // 4. Manual League filter (from dropdown)
-      // if leagues are selected, provider must cover at least one selected league
+      // 4. Manual League filter
       if (filters.leagues.length > 0) {
         if (!filters.leagues.some(league => (provider[league] || 0) > 0)) return false;
       }
 
-      // 5. Search Entity Logic (Club/League Autocomplete)
+      // 5. Search Entity Logic
       if (selectedEntities.length > 0) {
         const matchesAllEntities = selectedEntities.every(entity => {
           if (entity.type === 'league') {
@@ -206,7 +198,6 @@ const DetailVergleich = () => {
       return true;
     });
 
-    // Sort providers by coverage of Top 5 leagues + CL/EL
     return [...filtered].sort((a, b) => {
       const getScore = (p: any) => {
         const majorLeagues = [
@@ -323,7 +314,7 @@ const DetailVergleich = () => {
                   </div>
                 </div>
 
-                {/* Team Card with Initials Fix */}
+                {/* Team Card */}
                 <div className="bg-white/80 backdrop-blur-md border border-white/40 rounded-2xl p-3 sm:p-4 flex items-center gap-2 sm:gap-4 flex-1 shadow-lg hover:bg-white transition-all group cursor-pointer" onClick={() => window.location.href = '/ueber-uns'}>
                   <div className="flex -space-x-3 group-hover:space-x-1 transition-all">
                     {/* Alexander (AS) */}
@@ -492,6 +483,7 @@ const DetailVergleich = () => {
                             </div>
                           </div>
 
+                          {/* Highlights Bar */}
                           <div className="mt-4 flex flex-wrap gap-1.5">
                             {provider.highlights?.highlight_1 && (
                               <div className="text-xs text-green-700 bg-green-100 rounded px-2 py-1">
@@ -535,6 +527,7 @@ const DetailVergleich = () => {
 
                           {isExpanded && (
                             <div className="mt-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                              {/* Tab Navigation */}
                               <div className="flex bg-green-50/50 rounded-lg p-1 mb-6 border border-green-100/30">
                                 {tabs.map((tab) => (
                                   <button
@@ -552,6 +545,7 @@ const DetailVergleich = () => {
                               </div>
 
                               <div className="space-y-6 pt-2 border-t border-gray-100">
+                                {/* Tab 1: Preise & Modalitäten */}
                                 {activeTab === 'prices' && (
                                   <div className="space-y-5">
                                     <div className="flex items-center gap-2">
@@ -605,6 +599,7 @@ const DetailVergleich = () => {
                                   </div>
                                 )}
 
+                                {/* Tab 2: Coverage */}
                                 {activeTab === 'coverage' && (
                                   <div className="space-y-6">
                                     <div className="flex items-center gap-2">
@@ -653,6 +648,7 @@ const DetailVergleich = () => {
                                   </div>
                                 )}
 
+                                {/* Tab 3: Features */}
                                 {activeTab === 'features' && (
                                   <div className="space-y-5">
                                     <div className="flex items-center gap-2">
@@ -690,6 +686,7 @@ const DetailVergleich = () => {
                                   </div>
                                 )}
 
+                                {/* Tab 4: Weitere Sportarten */}
                                 {activeTab === 'sports' && (
                                   <div className="space-y-5">
                                     <div className="flex items-center gap-2">
@@ -729,7 +726,7 @@ const DetailVergleich = () => {
                 </div>
               </div>
             ) : (
-              /* Desktop View - Table layout with horizontal filter bar */
+              /* Desktop View */
               <div className="flex flex-col gap-4">
                 {/* Horizontal Filter Bar above table */}
                 <div className="max-w-7xl mx-auto w-full">
@@ -1006,7 +1003,8 @@ const DetailVergleich = () => {
           </div>
           <Footer />
         </div>
-        );
+      </div>
+      );
 };
 
-        export default DetailVergleich;
+      export default DetailVergleich;
