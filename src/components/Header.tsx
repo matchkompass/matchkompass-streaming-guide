@@ -9,13 +9,7 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
 
-  const navigation = [
-    { name: "Wizard", href: "/wizard" },
-    { name: "Vergleich", href: "/vergleich" },
-    { name: "Alle Vereine & Ligen", href: "/ligen" },
-    { name: "Alle Anbieter", href: "/anbieter" },
-    { name: "Deals & News", href: "/deals" },
-  ];
+
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -24,29 +18,42 @@ const Header = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
+          <Link to="/" className="flex items-center space-x-2 shrink-0">
             <img src="/favicon.ico" alt="MatchStream" className="w-8 h-8 object-contain" />
             <span className="text-xl font-bold text-green-600">MatchStream</span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          {/* Desktop Navigation - Centered */}
+          <div className="hidden md:flex flex-1 justify-center">
             <nav className="flex items-center space-x-8">
-              {navigation.map((item) => (
+              {[
+                { name: "Vergleich", href: "/vergleich" },
+                { name: "Vereine & Ligen", href: "/ligen" },
+                { name: "Anbieter", href: "/anbieter" },
+                { name: "Deals & News", href: "/deals" },
+              ].map((item) => (
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`text-sm font-medium transition-colors ${
-                    isActive(item.href)
-                      ? "text-green-600 border-b-2 border-green-600 pb-4"
-                      : "text-gray-700 hover:text-green-600"
-                  }`}
+                  className={`text-sm font-medium transition-colors ${isActive(item.href)
+                    ? "text-green-600 border-b-2 border-green-600 pb-4"
+                    : "text-gray-700 hover:text-green-600"
+                    }`}
                 >
                   {item.name}
                 </Link>
               ))}
             </nav>
+          </div>
+
+          {/* Right Actions */}
+          <div className="hidden md:flex items-center space-x-4 shrink-0">
             <GlobalSearch />
+            <Button asChild className="bg-green-600 hover:bg-green-700 text-white shadow-md">
+              <Link to="/wizard">
+                Beste Kombination finden
+              </Link>
+            </Button>
           </div>
 
           {/* Mobile menu button */}
@@ -65,15 +72,20 @@ const Header = () => {
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-gray-200">
             <nav className="space-y-2">
-              {navigation.map((item) => (
+              {[
+                { name: "Beste Kombination finden", href: "/wizard" },
+                { name: "Vergleich", href: "/vergleich" },
+                { name: "Vereine & Ligen", href: "/ligen" },
+                { name: "Anbieter", href: "/anbieter" },
+                { name: "Deals & News", href: "/deals" },
+              ].map((item) => (
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`block px-3 py-2 text-base font-medium transition-colors ${
-                    isActive(item.href)
-                      ? "text-green-600 bg-green-50"
-                      : "text-gray-700 hover:text-green-600 hover:bg-gray-50"
-                  }`}
+                  className={`block px-3 py-2 text-base font-medium transition-colors ${isActive(item.href)
+                    ? "text-green-600 bg-green-50"
+                    : "text-gray-700 hover:text-green-600 hover:bg-gray-50"
+                    }`}
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.name}

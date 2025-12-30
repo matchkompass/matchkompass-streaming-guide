@@ -22,15 +22,15 @@ interface BreadcrumbNavigationProps {
 
 const BreadcrumbNavigation = ({ items, customItems }: BreadcrumbNavigationProps) => {
   const location = useLocation();
-  
+
   // Auto-generate breadcrumbs if not provided
   const generateBreadcrumbs = (): BreadcrumbItem[] => {
     if (customItems) return customItems;
     if (items) return items;
-    
+
     const pathSegments = location.pathname.split('/').filter(segment => segment);
     const breadcrumbs: BreadcrumbItem[] = [{ label: 'Home', href: '/' }];
-    
+
     const pathMap: Record<string, string> = {
       'wizard': 'Streaming Wizard',
       'vergleich': 'Anbieter Vergleich',
@@ -42,23 +42,29 @@ const BreadcrumbNavigation = ({ items, customItems }: BreadcrumbNavigationProps)
       'competition': 'Wettbewerb',
       'streaming-provider': 'Streaming Anbieter'
     };
-    
+
+    const linkMap: Record<string, string> = {
+      'streaming-provider': '/anbieter',
+      'club': '/vergleich',
+      'competition': '/vergleich'
+    };
+
     let currentPath = '';
     pathSegments.forEach((segment, index) => {
       currentPath += `/${segment}`;
       const isLast = index === pathSegments.length - 1;
-      
+
       breadcrumbs.push({
         label: pathMap[segment] || segment.charAt(0).toUpperCase() + segment.slice(1),
-        href: isLast ? undefined : currentPath
+        href: isLast ? undefined : (linkMap[segment] || currentPath)
       });
     });
-    
+
     return breadcrumbs;
   };
 
   const breadcrumbItems = generateBreadcrumbs();
-  
+
   if (breadcrumbItems.length <= 1) return null;
 
   return (

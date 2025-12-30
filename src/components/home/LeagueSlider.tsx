@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { LEAGUE_CLUSTERS } from "@/pages/Wizard";
+import { LEAGUE_CLUSTERS } from "@/utils/constants";
 
 const LeagueSlider = () => {
   const { leagues, loading } = useLeagues();
@@ -37,13 +37,13 @@ const LeagueSlider = () => {
   const currentLeagues = sortedLeagues.slice(startIndex, startIndex + itemsPerView);
 
   const nextSlide = () => {
-    setCurrentPage((prev) => 
+    setCurrentPage((prev) =>
       prev + 1 >= totalPages ? 0 : prev + 1
     );
   };
 
   const prevSlide = () => {
-    setCurrentPage((prev) => 
+    setCurrentPage((prev) =>
       prev === 0 ? totalPages - 1 : prev - 1
     );
   };
@@ -70,17 +70,17 @@ const LeagueSlider = () => {
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-2xl font-bold text-gray-900">Unsere Ligen</h3>
         <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            size="icon" 
+          <Button
+            variant="outline"
+            size="icon"
             onClick={prevSlide}
             disabled={totalPages <= 1}
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <Button 
-            variant="outline" 
-            size="icon" 
+          <Button
+            variant="outline"
+            size="icon"
             onClick={nextSlide}
             disabled={totalPages <= 1}
           >
@@ -88,7 +88,7 @@ const LeagueSlider = () => {
           </Button>
         </div>
       </div>
-      
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {currentLeagues.map((league) => (
           <Link key={league.league_id} to={`/competition/${league.league_slug}`}>
@@ -101,7 +101,7 @@ const LeagueSlider = () => {
                 <p className="text-gray-600 text-sm mb-4">
                   {league['number of games']} Spiele
                 </p>
-                <Button 
+                <Button
                   size="sm"
                   className="bg-green-600 hover:bg-green-700"
                 >
@@ -112,7 +112,7 @@ const LeagueSlider = () => {
           </Link>
         ))}
       </div>
-      
+
       {/* Pagination dots */}
       {totalPages > 1 && (
         <div className="flex justify-center mt-6 gap-2">
@@ -120,9 +120,8 @@ const LeagueSlider = () => {
             <button
               key={index}
               onClick={() => goToPage(index)}
-              className={`w-3 h-3 rounded-full transition-colors ${
-                currentPage === index ? 'bg-green-600' : 'bg-gray-300'
-              }`}
+              className={`w-3 h-3 rounded-full transition-colors ${currentPage === index ? 'bg-green-600' : 'bg-gray-300'
+                }`}
             />
           ))}
         </div>

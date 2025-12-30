@@ -160,7 +160,7 @@ const EnhancedGlobalSearch: React.FC = () => {
   };
 
   return (
-    <div ref={searchRef} className="relative w-full max-w-lg">
+    <div ref={searchRef} className="relative w-full">
       <div className="relative">
         <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
         <Input

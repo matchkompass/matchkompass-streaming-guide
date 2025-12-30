@@ -12,6 +12,7 @@ import Widerrufsrecht from "./pages/Widerrufsrecht";
 import Anbieter from "./pages/Anbieter";
 import BundesligaStreaming from "./pages/BundesligaStreaming";
 import ChampionsLeagueStreaming from "./pages/ChampionsLeagueStreaming";
+import AboutUs from "./pages/AboutUs";
 
 export const navItems = [
   {
@@ -20,7 +21,7 @@ export const navItems = [
     page: <Index />,
   },
   {
-    title: "Wizard", 
+    title: "Wizard",
     to: "/wizard",
     page: <Wizard />,
   },
@@ -75,6 +76,11 @@ export const navItems = [
     to: "/widerrufsrecht",
     page: <Widerrufsrecht />,
   },
+  {
+    title: "Über uns",
+    to: "/ueber-uns",
+    page: <AboutUs />,
+  },
   // SEO Landing Pages
   {
     title: "Bundesliga Streaming",
@@ -82,7 +88,7 @@ export const navItems = [
     page: <BundesligaStreaming />,
   },
   {
-    title: "Champions League Streaming", 
+    title: "Champions League Streaming",
     to: "/champions-league-streaming",
     page: <ChampionsLeagueStreaming />,
   },

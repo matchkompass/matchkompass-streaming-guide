@@ -27,8 +27,9 @@ const Footer = () => {
       { name: "Impressum", href: "/impressum" },
       { name: "Datenschutz", href: "/datenschutz" },
       { name: "AGB", href: "/agb" },
-      { name: "Cookie-Richtlinie", href: "/cookies" },
+      { name: "Cookies", href: "/cookies" },
       { name: "Barrierefreiheit", href: "/barrierefreiheit" },
+      { name: "Über uns", href: "/ueber-uns" },
     ]
   };
 
@@ -45,7 +46,7 @@ const Footer = () => {
               <span className="text-xl font-bold">MatchStream</span>
             </Link>
             <p className="text-gray-400 mb-4">
-              Ihre Plattform für die optimale Streaming-Lösung. Finden Sie die perfekte 
+              Ihre Plattform für die optimale Streaming-Lösung. Finden Sie die perfekte
               Kombination für Ihre Lieblingsvereine.
             </p>
             <div className="flex items-center gap-2 text-sm text-gray-400 mb-4">

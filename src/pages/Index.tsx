@@ -1,5 +1,5 @@
-
 import { Link } from "react-router-dom";
+import { LEAGUE_CLUSTERS } from "@/utils/constants";
 import { Search, Shield, TrendingUp, Users, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,8 +9,9 @@ import Footer from "@/components/Footer";
 import SEOHead from "@/components/SEOHead";
 import EnhancedGlobalSearch from "@/components/enhanced/EnhancedGlobalSearch";
 import ProviderSlider from "@/components/home/ProviderSlider";
-import LeagueSlider from "@/components/home/LeagueSlider";
-import ClubSlider from "@/components/home/ClubSlider";
+import LeagueGrid from "@/components/home/LeagueGrid";
+import ProviderGrid from "@/components/home/ProviderGrid";
+import ClubGrid from "@/components/home/ClubGrid";
 import TestimonialsSection from "@/components/home/TestimonialsSection";
 import NewsletterSection from "@/components/home/NewsletterSection";
 import FAQSection from "@/components/FAQSection";
@@ -40,7 +41,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-green-50">
-      <SEOHead 
+      <SEOHead
         title="MatchStream - Streaming Guide für Fußball | Optimaler Streaming-Vergleich"
         description="Finde die perfekte Streaming-Kombination für deine Lieblingsvereine. Vergleiche alle Anbieter und spare Geld beim Fußball-Streaming. ✓ Bundesliga ✓ Champions League ✓ Premier League"
         keywords="Fußball Streaming, Bundesliga Stream, Champions League, Sky, DAZN, Streaming Vergleich, Fußball schauen"
@@ -61,7 +62,7 @@ const Index = () => {
         }}
       />
       <Header />
-      
+
       {/* Hero Section */}
       <section className="relative py-20 px-4 overflow-hidden">
         {/* Background Pattern */}
@@ -76,25 +77,25 @@ const Index = () => {
             <rect width="100%" height="100%" fill="url(#hero-pattern)" />
           </svg>
         </div>
-        
+
         {/* Subtle gradient overlays */}
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-green-200 rounded-full blur-3xl opacity-20" />
         <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-blue-200 rounded-full blur-3xl opacity-15" />
-        
+
         <div className="relative max-w-7xl mx-auto text-center">
           <div className="mb-8">
             <Badge className="mb-4 bg-green-100 text-green-800 hover:bg-green-200">
               🏆 Deutschlands #1 Streaming-Guide für Fußball
             </Badge>
           </div>
-          
+
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight">
-            Finde die perfekte 
+            Finde die perfekte
             <span className="text-green-600 block">Streaming-Kombination</span>
           </h1>
-          
+
           <p className="text-xl md:text-2xl text-gray-600 mb-10 max-w-4xl mx-auto hidden md:block leading-relaxed">
-            MatchStream berechnet präzise, welche Streaming-Dienste du brauchst, 
+            MatchStream berechnet präzise, welche Streaming-Dienste du brauchst,
             um alle Spiele deiner Lieblingsvereine zu verfolgen – zum besten Preis.
           </p>
 
@@ -117,31 +118,18 @@ const Index = () => {
               </Link>
             </Button>
           </div>
-          
-          {/* Additional Internal Links */}
-          <div className="grid grid-cols-3 gap-3 max-w-2xl mx-auto mt-8">
-            <Button asChild variant="outline" size="sm" className="w-full hover:bg-gray-50">
-              <Link to="/ligen">Alle Ligen</Link>
-            </Button>
-            <Button asChild variant="outline" size="sm" className="w-full hover:bg-gray-50">
-              <Link to="/anbieter">Alle Anbieter</Link>
-            </Button>
-            <Button asChild variant="outline" size="sm" className="w-full hover:bg-gray-50">
-              <Link to="/deals">Deals & News</Link>
-            </Button>
-          </div>
         </div>
       </section>
 
-      {/* League Slider Section */}
-      <section className="py-12 px-4 bg-gray-50">
-        <div className="max-w-6xl mx-auto">
-          <LeagueSlider />
+      {/* League Grid Section */}
+      <section className="py-12 px-4 bg-gradient-to-bl from-green-50 to-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <LeagueGrid />
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="py-16 px-4 bg-white">
+      <section className="py-16 px-4 bg-gradient-to-tl from-gray-50 to-green-50">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
             Warum MatchStream?
@@ -164,17 +152,43 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Provider Slider Section */}
-      <section className="py-16 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <ProviderSlider />
+      {/* Provider Grid Section */}
+      <section className="py-16 px-4 bg-gradient-to-br from-green-50 to-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <ProviderGrid />
         </div>
       </section>
 
-      {/* Club Slider Section */}
-      <section className="py-16 px-4 bg-gray-50">
-        <div className="max-w-6xl mx-auto">
-          <ClubSlider />
+      {/* Club Grid Section */}
+      <section className="py-16 px-4 bg-gradient-to-bl from-gray-50 to-green-50">
+        <div className="max-w-7xl mx-auto">
+          <ClubGrid />
+        </div>
+      </section>
+
+      {/* Quick Links Section (Moved from Hero) */}
+      <section className="py-12 px-4 bg-gradient-to-tl from-green-50 to-gray-50 border-t border-gray-100">
+        <div className="max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Button asChild variant="outline" size="lg" className="w-full h-auto py-4 hover:bg-gray-50 border-gray-200">
+              <Link to="/ligen" className="flex flex-col items-center justify-center gap-2">
+                <span className="font-semibold text-lg text-gray-900">Alle Ligen</span>
+                <span className="text-xs text-gray-500 font-normal">Durchsuche alle Wettbewerbe</span>
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="w-full h-auto py-4 hover:bg-gray-50 border-gray-200">
+              <Link to="/anbieter" className="flex flex-col items-center justify-center gap-2">
+                <span className="font-semibold text-lg text-gray-900">Alle Anbieter</span>
+                <span className="text-xs text-gray-500 font-normal">Streaming-Dienste vergleichen</span>
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="w-full h-auto py-4 hover:bg-gray-50 border-gray-200">
+              <Link to="/deals" className="flex flex-col items-center justify-center gap-2">
+                <span className="font-semibold text-lg text-gray-900">Deals & News</span>
+                <span className="text-xs text-gray-500 font-normal">Aktuelle Angebote</span>
+              </Link>
+            </Button>
+          </div>
         </div>
       </section>
 
@@ -198,7 +212,7 @@ const Index = () => {
             Bereit für die perfekte Streaming-Lösung?
           </h2>
           <p className="text-xl mb-8 opacity-90">
-            Starte jetzt und finde heraus, wie du alle Spiele deiner Lieblingsvereine 
+            Starte jetzt und finde heraus, wie du alle Spiele deiner Lieblingsvereine
             zum besten Preis schauen kannst.
           </p>
           <Button asChild size="lg" className="bg-white text-green-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold">

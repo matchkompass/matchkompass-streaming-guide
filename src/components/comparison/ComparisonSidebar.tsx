@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { X, Filter } from "lucide-react";
-import { LEAGUE_CLUSTERS } from "@/pages/Wizard";
+import { LEAGUE_CLUSTERS } from "@/utils/constants";
 import { useLeagues } from "@/hooks/useLeagues";
 
 interface ComparisonFilters {
@@ -90,7 +90,7 @@ const ComparisonSidebar: React.FC<ComparisonSidebarProps> = ({
     <div className="fixed inset-0 z-50 lg:relative lg:inset-auto">
       {/* Mobile overlay */}
       <div className="lg:hidden fixed inset-0 bg-black bg-opacity-50" onClick={onClose} />
-      
+
       <Card className="h-full lg:h-auto w-80 bg-white lg:bg-transparent lg:shadow-none fixed right-0 top-0 lg:relative lg:right-auto lg:top-auto overflow-y-auto">
         <CardHeader className="flex flex-row items-center justify-between lg:hidden">
           <CardTitle className="flex items-center">
@@ -251,24 +251,24 @@ const ComparisonSidebar: React.FC<ComparisonSidebarProps> = ({
           </div>
 
           {/* Active Filters Summary */}
-          {(filters.competitions.length > 0 || filters.features.fourK || filters.features.mobile || 
+          {(filters.competitions.length > 0 || filters.features.fourK || filters.features.mobile ||
             filters.features.download || filters.features.multiStream) && (
-            <div>
-              <h4 className="font-medium mb-2">Aktive Filter</h4>
-              <div className="flex flex-wrap gap-1">
-                {filters.competitions.slice(0, 3).map((comp) => (
-                  <Badge key={comp} variant="secondary" className="text-xs">
-                    {comp}
-                  </Badge>
-                ))}
-                {filters.competitions.length > 3 && (
-                  <Badge variant="secondary" className="text-xs">
-                    +{filters.competitions.length - 3}
-                  </Badge>
-                )}
+              <div>
+                <h4 className="font-medium mb-2">Aktive Filter</h4>
+                <div className="flex flex-wrap gap-1">
+                  {filters.competitions.slice(0, 3).map((comp) => (
+                    <Badge key={comp} variant="secondary" className="text-xs">
+                      {comp}
+                    </Badge>
+                  ))}
+                  {filters.competitions.length > 3 && (
+                    <Badge variant="secondary" className="text-xs">
+                      +{filters.competitions.length - 3}
+                    </Badge>
+                  )}
+                </div>
               </div>
-            </div>
-          )}
+            )}
         </CardContent>
       </Card>
     </div>

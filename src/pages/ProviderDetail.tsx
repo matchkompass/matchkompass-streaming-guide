@@ -17,19 +17,20 @@ import {
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SEOHead from "@/components/SEOHead";
-import { useStreaming, StreamingProvider } from "@/hooks/useStreaming";
-import { useLeagues } from "@/hooks/useLeagues";
+import { useStreamingEnhanced, StreamingProviderEnhanced } from "@/hooks/useStreamingEnhanced";
+import { useLeaguesEnhanced } from "@/hooks/useLeaguesEnhanced";
+import BreadcrumbNavigation from "@/components/BreadcrumbNavigation";
 
 const ProviderDetail = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { providers, loading: providersLoading } = useStreaming();
-  const { leagues } = useLeagues();
-  const [provider, setProvider] = useState<StreamingProvider | null>(null);
+  const { providers, loading: providersLoading } = useStreamingEnhanced();
+  const { leagues } = useLeaguesEnhanced();
+  const [provider, setProvider] = useState<StreamingProviderEnhanced | null>(null);
   const [showYearly, setShowYearly] = useState(false);
 
   useEffect(() => {
     if (providers.length > 0 && slug) {
-      const foundProvider = providers.find(p => p.slug === slug);
+      const foundProvider = (providers as StreamingProviderEnhanced[]).find(p => p.slug === slug);
       setProvider(foundProvider || null);
     }
   }, [providers, slug]);
@@ -39,7 +40,7 @@ const ProviderDetail = () => {
     return parseFloat(priceString.replace(/[^\d.,]/g, '').replace(',', '.')) || 0;
   };
 
-  const parseFeatures = (provider: StreamingProvider) => {
+  const parseFeatures = (provider: StreamingProviderEnhanced) => {
     const defaultFeatures = {
       '4K': false,
       'mobile': false,
@@ -51,8 +52,8 @@ const ProviderDetail = () => {
 
     if (provider.features) {
       try {
-        const featureObj = typeof provider.features === 'string' 
-          ? JSON.parse(provider.features) 
+        const featureObj = typeof provider.features === 'string'
+          ? JSON.parse(provider.features)
           : provider.features;
         return { ...defaultFeatures, ...featureObj };
       } catch (e) {
@@ -64,9 +65,9 @@ const ProviderDetail = () => {
 
   const getLeagueCoverage = () => {
     if (!provider) return [];
-    
+
     const leagueColumns = [
-      'bundesliga', 'second_bundesliga', 'dfb_pokal', 'champions_league', 
+      'bundesliga', 'second_bundesliga', 'dfb_pokal', 'champions_league',
       'europa_league', 'conference_league', 'club_world_cup', 'premier_league',
       'fa_cup', 'la_liga', 'copa_del_rey', 'serie_a', 'ligue_1', 'eredevise',
       'sueper_lig', 'liga_portugal', 'saudi_pro_league', 'mls'
@@ -74,11 +75,11 @@ const ProviderDetail = () => {
 
     return leagueColumns
       .map(column => {
-        const coveredGames = (provider[column as keyof StreamingProvider] as number) || 0;
+        const coveredGames = (provider[column as keyof StreamingProviderEnhanced] as number) || 0;
         const league = leagues.find(l => l.league_slug === column);
         const totalGames = league?.['number of games'] || 0;
         const percentage = totalGames > 0 ? Math.round((coveredGames / totalGames) * 100) : 0;
-        
+
         return {
           league: league?.league || column.replace('_', ' '),
           slug: column,
@@ -130,7 +131,7 @@ const ProviderDetail = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <SEOHead 
+      <SEOHead
         title={`${provider?.provider_name} Streaming - Preise & Test | MatchStream`}
         description={`${provider?.provider_name} im Test: Alle Infos zu Preisen, Liga-Abdeckung und Features. Ab ${monthlyPrice.toFixed(2)}€/Monat für Fußball-Streaming.`}
         keywords={`${provider?.provider_name} Test, ${provider?.provider_name} Preis, Fußball Streaming, Streaming Anbieter`}
@@ -153,7 +154,8 @@ const ProviderDetail = () => {
         }}
       />
       <Header />
-      
+      <BreadcrumbNavigation />
+
       <div className="max-w-6xl mx-auto px-4 py-6">
         {/* Hero Section */}
         <div className="bg-white rounded-lg shadow-sm mb-6 p-6">
@@ -169,19 +171,13 @@ const ProviderDetail = () => {
             </div>
             <div className="flex-1">
               <h1 className="text-3xl font-bold text-gray-900 mb-2">{provider.provider_name}</h1>
-              <p className="text-gray-600 mb-4">{provider.name}</p>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`h-5 w-5 ${
-                        i < 4 ? 'text-yellow-400 fill-current' : 'text-gray-300'
-                      }`}
-                    />
-                  ))}
-                </div>
-                <span className="text-sm text-gray-600">(4.0/5)</span>
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                  {provider.highlights.highlight_1}
+                </Badge>
+                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                  {provider.highlights.highlight_2}
+                </Badge>
               </div>
             </div>
             <div className="text-right">
@@ -199,6 +195,15 @@ const ProviderDetail = () => {
             </div>
           </div>
         </div>
+
+        {/* Intro Text */}
+        {((provider as any).intro_text || provider.highlights?.highlight_1) && (
+          <div className="bg-white rounded-lg shadow-sm mb-6 p-6 border-l-4 border-green-500">
+            <p className="text-gray-700 leading-relaxed font-medium">
+              {(provider as any).intro_text || `Erfahre alles über ${provider.provider_name}: In unserer detaillierten Übersicht findest du alle Informationen zu den aktuellen Kosten, verfügbaren Fußball-Ligen und technischen Features. ${provider.provider_name} bietet ein umfangreiches Sportangebot, das wir hier für dich analysiert haben.`}
+            </p>
+          </div>
+        )}
 
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
@@ -237,7 +242,7 @@ const ProviderDetail = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Features */}
                   <div className="grid md:grid-cols-2 gap-3 mb-4">
                     <div className="flex items-center gap-2">
@@ -262,7 +267,7 @@ const ProviderDetail = () => {
                     </div>
                   </div>
 
-                  <Button 
+                  <Button
                     className="w-full bg-green-600 hover:bg-green-700"
                     onClick={() => {
                       const affiliateUrl = `${provider.affiliate_url}${provider.affiliate_url?.includes('?') ? '&' : '?'}affiliate=matchkompass`;
@@ -300,12 +305,11 @@ const ProviderDetail = () => {
                           <TableCell>
                             <div className="flex items-center gap-2">
                               <div className="flex-1 bg-gray-200 rounded-full h-2">
-                                <div 
-                                  className={`h-2 rounded-full ${
-                                    item.percentage >= 90 ? 'bg-green-500' : 
-                                    item.percentage >= 50 ? 'bg-orange-500' : 
-                                    'bg-red-500'
-                                  }`}
+                                <div
+                                  className={`h-2 rounded-full ${item.percentage >= 90 ? 'bg-green-500' :
+                                    item.percentage >= 50 ? 'bg-orange-500' :
+                                      'bg-red-500'
+                                    }`}
                                   style={{ width: `${item.percentage}%` }}
                                 />
                               </div>
@@ -386,7 +390,7 @@ const ProviderDetail = () => {
             {/* CTA */}
             <Card>
               <CardContent className="pt-6">
-                <Button 
+                <Button
                   className="w-full bg-green-600 hover:bg-green-700 text-lg py-3"
                   onClick={() => {
                     const affiliateUrl = `${provider.affiliate_url}${provider.affiliate_url?.includes('?') ? '&' : '?'}affiliate=matchkompass`;
@@ -401,7 +405,84 @@ const ProviderDetail = () => {
                 </p>
               </CardContent>
             </Card>
+            {/* Other Sports Card */}
+            {provider.further_offers && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Weitere Sportangebote</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    {(() => {
+                      let offers = provider.further_offers;
+                      if (typeof offers === 'string') {
+                        try { offers = JSON.parse(offers); } catch (e) { offers = {}; }
+                      }
+                      const offersList = Array.isArray(offers)
+                        ? offers
+                        : (offers && typeof offers === 'object'
+                          ? Object.keys(offers).filter(key => (offers as any)[key] === true)
+                          : []);
+
+                      return offersList.map((sport: string) => (
+                        <Badge key={sport} variant="outline" className="bg-gray-50 text-gray-700 py-1.5 px-3">
+                          {sport}
+                        </Badge>
+                      ));
+                    })()}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
+        </div>
+
+        {/* FAQ Section for Provider */}
+        <div className="mt-12">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Häufige Fragen zu {provider.provider_name}</h2>
+          <div className="grid gap-4 max-w-4xl mx-auto">
+            <Card>
+              <CardContent className="p-4">
+                <h3 className="font-bold text-lg mb-2">Was kostet {provider.provider_name} aktuell?</h3>
+                <p className="text-gray-600 text-sm">
+                  {provider.provider_name} ist aktuell ab {monthlyPrice.toFixed(2)}€ pro Monat im Monatsabo erhältlich. Im Jahresabo sinken die effektiven monatlichen Kosten oft deutlich.
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <h3 className="font-bold text-lg mb-2">Welche Fußball-Ligen sind bei {provider.provider_name} enthalten?</h3>
+                <p className="text-gray-600 text-sm">
+                  {provider.provider_name} zeigt unter anderem {leagueCoverage.slice(0, 3).map(l => l.league).join(", ")}. Eine vollständige Liste findest du in unserer Liga-Übersicht oben.
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <h3 className="font-bold text-lg mb-2">Gibt es eine Mindestlaufzeit?</h3>
+                <p className="text-gray-600 text-sm">
+                  {provider.min_contract_duration || "Dies hängt vom gewählten Paket ab. Monatsabos sind in der Regel monatlich kündbar, während Jahresabos eine Bindung von 12 Monaten haben."}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* Outro Text */}
+        <div className="mt-12 bg-gray-100 rounded-lg p-8 text-center">
+          <h3 className="text-xl font-bold text-gray-900 mb-4">Unser Fazit zu {provider.provider_name}</h3>
+          <p className="text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            {provider.provider_name} bleibt einer der wichtigsten Anbieter für Sport-Fans in Deutschland. Vor allem die Abdeckung von {leagueCoverage[0]?.league || "Top-Fußball"} macht den Dienst für viele unverzichtbar. Vergleiche jetzt alle Optionen und finde das beste Angebot für dein persönliches Streaming-Setup.
+          </p>
+          <Button
+            className="mt-6 bg-green-600 hover:bg-green-700 px-8 py-6 text-lg"
+            onClick={() => {
+              const affiliateUrl = `${provider.affiliate_url}${provider.affiliate_url?.includes('?') ? '&' : '?'}affiliate=matchkompass`;
+              window.open(affiliateUrl, '_blank');
+            }}
+          >
+            Jetzt Angebot prüfen*
+          </Button>
         </div>
       </div>
 

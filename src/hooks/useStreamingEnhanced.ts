@@ -40,11 +40,13 @@ export interface StreamingProviderEnhanced {
   efl_cup: number;
   coppa_italia: number;
   coupe_de_france: number;
+  further_offers: any;
+  min_contract_duration: string;
 }
 
 const fetchEnhancedProviders = async (): Promise<StreamingProviderEnhanced[]> => {
   console.log('Fetching enhanced streaming providers with highlights from Supabase...');
-  
+
   const { data, error } = await supabase
     .from('streaming')
     .select('*')
@@ -62,7 +64,9 @@ const fetchEnhancedProviders = async (): Promise<StreamingProviderEnhanced[]> =>
       highlight_1: provider.highlight_1 || '',
       highlight_2: provider.highlight_2 || '',
       highlight_3: provider.highlight_3 || ''
-    }
+    },
+    further_offers: provider.further_offers,
+    min_contract_duration: provider.min_contract_duration || ''
   })) || [];
 
   console.log('Enhanced streaming providers fetched successfully:', enhancedData.length, 'providers');
