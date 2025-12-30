@@ -63,38 +63,55 @@ const Index = () => {
       <Header />
       
       {/* Hero Section */}
-      <section className="relative py-16 px-4">
-        <div className="max-w-6xl mx-auto text-center">
+      <section className="relative py-20 px-4 overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-[0.03]">
+          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="hero-pattern" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+                <circle cx="30" cy="30" r="2" fill="currentColor" className="text-green-900" />
+                <path d="M0 30h60M30 0v60" stroke="currentColor" strokeWidth="0.5" className="text-green-900" opacity="0.5" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#hero-pattern)" />
+          </svg>
+        </div>
+        
+        {/* Subtle gradient overlays */}
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-green-200 rounded-full blur-3xl opacity-20" />
+        <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-blue-200 rounded-full blur-3xl opacity-15" />
+        
+        <div className="relative max-w-7xl mx-auto text-center">
           <div className="mb-8">
             <Badge className="mb-4 bg-green-100 text-green-800 hover:bg-green-200">
               🏆 Deutschlands #1 Streaming-Guide für Fußball
             </Badge>
           </div>
           
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight">
             Finde die perfekte 
             <span className="text-green-600 block">Streaming-Kombination</span>
           </h1>
           
-          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto hidden md:block">
+          <p className="text-xl md:text-2xl text-gray-600 mb-10 max-w-4xl mx-auto hidden md:block leading-relaxed">
             MatchStream berechnet präzise, welche Streaming-Dienste du brauchst, 
             um alle Spiele deiner Lieblingsvereine zu verfolgen – zum besten Preis.
           </p>
 
-          {/* Global Search Field - gleiche Breite wie Buttons */}
-          <div className="mb-8 flex justify-center">
-            <div className="w-full max-w-lg">
+          {/* Global Search Field - breiter auf Desktop */}
+          <div className="mb-10 flex justify-center">
+            <div className="w-full max-w-2xl">
               <EnhancedGlobalSearch />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg mx-auto">
-            <Button asChild size="lg" className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 text-lg">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
+            <Button asChild size="lg" className="bg-green-600 hover:bg-green-700 text-white px-10 py-5 text-lg shadow-lg hover:shadow-xl transition-all">
               <Link to="/wizard">
                 Optimale Kombination finden
               </Link>
             </Button>
-            <Button asChild variant="outline" size="lg" className="px-8 py-4 text-lg border-2">
+            <Button asChild variant="outline" size="lg" className="px-10 py-5 text-lg border-2 hover:bg-gray-50 transition-all">
               <Link to="/vergleich">
                 Anbieter vergleichen
               </Link>
@@ -102,14 +119,14 @@ const Index = () => {
           </div>
           
           {/* Additional Internal Links */}
-          <div className="grid grid-cols-3 gap-2 max-w-lg mx-auto mt-6">
-            <Button asChild variant="outline" size="sm" className="w-full">
+          <div className="grid grid-cols-3 gap-3 max-w-2xl mx-auto mt-8">
+            <Button asChild variant="outline" size="sm" className="w-full hover:bg-gray-50">
               <Link to="/ligen">Alle Ligen</Link>
             </Button>
-            <Button asChild variant="outline" size="sm" className="w-full">
+            <Button asChild variant="outline" size="sm" className="w-full hover:bg-gray-50">
               <Link to="/anbieter">Alle Anbieter</Link>
             </Button>
-            <Button asChild variant="outline" size="sm" className="w-full">
+            <Button asChild variant="outline" size="sm" className="w-full hover:bg-gray-50">
               <Link to="/deals">Deals & News</Link>
             </Button>
           </div>
