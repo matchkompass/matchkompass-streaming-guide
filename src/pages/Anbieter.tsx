@@ -43,7 +43,7 @@ const Anbieter = () => {
   }, [providers, searchTerm]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-green-50">
       <SEOHead 
         title="Alle Streaming-Anbieter für Fußball | Übersicht & Vergleich | MatchStream"
         description="Entdecke alle verfügbaren Streaming-Anbieter für Fußball. ✓ Sky ✓ DAZN ✓ Amazon Prime Video ✓ Vollständige Übersicht mit Preisen und Liga-Abdeckung."
@@ -75,17 +75,51 @@ const Anbieter = () => {
         type="organization" 
         data={{}} 
       />
-    <Header />
-    <BreadcrumbNavigation />
+      <Header />
+      <BreadcrumbNavigation />
       
-      <div className="max-w-5xl mx-auto px-4 py-10">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-4">Alle Streaming-Anbieter</h1>
-          <p className="text-gray-600 max-w-2xl mx-auto">
+      {/* Hero Section with Background Pattern */}
+      <section className="relative py-12 px-4 overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-[0.03]">
+          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="anbieter-pattern" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+                <circle cx="30" cy="30" r="2" fill="currentColor" className="text-green-900" />
+                <path d="M0 30h60M30 0v60" stroke="currentColor" strokeWidth="0.5" className="text-green-900" opacity="0.5" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#anbieter-pattern)" />
+          </svg>
+        </div>
+        
+        {/* Subtle gradient overlays */}
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-green-200 rounded-full blur-3xl opacity-20" />
+        <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-blue-200 rounded-full blur-3xl opacity-15" />
+        
+        <div className="relative max-w-7xl mx-auto text-center">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            Alle Streaming-Anbieter
+          </h1>
+          <p className="text-xl text-gray-600 max-w-4xl mx-auto mb-8">
             Entdecke alle verfügbaren Streaming-Anbieter für Fußball und finde den perfekten Service für deine Bedürfnisse.
           </p>
+          
+          {/* Search Bar */}
+          <div className="relative max-w-2xl mx-auto">
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+            <Input
+              type="text"
+              placeholder="Anbieter suchen..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-12 h-14 text-lg shadow-sm"
+            />
+          </div>
         </div>
-
+      </section>
+      
+      <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Statistics Section */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card className="text-center p-6">
@@ -100,18 +134,6 @@ const Anbieter = () => {
             <div className="text-3xl font-bold text-orange-600 mb-2">{totalCountries}</div>
             <div className="text-gray-600">Länder</div>
           </Card>
-        </div>
-
-        {/* Search Bar */}
-        <div className="relative mb-8">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <Input
-            type="text"
-            placeholder="Anbieter suchen..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 h-12 text-base"
-          />
         </div>
 
         {/* Conversion Elements */}

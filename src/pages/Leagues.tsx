@@ -110,7 +110,7 @@ const Leagues = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-green-50">
       <SEOHead 
         title="Alle Fußball-Ligen & Wettbewerbe | Streaming-Guide | MatchStream"
         description="Entdecke alle verfügbaren Fußballligen und Wettbewerbe. ✓ Bundesliga ✓ Champions League ✓ Premier League ✓ La Liga. Finde die besten Streaming-Optionen."
@@ -142,31 +142,51 @@ const Leagues = () => {
       />
       <Header />
       
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Header Section */}
-        <div className="text-center mb-12">
+      {/* Hero Section with Background Pattern */}
+      <section className="relative py-12 px-4 overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-[0.03]">
+          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="leagues-pattern" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+                <circle cx="30" cy="30" r="2" fill="currentColor" className="text-green-900" />
+                <path d="M0 30h60M30 0v60" stroke="currentColor" strokeWidth="0.5" className="text-green-900" opacity="0.5" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#leagues-pattern)" />
+          </svg>
+        </div>
+        
+        {/* Subtle gradient overlays */}
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-green-200 rounded-full blur-3xl opacity-20" />
+        <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-blue-200 rounded-full blur-3xl opacity-15" />
+        
+        <div className="relative max-w-7xl mx-auto text-center">
           <div className="flex items-center justify-center mb-4">
             <Trophy className="h-10 w-10 text-green-600 mr-3" />
-            <h1 className="text-4xl font-bold text-gray-900">
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900">
               Alle Vereine & Ligen
             </h1>
           </div>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+          <p className="text-xl text-gray-600 max-w-4xl mx-auto mb-8">
             Entdecke alle verfügbaren Fußballligen und finde heraus, 
             welche Streaming-Dienste du für deine Lieblingswettbewerbe brauchst.
           </p>
           
           {/* Search Bar */}
-          <div className="relative max-w-md mx-auto">
-            <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+          <div className="relative max-w-2xl mx-auto">
+            <Search className="absolute left-4 top-4 h-5 w-5 text-gray-400" />
             <Input
               placeholder="Liga oder Land suchen..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 text-lg py-6"
+              className="pl-12 text-lg py-6 shadow-sm"
             />
           </div>
         </div>
+      </section>
+      
+      <div className="max-w-7xl mx-auto px-4 py-8">
 
         {/* Statistics - Hidden on mobile */}
         <div className="hidden md:grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
