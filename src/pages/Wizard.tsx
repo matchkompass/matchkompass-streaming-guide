@@ -217,13 +217,13 @@ const Wizard = () => {
   // Handle loading states
   if (clubsLoading || providersLoading || leaguesLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-sport-green-light/30">
         <Header />
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
-            <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-green-600" />
-            <h2 className="text-xl font-semibold mb-2">Lade Daten...</h2>
-            <p className="text-gray-600">
+            <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
+            <h2 className="text-xl font-semibold mb-2 text-foreground">Lade Daten...</h2>
+            <p className="text-muted-foreground">
               {clubsLoading && "Lade Vereinsdaten... "}
               {providersLoading && "Lade Streaming-Anbieter... "}
               {leaguesLoading && "Lade Liga-Informationen... "}
@@ -238,21 +238,21 @@ const Wizard = () => {
   // Handle error states
   if (clubsError || providersError || leaguesError) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-sport-green-light/30">
         <Header />
         <div className="max-w-4xl mx-auto px-4 py-8">
-          <Alert className="mb-6">
-            <AlertCircle className="h-4 w-4" />
+          <Alert className="mb-6 border-destructive/50 bg-destructive/10">
+            <AlertCircle className="h-4 w-4 text-destructive" />
             <AlertDescription>
-              <strong>Fehler beim Laden der Daten:</strong>
-              <ul className="mt-2 list-disc list-inside">
+              <strong className="text-foreground">Fehler beim Laden der Daten:</strong>
+              <ul className="mt-2 list-disc list-inside text-muted-foreground">
                 {clubsError && <li>Vereinsdaten: {clubsError}</li>}
                 {providersError && <li>Streaming-Anbieter: {providersError}</li>}
                 {leaguesError && <li>Liga-Daten: {leaguesError}</li>}
               </ul>
             </AlertDescription>
           </Alert>
-          <Button onClick={() => window.location.reload()} className="bg-green-600 hover:bg-green-700">
+          <Button onClick={() => window.location.reload()} className="bg-primary hover:bg-primary/90">
             Seite neu laden
           </Button>
         </div>
@@ -266,101 +266,147 @@ const Wizard = () => {
       case 1:
         return (
           <div className="space-y-6">
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">
                 Wähle deine Lieblingsvereine
               </h2>
-              <p className="text-gray-600 mb-6">
+              <p className="text-muted-foreground text-lg">
                 Markiere alle Vereine, deren Spiele du verfolgen möchtest
               </p>
             </div>
 
-            <div className="relative max-w-md mx-auto">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            {/* Search with better styling */}
+            <div className="relative max-w-lg mx-auto">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
-                placeholder="Verein suchen ..."
+                placeholder="Verein suchen..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-12 h-12 text-lg bg-background border-border rounded-xl shadow-sm focus:ring-2 focus:ring-primary/20"
               />
             </div>
 
+            {/* Selected clubs preview */}
+            {selectedClubIds.length > 0 && (
+              <div className="flex flex-wrap items-center justify-center gap-2 py-4">
+                {selectedClubs.slice(0, 5).map(club => (
+                  <div key={club.club_id} className="flex items-center gap-2 bg-sport-green-light text-sport-green-dark px-3 py-1.5 rounded-full text-sm font-medium">
+                    {club.logo_url && <img src={club.logo_url} alt="" className="w-4 h-4 object-contain" />}
+                    {club.name}
+                    <button onClick={() => handleClubToggle(club.club_id)} className="hover:text-destructive">×</button>
+                  </div>
+                ))}
+                {selectedClubIds.length > 5 && (
+                  <span className="text-muted-foreground text-sm">+{selectedClubIds.length - 5} weitere</span>
+                )}
+              </div>
+            )}
+
             {Object.keys(clubsByLeague).length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-gray-500">Keine Vereine gefunden.</p>
+              <div className="text-center py-12">
+                <p className="text-muted-foreground text-lg">Keine Vereine gefunden.</p>
               </div>
             ) : (
-              <div className="space-y-8">
-                {LEAGUE_CLUSTERS.map((cluster, idx) => {
-                  // Skip national cups in step 1
+              <div className="space-y-6">
+                {LEAGUE_CLUSTERS.map((cluster) => {
                   if (cluster.key === "pokale") return null;
                   const clusterLeagues = cluster.leagues.filter(league => 
                     clubsByLeague[league.name] && clubsByLeague[league.name].clubs.length > 0 &&
                     !["DFB Pokal", "Copa del Rey", "Eredivisie"].includes(league.name)
                   );
                   if (clusterLeagues.length === 0) return null;
+                  
+                  // Determine cluster theme colors
+                  const themeColors = {
+                    deutschland: { bg: 'bg-sport-blue-light', border: 'border-sport-blue/20', header: 'bg-sport-blue/10 text-sport-blue' },
+                    int_wettbewerbe: { bg: 'bg-sport-green-light', border: 'border-sport-green/20', header: 'bg-sport-green/10 text-sport-green' },
+                    int_ligen: { bg: 'bg-sport-gold-light', border: 'border-sport-gold/20', header: 'bg-sport-gold/10 text-sport-gold' },
+                    pokale: { bg: 'bg-sport-orange-light', border: 'border-sport-orange/20', header: 'bg-sport-orange/10 text-sport-orange' }
+                  };
+                  const colors = themeColors[cluster.key as keyof typeof themeColors] || themeColors.deutschland;
+                  
                   return (
-                     <div key={cluster.name} className={`border-2 rounded-lg ${cluster.color}`}>
-                       <div className={`px-3 md:px-6 py-2 md:py-3 ${cluster.headerColor} font-semibold text-base md:text-lg`}>
-                         {cluster.name}
-                       </div>
-                       <div className="p-3 md:p-6 space-y-3 md:space-y-4">
+                    <div key={cluster.name} className={`rounded-2xl border-2 ${colors.border} ${colors.bg} overflow-hidden`}>
+                      <div className={`px-4 md:px-6 py-3 md:py-4 ${colors.header} font-bold text-lg md:text-xl`}>
+                        {cluster.name}
+                      </div>
+                      <div className="p-4 md:p-6 space-y-4">
                         {clusterLeagues.map(league => {
                           const leagueData = clubsByLeague[league.name];
                           if (!leagueData || leagueData.clubs.length === 0) return null;
                           const isExpanded = expandedLeagues.includes(league.name);
                           const showAll = showAllClubs[league.name] || false;
                           const displayedClubs = showAll ? leagueData.clubs : leagueData.clubs.slice(0, 8);
+                          
                           return (
-                            <div key={league.name} className="border rounded-lg bg-white shadow-sm">
-                               <button
-                                 onClick={() => toggleLeague(league.name)}
-                                 className="w-full px-3 md:px-6 py-3 md:py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
-                               >
-                                 <div className="flex items-center gap-2 md:gap-3">
-                                   <h3 className="text-base md:text-lg font-semibold text-gray-800">
-                                     🏆 {league.name}
-                                   </h3>
-                                   <Badge variant="secondary" className="text-xs">
-                                     {leagueData.clubs.length} Vereine
-                                   </Badge>
-                                 </div>
-                                 {isExpanded ? 
-                                   <ChevronUp className="h-4 w-4 md:h-5 md:w-5 text-gray-500" /> : 
-                                   <ChevronDown className="h-4 w-4 md:h-5 md:w-5 text-gray-500" />
-                                 }
-                               </button>
+                            <div key={league.name} className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
+                              <button
+                                onClick={() => toggleLeague(league.name)}
+                                className="w-full px-4 md:px-6 py-4 flex items-center justify-between hover:bg-muted/50 transition-colors"
+                              >
+                                <div className="flex items-center gap-3">
+                                  <span className="text-2xl">🏆</span>
+                                  <h3 className="text-base md:text-lg font-semibold text-foreground">
+                                    {league.name}
+                                  </h3>
+                                  <Badge variant="secondary" className="text-xs font-medium">
+                                    {leagueData.clubs.length} Vereine
+                                  </Badge>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  {leagueData.clubs.filter(c => selectedClubIds.includes(c.club_id)).length > 0 && (
+                                    <Badge className="bg-primary text-primary-foreground text-xs">
+                                      {leagueData.clubs.filter(c => selectedClubIds.includes(c.club_id)).length} ausgewählt
+                                    </Badge>
+                                  )}
+                                  {isExpanded ? 
+                                    <ChevronUp className="h-5 w-5 text-muted-foreground" /> : 
+                                    <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                                  }
+                                </div>
+                              </button>
                               {isExpanded && (
-                                 <div className="px-3 md:px-6 pb-6">
-                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
-                                     {displayedClubs.map((club) => (
+                                <div className="px-4 md:px-6 pb-6">
+                                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                                    {displayedClubs.map((club) => {
+                                      const isSelected = selectedClubIds.includes(club.club_id);
+                                      return (
                                         <Card
                                           key={club.club_id}
-                                          className={`cursor-pointer transition-all duration-200 hover:shadow-md w-full ${
-                                            selectedClubIds.includes(club.club_id)
-                                              ? 'ring-2 ring-green-500 bg-green-50'
-                                              : 'hover:bg-gray-50'
+                                          className={`cursor-pointer transition-all duration-200 hover-lift group ${
+                                            isSelected
+                                              ? 'ring-2 ring-primary bg-sport-green-light border-primary'
+                                              : 'hover:border-primary/50 border-border'
                                           }`}
                                           onClick={() => handleClubToggle(club.club_id)}
                                         >
-                                           <CardContent className="p-1 md:p-2 flex flex-col items-center min-h-[60px] md:min-h-[80px]">
-                                             <div className="text-lg md:text-xl mb-1">
-                                               {club.logo_url ? (
-                                                 <img src={club.logo_url} alt={club.name} className="w-5 h-5 md:w-6 md:h-6 object-contain" />
-                                               ) : (
-                                                 "⚽"
-                                               )}
-                                             </div>
-                                             <h3 className="font-medium text-xs md:text-sm text-center line-clamp-2 leading-tight">{club.name}</h3>
-                                             {selectedClubIds.includes(club.club_id) && (
-                                               <div className="mt-1">
-                                                 <Check className="h-3 w-3 md:h-4 md:w-4 text-green-600 mx-auto" />
-                                               </div>
-                                             )}
-                                           </CardContent>
-                                       </Card>
-                                     ))}
-                                   </div>
+                                          <CardContent className="p-3 flex flex-col items-center min-h-[100px] justify-center relative">
+                                            {isSelected && (
+                                              <div className="absolute top-2 right-2 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
+                                                <Check className="h-3 w-3 text-primary-foreground" />
+                                              </div>
+                                            )}
+                                            <div className="mb-2">
+                                              {club.logo_url ? (
+                                                <img 
+                                                  src={club.logo_url} 
+                                                  alt={club.name} 
+                                                  className="w-10 h-10 md:w-12 md:h-12 object-contain"
+                                                />
+                                              ) : (
+                                                <div className="w-10 h-10 md:w-12 md:h-12 bg-muted rounded-full flex items-center justify-center text-2xl">
+                                                  ⚽
+                                                </div>
+                                              )}
+                                            </div>
+                                            <h3 className="font-medium text-sm text-center text-foreground line-clamp-2 leading-tight">
+                                              {club.name}
+                                            </h3>
+                                          </CardContent>
+                                        </Card>
+                                      );
+                                    })}
+                                  </div>
                                   {leagueData.clubs.length > 8 && (
                                     <div className="mt-4 text-center">
                                       <Button
@@ -370,6 +416,7 @@ const Wizard = () => {
                                           ...prev,
                                           [league.name]: !showAll
                                         }))}
+                                        className="border-border"
                                       >
                                         {showAll ? 'Weniger anzeigen' : `Alle ${leagueData.clubs.length} Vereine anzeigen`}
                                       </Button>
@@ -384,117 +431,6 @@ const Wizard = () => {
                     </div>
                   );
                 })}
-                {/* Weitere Wettbewerbe cluster */}
-                {(() => {
-                  const allClusterLeagues = LEAGUE_CLUSTERS.flatMap(cluster => cluster.leagues.map(l => l.name));
-                  const weitereLeagues = Object.keys(clubsByLeague).filter(leagueName => !allClusterLeagues.includes(leagueName) && clubsByLeague[leagueName].clubs.length > 0);
-                  if (weitereLeagues.length === 0) return null;
-                  return (
-                    <div className="border-2 rounded-lg bg-gray-50 border-gray-200">
-                      <div className="px-6 py-3 bg-gray-100 text-gray-800 font-semibold text-lg">
-                        📋 Weitere Wettbewerbe
-                      </div>
-                      <div className="p-6 space-y-4">
-                        {weitereLeagues.map(leagueName => {
-                          const leagueData = clubsByLeague[leagueName];
-                          if (!leagueData || leagueData.clubs.length === 0) return null;
-                          const isExpanded = expandedLeagues.includes(leagueName);
-                          const showAll = showAllClubs[leagueName] || false;
-                          const displayedClubs = showAll ? leagueData.clubs : leagueData.clubs.slice(0, 8);
-                          return (
-                            <div key={leagueName} className="border rounded-lg bg-white shadow-sm">
-                              <button
-                                onClick={() => toggleLeague(leagueName)}
-                                className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
-                              >
-                                <div className="flex items-center gap-3">
-                                  <h3 className="text-lg font-semibold text-gray-800">
-                                    🏆 {leagueName}
-                                  </h3>
-                                  <Badge variant="secondary" className="text-xs">
-                                    {leagueData.clubs.length} Vereine
-                                  </Badge>
-                                </div>
-                                {isExpanded ? 
-                                  <ChevronUp className="h-5 w-5 text-gray-500" /> : 
-                                  <ChevronDown className="h-5 w-5 text-gray-500" />
-                                }
-                              </button>
-                              {isExpanded && (
-                                <div className="px-6 pb-6">
-                                  <div className="grid grid-cols-3 gap-3">
-                                    {displayedClubs.map((club) => (
-                                       <Card
-                                         key={club.club_id}
-                                         className={`cursor-pointer transition-all duration-200 hover:shadow-md w-full ${
-                                           selectedClubIds.includes(club.club_id)
-                                             ? 'ring-2 ring-green-500 bg-green-50'
-                                             : 'hover:bg-gray-50'
-                                         }`}
-                                         onClick={() => handleClubToggle(club.club_id)}
-                                       >
-                                          <CardContent className="p-2 flex flex-col items-center min-h-[80px]">
-                                            <div className="text-xl mb-1">
-                                              {club.logo_url ? (
-                                                <img src={club.logo_url} alt={club.name} className="w-6 h-6 object-contain" />
-                                              ) : (
-                                                "⚽"
-                                              )}
-                                            </div>
-                                            <h3 className="font-medium text-sm text-center line-clamp-2 leading-tight">{club.name}</h3>
-                                            <div className="flex flex-wrap gap-1 justify-center mt-1">
-                                              {getClubCompetitions(club).slice(0, 2).map((slug, idx) => {
-                                                // Get icon from database
-                                                const league = leagues.find(l => l.league_slug === slug);
-                                                const leagueIcon = league?.icon || LEAGUE_SLUG_TO_FLAG[slug] || "🏆";
-                                                return (
-                                                  <Badge key={idx} variant="secondary" className="text-xs flex items-center gap-1">
-                                                    <span>{leagueIcon}</span>
-                                                    <span>{LEAGUE_SLUG_TO_NAME[slug] || slug.replace('_', ' ')}</span>
-                                                  </Badge>
-                                                );
-                                              })}
-                                            </div>
-                                            {selectedClubIds.includes(club.club_id) && (
-                                              <div className="mt-1">
-                                                <Check className="h-4 w-4 text-green-600 mx-auto" />
-                                              </div>
-                                            )}
-                                          </CardContent>
-                                      </Card>
-                                    ))}
-                                  </div>
-                                  {leagueData.clubs.length > 8 && (
-                                    <div className="mt-4 text-center">
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => setShowAllClubs(prev => ({
-                                          ...prev,
-                                          [leagueName]: !showAll
-                                        }))}
-                                      >
-                                        {showAll ? 'Weniger anzeigen' : `Alle ${leagueData.clubs.length} Vereine anzeigen`}
-                                      </Button>
-                                    </div>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                })()}
-              </div>
-            )}
-
-            {selectedClubIds.length > 0 && (
-              <div className="text-center">
-                <Badge className="bg-green-100 text-green-800">
-                  {selectedClubIds.length} Vereine ausgewählt
-                </Badge>
               </div>
             )}
           </div>
@@ -533,7 +469,7 @@ const Wizard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-sport-green-light/30">
       <SEOHead 
         title="Streaming-Optimizer Wizard | Perfekte Kombination finden | MatchStream"
         description="Finde in nur 3 Schritten die optimale Streaming-Kombination für deine Lieblingsvereine. ✓ Persönliche Empfehlungen ✓ Beste Preise ✓ 100% Abdeckung"
@@ -542,93 +478,134 @@ const Wizard = () => {
       />
       <Header />
       
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="mb-6">
-          <div className="flex items-center justify-center space-x-4 mb-3">
-            {[1, 2, 3].map((step) => (
-              <div key={step} className="flex items-center">
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                    currentStep >= step
-                      ? 'bg-green-600 text-white'
-                      : 'bg-gray-200 text-gray-600'
-                  }`}
-                >
-                  {currentStep > step ? <Check className="h-4 w-4" /> : step}
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Modern Step Indicator */}
+        <div className="mb-8">
+          <div className="flex items-center justify-center mb-6">
+            {[
+              { step: 1, label: "Vereine", icon: "⚽" },
+              { step: 2, label: "Wettbewerbe", icon: "🏆" },
+              { step: 3, label: "Ergebnis", icon: "✨" }
+            ].map((item, index) => (
+              <div key={item.step} className="flex items-center">
+                <div className="flex flex-col items-center">
+                  <div
+                    className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center text-lg font-bold transition-all duration-300 shadow-md ${
+                      currentStep >= item.step
+                        ? 'bg-primary text-primary-foreground shadow-primary/30'
+                        : 'bg-muted text-muted-foreground'
+                    }`}
+                  >
+                    {currentStep > item.step ? (
+                      <Check className="h-6 w-6" />
+                    ) : (
+                      <span className="text-xl">{item.icon}</span>
+                    )}
+                  </div>
+                  <span className={`mt-2 text-xs md:text-sm font-medium ${
+                    currentStep >= item.step ? 'text-foreground' : 'text-muted-foreground'
+                  }`}>
+                    {item.label}
+                  </span>
                 </div>
-                {step < 3 && (
-                  <div className={`w-12 h-1 mx-2 ${currentStep > step ? 'bg-green-600' : 'bg-gray-200'}`} />
+                {index < 2 && (
+                  <div className={`w-16 md:w-24 h-1 mx-2 md:mx-4 rounded-full transition-all duration-300 ${
+                    currentStep > item.step ? 'bg-primary' : 'bg-muted'
+                  }`} />
                 )}
               </div>
             ))}
           </div>
-          <div className="text-center">
-            <p className="text-sm text-gray-600">
-              Schritt {currentStep} von 3
-            </p>
-          </div>
         </div>
 
-        {/* Always visible next button at top */}
-        {currentStep < 3 && (
-          <div className="mb-4 flex justify-end">
+        {/* Floating Action Button */}
+        {currentStep < 3 && canProceed() && (
+          <div className="fixed bottom-6 right-6 z-50 md:hidden">
             <Button
               onClick={() => setCurrentStep(prev => prev + 1)}
-              disabled={!canProceed()}
-              className="bg-green-600 hover:bg-green-700"
+              size="lg"
+              className="rounded-full w-14 h-14 shadow-lg bg-primary hover:bg-primary/90"
             >
-              Weiter
-              <ChevronRight className="ml-2 h-4 w-4" />
+              <ChevronRight className="h-6 w-6" />
             </Button>
           </div>
         )}
 
-        <div className="mb-6">
+        {/* Desktop Top Actions */}
+        {currentStep < 3 && (
+          <div className="hidden md:flex justify-end mb-6">
+            <Button
+              onClick={() => setCurrentStep(prev => prev + 1)}
+              disabled={!canProceed()}
+              size="lg"
+              className="bg-primary hover:bg-primary/90 shadow-md"
+            >
+              Weiter zu {currentStep === 1 ? 'Wettbewerben' : 'Ergebnissen'}
+              <ChevronRight className="ml-2 h-5 w-5" />
+            </Button>
+          </div>
+        )}
+
+        {/* Main Content Card */}
+        <div className="glass-card rounded-2xl p-4 md:p-8 mb-6">
           {renderStepContent()}
         </div>
 
-        <div className="flex justify-between items-center">
+        {/* Bottom Navigation */}
+        <div className="flex justify-between items-center bg-card rounded-xl p-4 shadow-sm border border-border">
           <div className="flex gap-2">
             <Button
               variant="outline"
               onClick={() => setCurrentStep(prev => Math.max(1, prev - 1))}
               disabled={currentStep === 1}
+              className="border-border"
             >
               <ChevronLeft className="mr-2 h-4 w-4" />
-              Zurück
+              <span className="hidden sm:inline">Zurück</span>
             </Button>
             {(currentStep === 1 || currentStep === 2) && (
               <Button
-                variant="outline"
+                variant="ghost"
                 onClick={() => setCurrentStep(3)}
+                className="text-muted-foreground hover:text-foreground"
               >
                 Überspringen
               </Button>
             )}
           </div>
 
-          {currentStep < 3 ? (
-            <Button
-              onClick={() => setCurrentStep(prev => prev + 1)}
-              disabled={!canProceed()}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              Weiter
-              <ChevronRight className="ml-2 h-4 w-4" />
-            </Button>
-          ) : (
-            <Button
-              onClick={() => {
-                setCurrentStep(1);
-                setSelectedClubIds([]);
-                setSelectedCompetitions([]);
-                
-              }}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              Neue Analyse starten
-            </Button>
-          )}
+          <div className="flex items-center gap-4">
+            {selectedClubIds.length > 0 && currentStep === 1 && (
+              <div className="hidden md:flex items-center gap-2 bg-sport-green-light text-sport-green-dark px-4 py-2 rounded-full text-sm font-medium">
+                <Check className="h-4 w-4" />
+                {selectedClubIds.length} Vereine ausgewählt
+              </div>
+            )}
+            
+            {currentStep < 3 ? (
+              <Button
+                onClick={() => setCurrentStep(prev => prev + 1)}
+                disabled={!canProceed()}
+                size="lg"
+                className="bg-primary hover:bg-primary/90"
+              >
+                Weiter
+                <ChevronRight className="ml-2 h-4 w-4" />
+              </Button>
+            ) : (
+              <Button
+                onClick={() => {
+                  setCurrentStep(1);
+                  setSelectedClubIds([]);
+                  setSelectedCompetitions([]);
+                }}
+                size="lg"
+                className="bg-primary hover:bg-primary/90"
+              >
+                Neue Analyse starten
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 

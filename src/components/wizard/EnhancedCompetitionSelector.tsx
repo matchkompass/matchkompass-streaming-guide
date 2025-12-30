@@ -155,34 +155,36 @@ const EnhancedCompetitionSelector: React.FC<EnhancedCompetitionSelectorProps> = 
   const CompetitionCard = ({ competition, isSelected }: { competition: Competition; isSelected: boolean }) => (
     <Card
       key={competition.id}
-      className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
+      className={`cursor-pointer transition-all duration-200 hover-lift ${
         isSelected
-          ? 'ring-2 ring-green-500 bg-green-50'
+          ? 'ring-2 ring-primary bg-sport-green-light border-primary'
           : competition.isRecommended
-          ? 'ring-1 ring-blue-300 bg-blue-50'
-          : 'hover:bg-gray-50'
+          ? 'ring-1 ring-sport-blue/30 bg-sport-blue-light/50'
+          : 'hover:border-primary/50 border-border'
       }`}
       onClick={() => onCompetitionToggle(competition.id)}
     >
-      <CardContent className="p-3">
+      <CardContent className="p-3 md:p-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <span className="text-xl">{competition.logo}</span>
+          <div className="flex items-center space-x-3">
+            <span className="text-2xl">{competition.logo}</span>
             <div>
-              <h4 className="font-medium text-sm">{competition.name}</h4>
-              <p className="text-xs text-gray-500">
+              <h4 className="font-medium text-sm md:text-base text-foreground">{competition.name}</h4>
+              <p className="text-xs text-muted-foreground">
                 {competition.gameCount} Spiele
               </p>
             </div>
           </div>
-          <div className="text-right">
+          <div className="text-right flex flex-col items-end gap-1">
             {competition.isRecommended && (
-              <Badge className="bg-blue-100 text-blue-800 text-xs mb-1">
+              <Badge className="bg-sport-blue/10 text-sport-blue text-xs border-sport-blue/20">
                 Empfohlen
               </Badge>
             )}
             {isSelected && (
-              <Check className="h-4 w-4 text-green-600" />
+              <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center">
+                <Check className="h-3 w-3 text-primary-foreground" />
+              </div>
             )}
           </div>
         </div>
@@ -192,11 +194,11 @@ const EnhancedCompetitionSelector: React.FC<EnhancedCompetitionSelectorProps> = 
 
   return (
     <div className="space-y-6">
-      <div className="text-center px-4">
-        <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
+      <div className="text-center mb-8">
+        <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">
           Wettbewerbe auswählen
         </h2>
-        <p className="text-sm md:text-base text-gray-600 mb-6">
+        <p className="text-muted-foreground text-lg">
           Basierend auf deinen Vereinen empfehlen wir diese Wettbewerbe
         </p>
       </div>
@@ -205,36 +207,36 @@ const EnhancedCompetitionSelector: React.FC<EnhancedCompetitionSelectorProps> = 
       {selectedCompetitions.length > 0 && (
         <div className="mb-6">
           <div className="flex items-center justify-center mb-4">
-            <div className="flex items-center gap-2 px-4 py-2 bg-green-100 rounded-full border border-green-200">
-              <Check className="h-4 w-4 text-green-600" />
-              <span className="text-sm font-medium text-green-800">Bereits ausgewählt</span>
+            <div className="flex items-center gap-2 px-4 py-2 bg-sport-green-light rounded-full border border-primary/20">
+              <Check className="h-4 w-4 text-primary" />
+              <span className="text-sm font-medium text-foreground">{selectedCompetitions.length} Wettbewerbe ausgewählt</span>
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {selectedCompetitions.map(slug => {
               const comp = allCompetitions.find(c => c.id === slug);
               if (!comp) return null;
               return (
-                <div
+                <Card
                   key={slug}
-                  className="rounded-lg border text-card-foreground shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md ring-2 ring-green-500 bg-green-50"
+                  className="cursor-pointer transition-all duration-200 hover-lift ring-2 ring-primary bg-sport-green-light border-primary"
                   onClick={() => onCompetitionToggle(slug)}
                 >
-                  <div className="p-3">
+                  <CardContent className="p-3 md:p-4">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-xl">{LEAGUE_SLUG_TO_FLAG[comp.id] || comp.logo}</span>
+                      <div className="flex items-center space-x-3">
+                        <span className="text-2xl">{LEAGUE_SLUG_TO_FLAG[comp.id] || comp.logo}</span>
                         <div>
-                          <h4 className="font-medium text-sm">{LEAGUE_SLUG_TO_NAME[comp.id] || comp.name}</h4>
-                          <p className="text-xs text-gray-500">{comp.gameCount} Spiele</p>
+                          <h4 className="font-medium text-sm md:text-base text-foreground">{LEAGUE_SLUG_TO_NAME[comp.id] || comp.name}</h4>
+                          <p className="text-xs text-muted-foreground">{comp.gameCount} Spiele</p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <Check className="h-4 w-4 text-green-600" />
+                      <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center">
+                        <Check className="h-3 w-3 text-primary-foreground" />
                       </div>
                     </div>
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
               );
             })}
           </div>
@@ -244,51 +246,52 @@ const EnhancedCompetitionSelector: React.FC<EnhancedCompetitionSelectorProps> = 
       {/* Available Competitions Section */}
       <div className="mb-6">
         <div className="flex items-center justify-center mb-4">
-          <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-full border border-gray-200">
-            <span className="text-sm font-medium text-gray-700">Weitere Wettbewerbe</span>
+          <div className="flex items-center gap-2 px-4 py-2 bg-muted rounded-full border border-border">
+            <span className="text-sm font-medium text-muted-foreground">Weitere Wettbewerbe hinzufügen</span>
           </div>
         </div>
         
         {/* Clustered Competitions */}
-        {LEAGUE_CLUSTERS.map((cluster, index) => {
+        {LEAGUE_CLUSTERS.map((cluster) => {
           const comps = allCompetitions.filter(comp => cluster.competitions.some(l => slugToName[comp.id] === l.name));
           if (comps.length === 0) return null;
           
-          let sectionId = '';
-          if (cluster.name.includes('Deutschland')) sectionId = 'deutschland-section';
-          else if (cluster.name.includes('Europa')) sectionId = 'europa-section';
-          else if (cluster.name.includes('Internationale')) sectionId = 'international-section';
+          const themeColors = cluster.name.includes('Deutschland') 
+            ? 'text-sport-blue' 
+            : cluster.name.includes('Europa') 
+            ? 'text-sport-green' 
+            : 'text-sport-gold';
           
           return (
-            <div key={cluster.name} className="mb-6" id={sectionId}>
-              <h3 className="text-lg font-semibold mb-3 text-blue-800 flex items-center gap-2">
+            <div key={cluster.name} className="mb-6">
+              <h3 className={`text-lg font-semibold mb-3 ${themeColors} flex items-center gap-2`}>
                 {cluster.name}
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                 {comps.map(competition => (
                   <Card
                     key={competition.id}
-                    className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
+                    className={`cursor-pointer transition-all duration-200 hover-lift ${
                       selectedCompetitions.includes(competition.id)
-                        ? 'ring-2 ring-green-500 bg-green-50'
-                        : 'hover:bg-gray-50'
+                        ? 'ring-2 ring-primary bg-sport-green-light border-primary'
+                        : 'hover:border-primary/50 border-border'
                     }`}
                     onClick={() => onCompetitionToggle(competition.id)}
                   >
-                    <CardContent className="p-3">
+                    <CardContent className="p-3 md:p-4">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <span className="text-xl">{LEAGUE_SLUG_TO_FLAG[competition.id] || competition.logo}</span>
+                        <div className="flex items-center space-x-3">
+                          <span className="text-2xl">{LEAGUE_SLUG_TO_FLAG[competition.id] || competition.logo}</span>
                           <div>
-                            <h4 className="font-medium text-sm">{LEAGUE_SLUG_TO_NAME[competition.id] || competition.name}</h4>
-                            <p className="text-xs text-gray-500">{competition.gameCount} Spiele</p>
+                            <h4 className="font-medium text-sm md:text-base text-foreground">{LEAGUE_SLUG_TO_NAME[competition.id] || competition.name}</h4>
+                            <p className="text-xs text-muted-foreground">{competition.gameCount} Spiele</p>
                           </div>
                         </div>
-                        <div className="text-right">
-                          {selectedCompetitions.includes(competition.id) && (
-                            <Check className="h-4 w-4 text-green-600" />
-                          )}
-                        </div>
+                        {selectedCompetitions.includes(competition.id) && (
+                          <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center">
+                            <Check className="h-3 w-3 text-primary-foreground" />
+                          </div>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
@@ -305,10 +308,10 @@ const EnhancedCompetitionSelector: React.FC<EnhancedCompetitionSelectorProps> = 
           if (weitereComps.length === 0) return null;
           return (
             <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-3 text-gray-700">
+              <h3 className="text-lg font-semibold mb-3 text-muted-foreground">
                 📋 Weitere Wettbewerbe
               </h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                 {weitereComps.map(competition => (
                   <CompetitionCard
                     key={competition.id}
@@ -321,14 +324,6 @@ const EnhancedCompetitionSelector: React.FC<EnhancedCompetitionSelectorProps> = 
           );
         })()}
       </div>
-
-      {selectedCompetitions.length > 0 && (
-        <div className="text-center">
-          <Badge className="bg-green-100 text-green-800">
-            {selectedCompetitions.length} Wettbewerbe ausgewählt
-          </Badge>
-        </div>
-      )}
     </div>
   );
 };
