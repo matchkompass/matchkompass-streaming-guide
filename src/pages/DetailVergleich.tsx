@@ -13,6 +13,7 @@ import { useStreamingEnhanced } from "@/hooks/useStreamingEnhanced";
 import { useLeaguesEnhanced } from "@/hooks/useLeaguesEnhanced";
 import { useIsMobile } from "@/hooks/use-mobile";
 import DetailComparisonSidebar from "@/components/comparison/DetailComparisonSidebar";
+import HorizontalFilterBar from "@/components/comparison/HorizontalFilterBar";
 
 const DetailVergleich2 = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -214,7 +215,8 @@ const DetailVergleich2 = () => {
             Vergleichen Sie Streaming-Anbieter Seite an Seite
           </p>
         </div>
-        {/* Table and rest of layout remain unchanged */}
+        
+        {/* Mobile View - Card layout */}
         {isMobile ? (
           <div className="flex flex-col gap-4">
             {/* Mobile filter button */}
@@ -339,16 +341,14 @@ const DetailVergleich2 = () => {
             })}
           </div>
         ) : (
-          <div className="flex gap-6">
-            <div className="w-72 min-w-[16rem] flex-shrink-0">
-              <DetailComparisonSidebar
-                filters={filters}
-                onFiltersChange={handleFiltersChange}
-                isOpen={true}
-                onClose={() => {}}
-              />
-            </div>
-            <div className="flex-1 min-w-0">
+          /* Desktop View - Table layout with horizontal filter bar */
+          <div className="flex flex-col gap-4">
+            {/* Horizontal Filter Bar above table */}
+            <HorizontalFilterBar
+              filters={filters}
+              onFiltersChange={handleFiltersChange}
+            />
+            {/* Table */}
               <div className="bg-white rounded-lg border overflow-auto">
                 <div className="relative">
                   <table className="w-full min-w-[1200px]">
@@ -564,10 +564,9 @@ const DetailVergleich2 = () => {
                 </div>
               </div>
 
-              {/* Disclaimer */}
-              <div className="mt-3 text-xs text-gray-500 text-center">
-                * Affiliate-Links: Wir erhalten eine Provision bei Abschluss eines Abonnements über unsere Links.
-              </div>
+            {/* Disclaimer */}
+            <div className="mt-3 text-xs text-gray-500 text-center">
+              * Affiliate-Links: Wir erhalten eine Provision bei Abschluss eines Abonnements über unsere Links.
             </div>
           </div>
         )}
