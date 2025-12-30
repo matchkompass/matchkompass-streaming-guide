@@ -182,17 +182,11 @@ const DetailVergleich = () => {
       }
 
       // 5. Search Entity Logic (Club/League Autocomplete)
-      // "if i type in bundesliga... shows... -> at least 1 game"
-      // "if i type in next to it fc barcelona -> at least 1 la liga AND 1 CL" (AND logic between entities)
       if (selectedEntities.length > 0) {
         const matchesAllEntities = selectedEntities.every(entity => {
           if (entity.type === 'league') {
-            // Provider must have > 0 games for this league
             return (provider[entity.id] || 0) > 0;
           } else if (entity.type === 'club') {
-            // Resolve club competitions
-            // Constraint: "ignore national cups for the moment"
-            // Major leagues usually: bundesliga, 2.bundesliga, champions_league, europa_league, etc.
             const club = clubs.find(c => c.club_id === entity.id);
             if (!club) return false;
 
@@ -200,14 +194,8 @@ const DetailVergleich = () => {
             const allComps = getClubCompetitions(club);
             const validComps = allComps.filter(c => !cups.includes(c));
 
-            // If club has no valid comps (weird), maybe pass?
             if (validComps.length === 0) return true;
 
-            // "at least 1 la liga AND 1 champions league" -> Must cover ALL valid major competitions of the club?
-            // Or at least one of them? 
-            // User example: "select providers with at least 1 la liga game AND 1 champions league game".
-            // This implies provider must be useful for ALL major aspects of the club.
-            // So we use EVERY.
             return validComps.every(comp => (provider[comp] || 0) > 0);
           }
           return true;
@@ -261,7 +249,6 @@ const DetailVergleich = () => {
       grouped[country].push(league);
     });
 
-    // Sort by popularity within each group (Reversed as requested: Bundesliga, 2., 3., etc.)
     Object.keys(grouped).forEach(country => {
       grouped[country].sort((a, b) => (a.popularity || 0) - (b.popularity || 0));
     });
@@ -336,7 +323,7 @@ const DetailVergleich = () => {
                   </div>
                 </div>
 
-                {/* Team Card */}
+                {/* Team Card with Initials Fix */}
                 <div className="bg-white/80 backdrop-blur-md border border-white/40 rounded-2xl p-3 sm:p-4 flex items-center gap-2 sm:gap-4 flex-1 shadow-lg hover:bg-white transition-all group cursor-pointer" onClick={() => window.location.href = '/ueber-uns'}>
                   <div className="flex -space-x-3 group-hover:space-x-1 transition-all">
                     {/* Alexander (AS) */}
@@ -505,7 +492,6 @@ const DetailVergleich = () => {
                             </div>
                           </div>
 
-                          {/* Highlights Bar - Replaces stats box - Updated to match desktop style exactly */}
                           <div className="mt-4 flex flex-wrap gap-1.5">
                             {provider.highlights?.highlight_1 && (
                               <div className="text-xs text-green-700 bg-green-100 rounded px-2 py-1">
@@ -549,7 +535,6 @@ const DetailVergleich = () => {
 
                           {isExpanded && (
                             <div className="mt-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                              {/* Tab Navigation - Refined to be even more subtle & light green-toned */}
                               <div className="flex bg-green-50/50 rounded-lg p-1 mb-6 border border-green-100/30">
                                 {tabs.map((tab) => (
                                   <button
@@ -567,7 +552,6 @@ const DetailVergleich = () => {
                               </div>
 
                               <div className="space-y-6 pt-2 border-t border-gray-100">
-                                {/* Tab 1: Preise & Modalitäten */}
                                 {activeTab === 'prices' && (
                                   <div className="space-y-5">
                                     <div className="flex items-center gap-2">
@@ -621,7 +605,6 @@ const DetailVergleich = () => {
                                   </div>
                                 )}
 
-                                {/* Tab 2: Coverage */}
                                 {activeTab === 'coverage' && (
                                   <div className="space-y-6">
                                     <div className="flex items-center gap-2">
@@ -670,7 +653,6 @@ const DetailVergleich = () => {
                                   </div>
                                 )}
 
-                                {/* Tab 3: Features */}
                                 {activeTab === 'features' && (
                                   <div className="space-y-5">
                                     <div className="flex items-center gap-2">
@@ -708,7 +690,6 @@ const DetailVergleich = () => {
                                   </div>
                                 )}
 
-                                {/* Tab 4: Weitere Sportarten */}
                                 {activeTab === 'sports' && (
                                   <div className="space-y-5">
                                     <div className="flex items-center gap-2">
