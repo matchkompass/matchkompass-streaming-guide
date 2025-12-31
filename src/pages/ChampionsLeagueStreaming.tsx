@@ -78,7 +78,7 @@ const ChampionsLeagueStreaming = () => {
       <Header />
       <BreadcrumbNavigation customItems={[
         { label: 'Home', href: '/' },
-        { label: 'Ligen', href: '/ligen' },
+        { label: 'Ligen', href: '/competition' },
         { label: 'Champions League Streaming' }
       ]} />
       

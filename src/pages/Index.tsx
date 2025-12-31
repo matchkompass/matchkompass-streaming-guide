@@ -171,7 +171,7 @@ const Index = () => {
         <div className="max-w-4xl mx-auto">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Button asChild variant="outline" size="lg" className="w-full h-auto py-4 hover:bg-gray-50 border-gray-200">
-              <Link to="/ligen" className="flex flex-col items-center justify-center gap-2">
+              <Link to="/competition" className="flex flex-col items-center justify-center gap-2">
                 <span className="font-semibold text-lg text-gray-900">Alle Ligen</span>
                 <span className="text-xs text-gray-500 font-normal">Durchsuche alle Wettbewerbe</span>
               </Link>

@@ -16,7 +16,7 @@ Disallow: /private/
 Disallow: /api/
 
 # Allow important pages
-Allow: /ligen
+Allow: /competition
 Allow: /streaming-provider
 Allow: /vergleich
 Allow: /wizard

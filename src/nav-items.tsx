@@ -32,7 +32,7 @@ export const navItems = [
   },
   {
     title: "Ligen",
-    to: "/ligen",
+    to: "/competition",
     page: <Leagues />,
   },
   {

@@ -10,11 +10,11 @@ const Footer = () => {
       { name: "Anbieter-Vergleich", href: "/vergleich" },
       { name: "Deals & News", href: "/deals" },
     ],
-    vereine: [
-      { name: "Bayern München", href: "/club/bayern-muenchen" },
-      { name: "Borussia Dortmund", href: "/club/borussia-dortmund" },
-      { name: "FC Barcelona", href: "/club/fc-barcelona" },
-      { name: "Real Madrid", href: "/club/real-madrid" }
+    anbieter: [
+      { name: "Sky", href: "/streaming-provider/sky" },
+      { name: "DAZN", href: "/streaming-provider/dazn" },
+      { name: "Magenta TV", href: "/streaming-provider/magenta-tv" },
+      { name: "WOW", href: "/streaming-provider/wow" }
     ],
     ligen: [
       { name: "Bundesliga", href: "/competition/bundesliga" },
@@ -81,13 +81,13 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Popular Clubs */}
+          {/* Popular Providers */}
           <div>
             <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-3">
-              Vereine
+              Anbieter
             </h3>
             <ul className="space-y-2">
-              {footerLinks.vereine.map((link) => (
+              {footerLinks.anbieter.map((link) => (
                 <li key={link.name}>
                   <Link to={link.href} className="text-gray-400 hover:text-white transition-colors">
                     {link.name}

@@ -28,7 +28,7 @@ const Header = () => {
             <nav className="flex items-center space-x-8">
               {[
                 { name: "Vergleich", href: "/vergleich" },
-                { name: "Vereine & Ligen", href: "/ligen" },
+                { name: "Vereine & Ligen", href: "/competition" },
                 { name: "Anbieter", href: "/streaming-provider" },
                 { name: "Deals & News", href: "/deals" },
               ].map((item) => (
@@ -75,7 +75,7 @@ const Header = () => {
               {[
                 { name: "Beste Kombination finden", href: "/wizard" },
                 { name: "Vergleich", href: "/vergleich" },
-                { name: "Vereine & Ligen", href: "/ligen" },
+                { name: "Vereine & Ligen", href: "/competition" },
                 { name: "Anbieter", href: "/streaming-provider" },
                 { name: "Deals & News", href: "/deals" },
               ].map((item) => (

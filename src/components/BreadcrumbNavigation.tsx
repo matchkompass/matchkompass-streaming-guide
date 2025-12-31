@@ -35,8 +35,8 @@ const BreadcrumbNavigation = ({ items, customItems }: BreadcrumbNavigationProps)
       'wizard': 'Streaming Wizard',
       'vergleich': 'Anbieter Vergleich',
       'detailvergleich': 'Detail Vergleich',
-      'ligen': 'Alle Ligen',
-      'anbieter': 'Alle Anbieter',
+      'competition': 'Alle Ligen',
+      'streaming-provider': 'Alle Anbieter',
       'deals': 'Deals & News',
       'club': 'Verein',
       'competition': 'Wettbewerb',
@@ -46,7 +46,7 @@ const BreadcrumbNavigation = ({ items, customItems }: BreadcrumbNavigationProps)
     const linkMap: Record<string, string> = {
       'streaming-provider': '/streaming-provider',
       'club': '/vergleich',
-      'competition': '/vergleich'
+      'competition': '/competition'
     };
 
     let currentPath = '';

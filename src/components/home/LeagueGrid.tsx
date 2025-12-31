@@ -33,7 +33,7 @@ const LeagueGrid = () => {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <h3 className="text-2xl font-bold text-gray-900">Beliebte Ligen</h3>
-                <Link to="/ligen" className="text-green-600 hover:text-green-700 font-medium text-sm flex items-center">
+                <Link to="/competition" className="text-green-600 hover:text-green-700 font-medium text-sm flex items-center">
                     Alle ansehen <ChevronRight className="h-4 w-4 ml-1" />
                 </Link>
             </div>
@@ -65,7 +65,7 @@ const LeagueGrid = () => {
 
             <div className="text-center sm:hidden">
                 <Button asChild variant="outline" className="w-full">
-                    <Link to="/ligen">Alle Ligen anzeigen</Link>
+                    <Link to="/competition">Alle Ligen anzeigen</Link>
                 </Button>
             </div>
         </div>

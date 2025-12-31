@@ -10,6 +10,11 @@
       "source": "/detailvergleich",
       "destination": "/vergleich",
       "permanent": true
+    },
+    {
+      "source": "/ligen",
+      "destination": "/competition",
+      "permanent": true
     }
   ],
   "rewrites": [

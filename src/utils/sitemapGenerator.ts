@@ -20,7 +20,7 @@ export const generateSitemap = async (): Promise<string> => {
       lastmod: currentDate
     },
     {
-      url: `${baseUrl}/ligen`,
+      url: `${baseUrl}/competition`,
       changefreq: 'weekly',
       priority: 0.9,
       lastmod: currentDate
@@ -220,7 +220,7 @@ Disallow: /private/
 Disallow: /api/
 
 # Allow important pages
-Allow: /ligen
+Allow: /competition
 Allow: /streaming-provider
 Allow: /vergleich
 Allow: /wizard

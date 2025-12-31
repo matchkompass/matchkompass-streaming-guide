@@ -132,7 +132,7 @@ const Leagues = () => {
         title="Alle Fußball-Ligen & Wettbewerbe | Streaming-Guide | MatchStream"
         description="Entdecke alle verfügbaren Fußballligen und Wettbewerbe. ✓ Bundesliga ✓ Champions League ✓ Premier League ✓ La Liga. Finde die besten Streaming-Optionen."
         keywords="Fußball Ligen, Bundesliga, Champions League, Premier League, La Liga, Serie A, Wettbewerbe"
-        canonical="https://matchstream.de/ligen"
+        canonical="https://matchstream.de/competition"
         structuredData={{
           "@context": "https://schema.org",
           "@type": "ItemList",

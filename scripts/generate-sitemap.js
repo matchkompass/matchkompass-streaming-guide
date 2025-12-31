@@ -25,7 +25,7 @@ const generateSitemap = async () => {
       lastmod: currentDate
     },
     {
-      url: `${baseUrl}/ligen`,
+      url: `${baseUrl}/competition`,
       changefreq: 'weekly',
       priority: 0.9,
       lastmod: currentDate
