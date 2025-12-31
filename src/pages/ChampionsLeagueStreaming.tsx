@@ -7,8 +7,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { Trophy, Star, Users, Shield } from "lucide-react";
+import { useClubs } from "@/hooks/useClubs";
 
 const ChampionsLeagueStreaming = () => {
+  const { clubs } = useClubs();
+  
+  // Helper function to find club slug by name
+  const getClubSlug = (teamName: string): string => {
+    const club = clubs.find(c => 
+      c.name?.toLowerCase() === teamName.toLowerCase() ||
+      c.name?.toLowerCase().includes(teamName.toLowerCase()) ||
+      teamName.toLowerCase().includes(c.name?.toLowerCase() || '')
+    );
+    return club?.slug || teamName.toLowerCase().replace(/[\s\.]+/g, '-');
+  };
   const providers = [
     { 
       name: "Amazon Prime Video", 
@@ -133,7 +145,7 @@ const ChampionsLeagueStreaming = () => {
                       <Trophy className="h-8 w-8 text-primary" />
                     </div>
                     <Link 
-                      to={`/club/${team.toLowerCase().replace(/[\s\.]+/g, '-')}`}
+                      to={`/club/${getClubSlug(team)}`}
                       className="font-semibold hover:text-primary transition-colors"
                     >
                       {team}

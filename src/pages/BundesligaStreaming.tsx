@@ -6,8 +6,20 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { Shield, TrendingUp, Users, Star } from "lucide-react";
+import { useClubs } from "@/hooks/useClubs";
 
 const BundesligaStreaming = () => {
+  const { clubs } = useClubs();
+  
+  // Helper function to find club slug by name
+  const getClubSlug = (teamName: string): string => {
+    const club = clubs.find(c => 
+      c.name?.toLowerCase() === teamName.toLowerCase() ||
+      c.name?.toLowerCase().includes(teamName.toLowerCase()) ||
+      teamName.toLowerCase().includes(c.name?.toLowerCase() || '')
+    );
+    return club?.slug || teamName.toLowerCase().replace(/[\s\.]+/g, '-');
+  };
   const providers = [
     { name: "Sky", coverage: "306 Spiele", price: "€29.99/Monat", highlight: "Alle Samstag Spiele" },
     { name: "DAZN", coverage: "121 Spiele", price: "€44.99/Monat", highlight: "Freitag & Sonntag Spiele" },
@@ -143,7 +155,7 @@ const BundesligaStreaming = () => {
               {teams.map((team, index) => (
                 <Link
                   key={index}
-                  to={`/club/${team.toLowerCase().replace(/[\s\.]+/g, '-')}`}
+                  to={`/club/${getClubSlug(team)}`}
                   className="p-4 border rounded-lg hover:shadow-md transition-shadow hover:border-primary"
                 >
                   <div className="text-sm font-medium text-center">{team}</div>

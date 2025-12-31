@@ -177,7 +177,7 @@ const Index = () => {
               </Link>
             </Button>
             <Button asChild variant="outline" size="lg" className="w-full h-auto py-4 hover:bg-gray-50 border-gray-200">
-              <Link to="/anbieter" className="flex flex-col items-center justify-center gap-2">
+              <Link to="/streaming-provider" className="flex flex-col items-center justify-center gap-2">
                 <span className="font-semibold text-lg text-gray-900">Alle Anbieter</span>
                 <span className="text-xs text-gray-500 font-normal">Streaming-Dienste vergleichen</span>
               </Link>

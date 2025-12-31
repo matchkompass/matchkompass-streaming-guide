@@ -83,7 +83,7 @@ const Anbieter = () => {
         title="Alle Streaming-Anbieter für Fußball | Übersicht & Vergleich | MatchStream"
         description="Entdecke alle verfügbaren Streaming-Anbieter für Fußball. ✓ Sky ✓ DAZN ✓ Amazon Prime Video ✓ Vollständige Übersicht mit Preisen und Liga-Abdeckung."
         keywords="Streaming Anbieter, Fußball Streaming Dienste, Sky, DAZN, Amazon Prime Video, Streaming Services"
-        canonical="https://matchstream.de/anbieter"
+        canonical="https://matchstream.de/streaming-provider"
         structuredData={{
           "@context": "https://schema.org",
           "@type": "ItemList",

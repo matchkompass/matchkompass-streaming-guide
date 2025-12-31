@@ -8,7 +8,6 @@ const Footer = () => {
     produkt: [
       { name: "Empfehlungs-Wizard", href: "/wizard" },
       { name: "Anbieter-Vergleich", href: "/vergleich" },
-      { name: "Detailvergleich", href: "/detailvergleich" },
       { name: "Deals & News", href: "/deals" },
     ],
     vereine: [

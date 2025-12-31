@@ -44,7 +44,7 @@ const BreadcrumbNavigation = ({ items, customItems }: BreadcrumbNavigationProps)
     };
 
     const linkMap: Record<string, string> = {
-      'streaming-provider': '/anbieter',
+      'streaming-provider': '/streaming-provider',
       'club': '/vergleich',
       'competition': '/vergleich'
     };

@@ -25,7 +25,7 @@ const ProviderGrid = () => {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <h3 className="text-2xl font-bold text-gray-900">Streaming Anbieter</h3>
-                <Link to="/anbieter" className="text-green-600 hover:text-green-700 font-medium text-sm flex items-center">
+                <Link to="/streaming-provider" className="text-green-600 hover:text-green-700 font-medium text-sm flex items-center">
                     Alle ansehen <ChevronRight className="h-4 w-4 ml-1" />
                 </Link>
             </div>
@@ -67,7 +67,7 @@ const ProviderGrid = () => {
 
             <div className="text-center sm:hidden">
                 <Button asChild variant="outline" className="w-full">
-                    <Link to="/anbieter">Alle Anbieter anzeigen</Link>
+                    <Link to="/streaming-provider">Alle Anbieter anzeigen</Link>
                 </Button>
             </div>
         </div>

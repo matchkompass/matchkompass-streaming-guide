@@ -31,9 +31,27 @@ const generateSitemap = async () => {
       lastmod: currentDate
     },
     {
-      url: `${baseUrl}/anbieter`,
+      url: `${baseUrl}/streaming-provider`,
       changefreq: 'weekly',
       priority: 0.9,
+      lastmod: currentDate
+    },
+    {
+      url: `${baseUrl}/bundesliga-streaming`,
+      changefreq: 'weekly',
+      priority: 0.9,
+      lastmod: currentDate
+    },
+    {
+      url: `${baseUrl}/champions-league-streaming`,
+      changefreq: 'weekly',
+      priority: 0.9,
+      lastmod: currentDate
+    },
+    {
+      url: `${baseUrl}/ueber-uns`,
+      changefreq: 'monthly',
+      priority: 0.7,
       lastmod: currentDate
     },
     {

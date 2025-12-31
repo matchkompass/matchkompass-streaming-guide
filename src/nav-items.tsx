@@ -42,7 +42,7 @@ export const navItems = [
   },
   {
     title: "Alle Anbieter",
-    to: "/anbieter",
+    to: "/streaming-provider",
     page: <Anbieter />,
   },
   // Legal pages for footer only

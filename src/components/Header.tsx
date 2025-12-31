@@ -29,7 +29,7 @@ const Header = () => {
               {[
                 { name: "Vergleich", href: "/vergleich" },
                 { name: "Vereine & Ligen", href: "/ligen" },
-                { name: "Anbieter", href: "/anbieter" },
+                { name: "Anbieter", href: "/streaming-provider" },
                 { name: "Deals & News", href: "/deals" },
               ].map((item) => (
                 <Link
@@ -76,7 +76,7 @@ const Header = () => {
                 { name: "Beste Kombination finden", href: "/wizard" },
                 { name: "Vergleich", href: "/vergleich" },
                 { name: "Vereine & Ligen", href: "/ligen" },
-                { name: "Anbieter", href: "/anbieter" },
+                { name: "Anbieter", href: "/streaming-provider" },
                 { name: "Deals & News", href: "/deals" },
               ].map((item) => (
                 <Link

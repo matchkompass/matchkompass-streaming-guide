@@ -1,5 +1,17 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "redirects": [
+    {
+      "source": "/anbieter",
+      "destination": "/streaming-provider",
+      "permanent": true
+    },
+    {
+      "source": "/detailvergleich",
+      "destination": "/vergleich",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/(.*)",

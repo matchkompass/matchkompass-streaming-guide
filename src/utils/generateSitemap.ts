@@ -14,9 +14,8 @@ export const generateSitemapEntries = (): SitemapEntry[] => {
     { url: `${baseUrl}/`, lastmod: currentDate, changefreq: 'daily', priority: 1.0 },
     { url: `${baseUrl}/wizard`, lastmod: currentDate, changefreq: 'weekly', priority: 0.9 },
     { url: `${baseUrl}/vergleich`, lastmod: currentDate, changefreq: 'weekly', priority: 0.9 },
-    { url: `${baseUrl}/detailvergleich`, lastmod: currentDate, changefreq: 'weekly', priority: 0.8 },
     { url: `${baseUrl}/ligen`, lastmod: currentDate, changefreq: 'weekly', priority: 0.8 },
-    { url: `${baseUrl}/anbieter`, lastmod: currentDate, changefreq: 'weekly', priority: 0.8 },
+    { url: `${baseUrl}/streaming-provider`, lastmod: currentDate, changefreq: 'weekly', priority: 0.9 },
     { url: `${baseUrl}/deals`, lastmod: currentDate, changefreq: 'daily', priority: 0.7 },
     
     // SEO Landing Pages
