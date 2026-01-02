@@ -94,7 +94,8 @@ export class EnhancedStreamingOptimizer {
         highlight_1: provider.highlight_1 || '',
         highlight_2: provider.highlight_2 || '',
         highlight_3: provider.highlight_3 || ''
-      }
+      },
+      min_contract_duration: provider.min_contract_duration || ''
     }));
   }
 

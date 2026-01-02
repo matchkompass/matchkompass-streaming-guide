@@ -1,8 +1,22 @@
-
 import { Link } from "react-router-dom";
+
+declare global {
+  interface Window {
+    CCM?: {
+      openWidget: () => void;
+    };
+  }
+}
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+
+  const handleCookieSettings = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (window.CCM) {
+      window.CCM.openWidget();
+    }
+  };
 
   const footerLinks = {
     produkt: [
@@ -26,7 +40,7 @@ const Footer = () => {
       { name: "Impressum", href: "/impressum" },
       { name: "Datenschutz", href: "/datenschutz" },
       { name: "AGB", href: "/agb" },
-      { name: "Cookies", href: "/cookies" },
+      { name: "Cookie-Einstellungen", href: "#", isCookieLink: true },
       { name: "Barrierefreiheit", href: "/barrierefreiheit" },
       { name: "Über uns", href: "/ueber-uns" },
     ]
@@ -121,9 +135,19 @@ const Footer = () => {
             <ul className="space-y-2">
               {footerLinks.rechtliches.map((link) => (
                 <li key={link.name}>
-                  <Link to={link.href} className="text-gray-400 hover:text-green-400 transition-colors">
-                    {link.name}
-                  </Link>
+                  {'isCookieLink' in link && link.isCookieLink ? (
+                    <a
+                      href="#"
+                      onClick={handleCookieSettings}
+                      className="text-gray-400 hover:text-green-400 transition-colors cursor-pointer"
+                    >
+                      {link.name}
+                    </a>
+                  ) : (
+                    <Link to={link.href} className="text-gray-400 hover:text-green-400 transition-colors">
+                      {link.name}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>

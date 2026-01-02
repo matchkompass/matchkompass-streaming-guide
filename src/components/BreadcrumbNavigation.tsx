@@ -35,12 +35,10 @@ const BreadcrumbNavigation = ({ items, customItems }: BreadcrumbNavigationProps)
       'wizard': 'Streaming Wizard',
       'vergleich': 'Anbieter Vergleich',
       'detailvergleich': 'Detail Vergleich',
-      'competition': 'Alle Ligen',
-      'streaming-provider': 'Alle Anbieter',
-      'deals': 'Deals & News',
-      'club': 'Verein',
       'competition': 'Wettbewerb',
-      'streaming-provider': 'Streaming Anbieter'
+      'streaming-provider': 'Streaming Anbieter',
+      'deals': 'Deals & News',
+      'club': 'Verein'
     };
 
     const linkMap: Record<string, string> = {
