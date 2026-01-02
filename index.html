@@ -1,48 +1,65 @@
 <!DOCTYPE html>
 <html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Matchkompass Streaming Guide - Find the best streaming services for your favorite sports matches">
-    <meta name="keywords" content="streaming, sports, matches, guide, where to watch">
-    <meta name="author" content="Matchkompass">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="/favicon.png" type="image/png">
+    <link rel="icon" href="/favicon_new.ico" type="image/x-icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MatchStream - Streaming Guide für Fußball</title>
+    <meta name="description" content="MatchStream - Finde die perfekte Streaming-Kombination für deine Lieblingsvereine" />
+    <meta name="author" content="MatchStream" />
+    <meta name="robots" content="index, follow" />
+    <meta name="googlebot" content="index, follow" />
+    <link rel="canonical" href="https://matchstream.de/" />
+
+    <meta property="og:title" content="MatchStream - Streaming Guide für Fußball" />
+    <meta property="og:description" content="Finde die perfekte Streaming-Kombination für deine Lieblingsvereine" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/banner.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="de_DE" />
+    <meta property="og:site_name" content="MatchStream" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@matchstream" />
+    <meta name="twitter:creator" content="@matchstream" />
+    <meta name="twitter:image" content="/banner.png" />
+    <meta name="twitter:image:alt" content="MatchStream - Fußball Streaming Guide" />
+    <script id="Cookiebot" src="https://consent.cookiebot.com/uc.js" data-cbid="828eeb3b-e804-4969-85ae-2c7692721f0e" data-blockingmode="auto" type="text/javascript"></script>
     
-    <!-- Open Graph Tags -->
-    <meta property="og:title" content="Matchkompass Streaming Guide">
-    <meta property="og:description" content="Find the best streaming services for your favorite sports matches">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://matchkompass.de">
-    
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-XXXXXXXXXX');
+    <!-- Google Analytics Default Consent -->
+    <script data-cookieconsent="ignore">
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("consent", "default", {
+        ad_personalization: "denied",
+        ad_storage: "denied",
+        ad_user_data: "denied",
+        analytics_storage: "denied",
+        functionality_storage: "denied",
+        personalization_storage: "denied",
+        security_storage: "granted",
+        wait_for_update: 500,
+      });
+      gtag("set", "ads_data_redaction", true);
+      gtag("set", "url_passthrough", false);
     </script>
     
-    <!-- CCM19 Cookie Banner Script -->
-    <script src="https://cloud.ccm19.de/app.js?apiKey=faac6b48c5ef0d8b00a5059b926f1d443841309f23b97402&domain=69551a212f0146d7710a0382" referrerpolicy="origin"></script>
-    
-    <title>Matchkompass Streaming Guide</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <header>
-        <h1>Matchkompass Streaming Guide</h1>
-        <p>Your guide to finding where to watch your favorite matches</p>
-    </header>
-    
-    <main>
-        <section class="content">
-            <h2>Welcome to Matchkompass</h2>
-            <p>Find the best streaming services for your favorite sports matches.</p>
-        </section>
-    </main>
-    
-    <footer>
-        <p>&copy; 2026 Matchkompass. All rights reserved.</p>
-    </footer>
-</body>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q10BF6NZ59"></script>
+    <script data-cookieconsent="statistics">
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-Q10BF6NZ59');
+    </script>
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>

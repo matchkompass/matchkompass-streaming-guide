@@ -1,39 +1,8 @@
 
 import { Link } from "react-router-dom";
-import { useMemo } from "react";
-import { useStreamingEnhanced } from "@/hooks/useStreamingEnhanced";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-  const { providers } = useStreamingEnhanced();
-
-  // Get top 8 providers based on major league coverage (Bundesliga, Champions League, Premier League, etc.)
-  const topProviders = useMemo(() => {
-    if (!providers || providers.length === 0) return [];
-    
-    // Calculate a score based on major league coverage
-    const scoredProviders = providers.map(provider => {
-      const majorLeagues = [
-        'bundesliga', 'premier_league', 'la_liga', 'serie_a', 'ligue_1',
-        'champions_league', 'europa_league', 'dfb_pokal'
-      ];
-      const score = majorLeagues.reduce((sum, league) => {
-        const leagueValue = provider[league as keyof typeof provider];
-        return sum + (typeof leagueValue === 'number' ? leagueValue : 0);
-      }, 0);
-      
-      return { ...provider, score };
-    });
-    
-    // Sort by score (descending) and take top 8
-    return scoredProviders
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 8)
-      .map(provider => ({
-        name: provider.name || provider.provider_name || 'Unknown',
-        href: `/streaming-provider/${provider.slug}`
-      }));
-  }, [providers]);
 
   const footerLinks = {
     produkt: [
@@ -41,7 +10,12 @@ const Footer = () => {
       { name: "Anbieter-Vergleich", href: "/vergleich" },
       { name: "Deals & News", href: "/deals" },
     ],
-    anbieter: topProviders,
+    anbieter: [
+      { name: "Sky", href: "/streaming-provider/sky" },
+      { name: "DAZN", href: "/streaming-provider/dazn" },
+      { name: "Magenta TV", href: "/streaming-provider/magenta-tv" },
+      { name: "WOW", href: "/streaming-provider/wow" }
+    ],
     ligen: [
       { name: "Bundesliga", href: "/competition/bundesliga" },
       { name: "2. Bundesliga", href: "/competition/2-bundesliga" },
@@ -113,17 +87,13 @@ const Footer = () => {
               Anbieter
             </h3>
             <ul className="space-y-2">
-              {footerLinks.anbieter.length > 0 ? (
-                footerLinks.anbieter.map((link) => (
-                  <li key={link.href}>
-                    <Link to={link.href} className="text-gray-400 hover:text-white transition-colors">
-                      {link.name}
-                    </Link>
-                  </li>
-                ))
-              ) : (
-                <li className="text-gray-400 text-sm">Lädt...</li>
-              )}
+              {footerLinks.anbieter.map((link) => (
+                <li key={link.name}>
+                  <Link to={link.href} className="text-gray-400 hover:text-white transition-colors">
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
