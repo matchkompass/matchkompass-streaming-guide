@@ -296,6 +296,7 @@ export type Database = {
           liga_portugal: number | null
           ligue_1: number | null
           logo_url: string | null
+          min_contract_duration: string | null
           mls: number | null
           monthly_price: string | null
           name: string | null
@@ -333,6 +334,7 @@ export type Database = {
           liga_portugal?: number | null
           ligue_1?: number | null
           logo_url?: string | null
+          min_contract_duration?: string | null
           mls?: number | null
           monthly_price?: string | null
           name?: string | null
@@ -370,6 +372,7 @@ export type Database = {
           liga_portugal?: number | null
           ligue_1?: number | null
           logo_url?: string | null
+          min_contract_duration?: string | null
           mls?: number | null
           monthly_price?: string | null
           name?: string | null
